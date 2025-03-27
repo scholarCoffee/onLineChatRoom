@@ -110,7 +110,7 @@ const getMessage = function() {
             message: 'Hello, how are you?',
             types: 0, // 内容类型（0-文字，1-图片链接， 2-语音）
             time: new Date() - 1000,
-            tip: 0,
+            tip: 1,
         },
         {
             id: 1,
