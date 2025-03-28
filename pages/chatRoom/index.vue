@@ -158,30 +158,12 @@ export default {
                     this.scrollToView = 'msg' + lastItem.tip;
                 }
             });
-        },
-        loadMoreMessages() {
-            // 加载更多消息逻辑（可选）
-            console.log('Load more messages...');
         }
     }
 }
 </script>
 <style lang="scss">
-.top-bar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 50px;
-    background-color: #f8f8f8;
-    padding: 0 10px;
-    z-index: 20;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); // 添加阴影以区分头部和内容
-    .logo {
-        width: 40px; // 调整图片宽度
-        height: 40px; // 调整图片高度
-        object-fit: cover; // 确保图片按比例填充
-    }
-}
+@import "../../commons/css/mycss.scss"; // 引入公共样式
 .fixed-top {
     position: fixed;
     top: 0;
@@ -190,7 +172,7 @@ export default {
     box-sizing: border-box; // 确保 padding 不影响宽度
 }
 .chat {
-    height: calc(100% - 50px); // 减去头部高度
+    height: 1688rpx; // 减去头部高度
     margin-top: 50px; // 避免内容被固定头部遮挡
     overflow-y: auto; // 确保滚动生效
     overflow-anchor: none; // 防止滚动跳动
@@ -201,7 +183,7 @@ export default {
     .chat-main {
         padding-left: $uni-spacing-col-base;
         padding-right: $uni-spacing-col-base;
-        padding-top: 100rpx;
+        padding-top: 20rpx;
         display: flex;
         flex-direction: column;        
     }

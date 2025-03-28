@@ -2,14 +2,14 @@
 	<view class="content">
 		<view class="top-bar">
 			<view class="top-bar-left">
-				<image src="/static/logo.png" class="logo"></image>
+				<image src="/static/5.webp" class="logo"></image>
 			</view>
 			<view class="top-bar-center">
 				<text class="title">{{ title }}</text>
 			</view>
 			<view class="top-bar-right">
-				<view class="search"><image src="/static/logo.png"></image></view>
-				<view class="add"><image src="/static/logo.png"></image></view>
+				<view class="search"><image src="/static/user/search.png"></image></view>
+				<view class="add"><image src="/static/user/add.png"></image></view>
 			</view>
 		</view>
 		<view class="main">
@@ -54,7 +54,7 @@
 	export default {
 		data() {
 			return {
-				title: 'Hello',
+				title: '首页',
                 friendsList: [], // 好友列表
 			}
 		},
@@ -75,6 +75,7 @@
 </script>
 
 <style lang="scss">
+    @import "../../commons/css/mycss.scss"; // 引入公共样式
     .content {
         display: flex;
         flex-direction: column;
@@ -84,60 +85,8 @@
         padding: 0 20rpx; // 增加左右内边距以适配小屏幕
     }
 
-    .top-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        z-index: 100;
-        height: 100rpx; // 调整高度以适配不同屏幕
-        width: 100%;
-        box-sizing: border-box;
-        background: linear-gradient(90deg, #4facfe, #00f2fe); // 渐变背景
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1); // 添加阴影
-        .top-bar-left {
-            padding-left: $uni-spacing-col-base;
-            float: left;
-            image {
-                margin-top: 10rpx;
-                width: 60rpx; // 调整图标大小
-                height: 60rpx;
-                border-radius: 16rpx;
-            }
-        }
-        .top-bar-center {
-            position: absolute;
-            text-align: center;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            flex: 1;
-            margin: auto;
-            .title {
-                font-size: 32rpx; // 调整字体大小
-                font-weight: bold;
-                color: #ffffff; // 白色字体
-            }
-        }
-        .top-bar-right {
-            float: right;
-            padding-right: 14rpx;
-            .search, .add {
-                width: 72rpx; // 调整按钮大小
-                height: 72rpx;
-                display: inline-block;
-            }
-            image {
-                padding: 18rpx 0 0 18rpx;
-                width: 48rpx; // 调整图标大小
-                height: 48rpx;
-            }
-        }
-    }
-
     .main {
-        padding: 140rpx 20rpx 0; // 调整顶部和左右间距
+        padding: 120rpx 20rpx 0; // 调整顶部和左右间距
         width: 100%;
     }
 

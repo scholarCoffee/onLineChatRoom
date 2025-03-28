@@ -6,22 +6,19 @@
 			</view>
 		</view>
 		<view class="logo">
-			<image src="/static/logo.png" class="logo"></image>
+			<image src="/static/6.webp" class="logo"></image>
 		</view>
 		<view class="main">
 			<view class="title">登录</view>
 			<view class="slogan">欢迎回来</view>
 			<view class="inputs">
-				<view class="input-group">
-					<input type="text" placeholder="请输入用户名" class="input"></input>
-				</view>
-				<view class="input-group">
-					<input type="password" placeholder="请输入密码" class="input"></input>
-				</view>
+				<input type="text" placeholder="请输入用户名/邮箱" class="user" placeholder-style="color:#999;font-weight:400;"></input>
+				<input type="password" placeholder="请输入密码" class="psw" placeholder-style="color:#999;font-weight:400;"></input>
 			</view>
-			<view class="tips">请输入用户名和密码</view>
-			<view class="submit">登录</view>
+			<view class="tips">输入用户或密码错误！</view>
 		</view>
+
+		<view class="submit">登录</view>
 	</view>
 </template>
 
@@ -39,95 +36,87 @@
 
 <style lang="scss">
 	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		background-color: #ffffff;
-		padding: 0 20rpx;
+		padding-top: var(--status-bar-height);
 	}
 
 	.top-bar {
+		position: fixed;
+		top: 0;
+		left: 0;
 		width: 100%;
-		height: 50rpx;
-		background: linear-gradient(90deg, #4facfe, #00f2fe);
-		display: flex;
-		align-items: center;
-		justify-content: flex-end;
-		padding: 0 20rpx;
-		.text {
-			color: #ffffff;
-			font-size: 28rpx;
-			font-weight: bold;
+		height: 88rpx;
+		z-index: 1001;
+		padding-top: var(--status-bar-height);
+		background: $uni-bg-color;
+
+		.top-bar-right {
+			float:right;
+			padding-right: 32rpx;
+			.text {
+				font-size: $uni-font-size-lg;
+				font-weight: 500;
+				color: $uni-text-color;
+				line-height: 88rpx;
+			}
 		}
 	}
 
 	.logo {
-		margin: 40rpx 0;
-		.logo {
-			width: 200rpx;
-			height: 200rpx;
+		text-align: center;
+		image{
+			padding-top: 256rpx;
+			width: 194rpx;
+			height: 92rpx;
+			margin: 0 atuo;
 		}
 	}
 
+
 	.main {
-		width: 100%;
-		max-width: 600rpx;
-		background: #f9f9f9;
-		border-radius: 20rpx;
-		padding: 40rpx;
-		box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
+		padding: 54rpx $uni-spacing-row-lg 120rpx;
 		.title {
-			font-size: 36rpx;
-			font-weight: bold;
-			color: #333333;
-			text-align: left;
-			margin-bottom: 20rpx;
+			font-size: 56rpx;
+			font-weight: 500;
+			color: $uni-text-color;
+			line-height: 80rpx;
 		}
 		.slogan {
-			font-size: 28rpx;
-			color: #666666;
-			text-align: left;
-			margin-bottom: 40rpx;
+			font-size: 40rpx;
+			color: $uni-text-color-grey;
+			line-height: 56rpx;
 		}
 		.inputs {
-			.input-group {
-				margin-bottom: 20rpx;
-				.input {
-					width: 100%;
-					height: 80rpx;
-					border: 1rpx solid #cccccc;
-					border-radius: 10rpx;
-					padding: 0 20rpx;
-					font-size: 28rpx;
-					color: #333333;
-				}
-				.input:focus {
-					border-color: #4facfe;
-					outline: none;
-				}
+			padding-top: 8rpx;
+			input {
+				padding-top: 40rpx;
+				height: 40rpx;
+				font-size: $uni-font-size-lg;
+				font-weight: 500;
+				color: $uni-text-color;
+				line-height: 88rpx;
+				border-bottom: 1px solid $uni-border-color;
 			}
 		}
 		.tips {
-			font-size: 24rpx;
-			color: #ff4d4f;
-			text-align: center;
-			margin-bottom: 20rpx;
+			float: left;
+			font-size: $uni-font-size-lg;
+			color: $uni-color-warning;
+			line-height: 56rpx;
 		}
-		.submit {
-			width: 100%;
-			height: 80rpx;
-			background: linear-gradient(90deg, #4facfe, #00f2fe);
-			color: #ffffff;
-			font-size: 28rpx;
-			font-weight: bold;
-			text-align: center;
-			line-height: 80rpx;
-			border-radius: 10rpx;
-			box-shadow: 0 4rpx 10rpx rgba(0, 0, 0, 0.1);
-		}
-		.submit:active {
-			background: linear-gradient(90deg, #00f2fe, #4facfe);
-		}
+	}
+	.submit {
+		margin: 0 auto;
+		width: 520rpx;
+		height: 96rpx;
+		background: $uni-color-primary;
+		box-shadow: 0 50rpx 32rpx -36rpx rgba(255,228,49,0.4);
+		border-radius: 48rpx;
+		font-size: $uni-font-size-lg;
+		color: $uni-text-color;
+		line-height: 96rpx;
+		text-align: center;
+	}
+	.submit:active {
+		background: linear-gradient(90deg, #00f2fe, #4facfe);
 	}
 </style>
