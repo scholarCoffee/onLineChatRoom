@@ -123,39 +123,13 @@
 </script>
 
 <style lang="scss">
+    @import "../../commons/css/mycss.scss"; // 引入公共样式
 	.content {
 		padding-top: var(--status-bar-height);
 	}
-
-	.top-bar {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 88rpx;
-		z-index: 1001;
-		padding-top: var(--status-bar-height);
-		background: $uni-bg-color;
-
-		.top-bar-left {
-			float:left;
-			padding-left: 16rpx;
-			width: 88rpx;
-			height: 88rpx;
-			.text {
-				font-size: $uni-font-size-lg;
-				font-weight: 500;
-				color: $uni-text-color;
-				line-height: 88rpx;
-			}
-			.back-img {
-				margin-top: 21rpx;
-				width: 46rpx;
-				height: 46rpx;
-			}
-		}
+	.top-bar-left {
+		padding-left: 0rpx !important
 	}
-
 	.logo {
 		text-align: center;
 		image{

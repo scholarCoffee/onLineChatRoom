@@ -37,11 +37,23 @@
     }
     .top-bar-right {
         float: right;
-        padding-right: 14rpx;
-        .search, .add {
+        .search {
             width: 72rpx; // 调整按钮大小
             height: 72rpx;
             display: inline-block;
+        }
+        .add {
+            width: 72rpx; // 调整按钮大小
+            height: 72rpx;
+            padding-right: 14rpx;
+            display: inline-block;
+        }
+        .text {
+            font-size: $uni-font-size-lg;
+            font-weight: 500;
+            color: $uni-text-color;
+            line-height: 88rpx;
+            padding-right: 32rpx;
         }
         image {
             padding: 18rpx 0 0 18rpx;

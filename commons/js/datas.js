@@ -1,10 +1,10 @@
-const friendFn = {
-    getFriendsList: function () {
-      return [
+const getFriendsList = () => {
+    return [
         {
             id: 0,
             imgUrl: '.../../static/6.webp',
             tip: 0,
+            email: '2231321312',
             name: 'Friend 1',
             time: new Date(),
             news: 'Hello, how are you?',
@@ -13,6 +13,7 @@ const friendFn = {
             id: 1,
             imgUrl: '.../../static/6.webp',
             tip: 2,
+            email: '2231321312',
             name: 'Friend 2',
             time: new Date(),
             news: 'Let\'s meet up this weekend!',
@@ -21,6 +22,7 @@ const friendFn = {
             id: 2,
             imgUrl: '.../../static/6.webp',
             tip: 0,
+            email: '2231321312',
             name: 'Friend 3',
             time: new Date(),
             news: 'Did you finish the project?',
@@ -29,76 +31,84 @@ const friendFn = {
             id: 3,
             imgUrl: '.../../static/6.webp',
             tip: 1,
+            email: '2231321312',
             name: 'Friend 4',
             time: new Date(),
             news: 'I have a question about the assignment.', 
         },
         {
-            id: 0,
+            id: 4,
             imgUrl: '.../../static/6.webp',
             tip: 0,
-            name: 'Friend 1',
+            email: '2231321312',
+            name: '的点点滴滴',
             time: new Date(),
             news: 'Hello, how are you?',
         },
         {
-            id: 1,
+            id: 5,
             imgUrl: '.../../static/6.webp',
             tip: 2,
-            name: 'Friend 2',
+            email: '2231321312',
+            name: '12312收拾收拾',
             time: new Date(),
             news: 'Let\'s meet up this weekend!',
         },
         {
-            id: 2,
+            id: 6,
             imgUrl: '.../../static/6.webp',
             tip: 0,
-            name: 'Friend 3',
+            email: '2231321312',
+            name: '张张贝贝',
             time: new Date(),
             news: 'Did you finish the project?',
         },
         {
-            id: 3,
+            id: 7,
             imgUrl: '.../../static/6.webp',
             tip: 1,
+            email: '2231321312',
             name: 'Friend 4',
             time: new Date(),
             news: 'I have a question about the assignment.', 
         },
         {
-            id: 0,
+            id: 8,
             imgUrl: '.../../static/6.webp',
             tip: 0,
-            name: 'Friend 1',
+            email: '2231321312',
+            name: '收拾收拾',
             time: new Date(),
             news: 'Hello, how are you?',
         },
         {
-            id: 1,
+            id: 9,
             imgUrl: '.../../static/6.webp',
             tip: 2,
-            name: 'Friend 2',
+            email: '2231321312',
+            name: '23121312',
             time: new Date(),
             news: 'Let\'s meet up this weekend!',
         },
         {
-            id: 2,
+            id: 10,
             imgUrl: '.../../static/6.webp',
             tip: 0,
+            email: '2231321312',
             name: 'Friend 3',
             time: new Date(),
             news: 'Did you finish the project?',
         },
         {
-            id: 3,
+            id: 11,
             imgUrl: '.../../static/6.webp',
             tip: 1,
+            email: '2231321312',
             name: 'Friend 4',
             time: new Date(),
             news: 'I have a question about the assignment.', 
         }
       ]
-   },
 }
 
    // 聊天消息
@@ -162,7 +172,33 @@ const getMessage = function() {
         }
     ]
    }
+
+const isFriendShip = () => {
+    return [{
+        userId: 1,
+        friend: 2
+    }, {
+        userId: 1,
+        friend: 3
+    }, {
+        userId: 1,
+        friend: 4
+    }, {
+        userId: 1,
+        friend: 5
+    }, {
+        userId: 1,
+        friend: 6
+    }, {
+        userId: 1,
+        friend: 7
+    }, {
+        userId: 1,
+        friend: 8
+    }]
+}
 export {
-    friendFn,
-    getMessage
+    getFriendsList,
+    getMessage,
+    isFriendShip
 }

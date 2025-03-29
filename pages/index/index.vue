@@ -8,7 +8,7 @@
 				<text class="title">{{ title }}</text>
 			</view>
 			<view class="top-bar-right">
-				<view class="search"><image src="/static/user/search.png"></image></view>
+				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
 				<view class="add"><image src="/static/user/add.png"></image></view>
 			</view>
 		</view>
@@ -48,7 +48,7 @@
 </template>
 
 <script>
-    import { friendFn } from './../../commons/js/datas.js';
+    import { getFriendsList } from './../../commons/js/datas.js';
     import { dateTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 
 	export default {
@@ -64,11 +64,16 @@
 		},
 		methods: {
             getFriendsList() {
-                const rawList = friendFn.getFriendsList();
+                const rawList = getFriendsList();
                 this.friendsList = rawList.map(friend => ({
                     ...friend,
                     time: dateTime(friend.time) // 格式化时间
                 }));
+            },
+            toSearch() {
+                uni.navigateTo({
+                    url: '/pages/search/index'
+                });
             },
 		}
 	}

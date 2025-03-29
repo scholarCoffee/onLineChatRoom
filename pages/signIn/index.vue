@@ -37,13 +37,22 @@
 				});
 			},
 			navigateToLogin() {
-
+				if (this.user.length == 0 || this.password.length == 0) {
+					uni.showToast({
+						title: '请输入用户名或密码',
+						icon: 'none'
+					})
+					return
+				}
+				uni.navigateTo({
+					url: '/pages/index/index'
+				});
 			},
 			getUserInfo(e) {
 				const { value } = e.target || {}
 				this.user = value
 			},
-			getPasswor(e) {
+			getPassword(e) {
 				const { value } = e.target || {}
 				this.password = value
 			}
@@ -52,30 +61,12 @@
 </script>
 
 <style lang="scss">
+    @import "../../commons/css/mycss.scss"; // 引入公共样式
 	.content {
 		padding-top: var(--status-bar-height);
 	}
-
-	.top-bar {
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100%;
-		height: 88rpx;
-		z-index: 1001;
-		padding-top: var(--status-bar-height);
-		background: $uni-bg-color;
-
-		.top-bar-right {
-			float:right;
-			padding-right: 32rpx;
-			.text {
-				font-size: $uni-font-size-lg;
-				font-weight: 500;
-				color: $uni-text-color;
-				line-height: 88rpx;
-			}
-		}
+	.top-bar-right {
+		line-height: 88rpx;
 	}
 
 	.logo {
