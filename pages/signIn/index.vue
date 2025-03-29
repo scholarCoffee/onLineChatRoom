@@ -6,29 +6,46 @@
 			</view>
 		</view>
 		<view class="logo">
-			<image src="/static/6.webp" class="logo"></image>
+			<image src="/static/6.webp"></image>
 		</view>
 		<view class="main">
 			<view class="title">登录</view>
 			<view class="slogan">欢迎回来</view>
 			<view class="inputs">
-				<input type="text" placeholder="请输入用户名/邮箱" class="user" placeholder-style="color:#999;font-weight:400;"></input>
-				<input type="password" placeholder="请输入密码" class="psw" placeholder-style="color:#999;font-weight:400;"></input>
+				<input type="text" placeholder="请输入用户名/邮箱" class="user" placeholder-style="color:#999;font-weight:400;" @blur="getUserInfo"></input>
+				<input type="password" placeholder="请输入密码" class="psw" placeholder-style="color:#999;font-weight:400;" @blur="getPassword"></input>
 			</view>
 			<view class="tips">输入用户或密码错误！</view>
 		</view>
 
-		<view class="submit">登录</view>
+		<view class="submit" @tap="navigateToLogin">登录</view>
 	</view>
 </template>
 
 <script>
 	export default {
+		data() {
+			return {
+				user: '',
+				password: ''
+			}
+		},
 		methods: {
 			navigateToRegister() {
 				uni.navigateTo({
 					url: '/pages/register/index'
 				});
+			},
+			navigateToLogin() {
+
+			},
+			getUserInfo(e) {
+				const { value } = e.target || {}
+				this.user = value
+			},
+			getPasswor(e) {
+				const { value } = e.target || {}
+				this.password = value
 			}
 		}
 	}
@@ -64,9 +81,9 @@
 	.logo {
 		text-align: center;
 		image{
-			padding-top: 256rpx;
+			padding-top: 226rpx;
 			width: 194rpx;
-			height: 92rpx;
+			height: 194rpx;
 			margin: 0 atuo;
 		}
 	}
