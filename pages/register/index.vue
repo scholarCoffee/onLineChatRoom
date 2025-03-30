@@ -127,9 +127,6 @@
 	.content {
 		padding-top: var(--status-bar-height);
 	}
-	.top-bar-left {
-		padding-left: 0rpx !important
-	}
 	.logo {
 		text-align: center;
 		image{
@@ -139,8 +136,6 @@
 			margin: 0 atuo;
 		}
 	}
-
-
 	.main {
 		padding: 54rpx $uni-spacing-row-lg 120rpx;
 		.title {
