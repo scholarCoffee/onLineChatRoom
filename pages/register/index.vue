@@ -94,7 +94,9 @@
 
 			},
 			navigateBack() {
-				uni.navigateBack();
+				uni.navigateBack({
+					delta: 1
+				});
 			},
 			register() {
 				// 注册逻辑

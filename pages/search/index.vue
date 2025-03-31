@@ -13,7 +13,9 @@
             <view class="search-user result">
                 <view class="title" v-if="qryUserInfo.length > 0">用户</view>
                 <view class="list user" v-for="(item, index) in qryUserInfo" :key="index">
-                    <image :src="item.imgUrl"></image>
+                    <navigator url="../home/index?id=aaa">
+                        <image :src="item.imgUrl"></image>
+                    </navigator>
                     <view class="names">
                         <view class="name" v-html="item.name"></view>
                         <view class="email" v-html="item.email"></view>

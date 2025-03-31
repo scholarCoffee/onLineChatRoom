@@ -11,15 +11,15 @@
             </view>
 		</view>
         <view class="bg">
-            <view class="bg-bai"></view>
+            <view class="bg-bai" :animation="animationData4"></view>
             <image src="../../static/1.webp" class="bg-img" mode="aspectFill"></image>
         </view>
         <view class="main">
             <view class="user-header">
-                <view class="sex" :style=" {'background-color': sexColor}">
+                <view class="sex" :style=" {'background-color': sexColor}" :animation="animationData3">
                     <image src="../../static/user/male.png"></image>
                 </view>
-                <image src="../../static/1.webp" class="user-img" mode="aspectFill"></image>
+                <image src="../../static/1.webp" class="user-img" mode="aspectFill" :animation="animationData2"></image>
             </view>
             <view class="user-imf">
                 <view class="name"> {{ user.name }}</view>
@@ -28,15 +28,15 @@
             </view>
         </view>
         <view class="bottom-bar">
-            <view class="bottom-btn">加为好友</view>
+            <view class="bottom-btn btn1" @tap="addFrinedAnimat">加为好友</view>
         </view>
-        <view class="add-misg" :style="{ height: addHeight + 'px' }">
+        <view class="add-misg" :style="{ 'height': addHeight + 'px', 'bottom': -+ addHeight + 'px' }" :animation="animationData">
             <view class="name"> {{ user.name }}</view>
             <textarea :value="myname + '请求加为好友~'" maxlength="120" class="add-main"></textarea>
         </view>
-        <view class="add-bt">
-            <view class="close">取消</view>
-            <view class="send">发送</view>            
+        <view class="add-bt bottom-bar" :animation="animationData1">
+            <view class="close btn1" @tap="addFrinedAnimat">取消</view>
+            <view class="send btn1">发送</view>            
         </view>
 	</view>
 </template>
@@ -47,6 +47,12 @@
 			return {
                 myname: '春雨',
                 addHeight: 0, // 弹出框高度
+                animationData: {}, // 动画
+                animationData1: {}, // 动画
+                animationData2: {}, // 动画
+                animationData3: {}, // 动画
+                animationData4: {}, // 动画
+                isAdd: false,
                 sexColor: 'rgb(255, 93, 91 ,1)', // 性别颜色
                 user: {
                     name: '张三',
@@ -71,6 +77,48 @@
                 query.select('.bg').boundingClientRect((rect) => {
                     this.addHeight = rect.height - 186; // 获取元素的高度
                 }).exec();
+            },
+            // 添加好友动画
+            addFrinedAnimat() {
+                this.isAdd = !this.isAdd; // 切换状态
+                const animation = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease'
+                });
+                const animation1 = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease'
+                });
+                const animation2 = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease'
+                });
+                const animation3 = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease'
+                });
+                const animation4 = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease'
+                });
+                if (this.isAdd) {
+                    animation.bottom(0).step(); // 设置动画的初始状态
+                    animation1.bottom(0).step(); // 设置动画的初始状态
+                    animation2.width(120).height(120).top(-60).step(); // 设置动画的初始状态
+                    animation3.opacity(0).step(); // 设置动画的初始状态
+                    animation4.backgroundColor('rgba(255, 228, 49, 0.6)').step(); // 设置动画的初始状态
+                } else {
+                    animation.bottom(-this.addHeight).step(); // 设置动画的初始状态
+                    animation1.bottom(-100).step(); // 设置动画的初始状态
+                    animation2.width(200).height(200).top(0).step(); // 设置动画的初始状态
+                    animation3.opacity(1).bottom(30).right(30).step(); // 设置动画的初始状态
+                    animation4.backgroundColor('rgba(255, 228, 49, 0)').step();
+                }
+                this.animationData = animation.export();
+                this.animationData1 = animation1.export();
+                this.animationData2 = animation2.export();
+                this.animationData3 = animation3.export();
+                this.animationData4 = animation4.export();
             }
 		}
 	}
@@ -102,7 +150,7 @@
     }
     .main {
         text-align: center;
-        padding-top: 148rpx;
+        padding-top: 240rpx;
         .user-header {
             position: relative;
             width: 412rpx;
@@ -110,7 +158,7 @@
             margin: 0 auto;
             .sex {
                 position: absolute;
-                z-index: 10;
+                z-index: 11;
                 right: 22rpx;
                 bottom: 22rpx;
                 width: 64rpx;
@@ -124,10 +172,12 @@
             }
             .user-img {
                 z-index: 10;
+                top: 0;
                 width: 400rpx;
                 height: 400rpx;
                 border-radius: 48rpx;
-                border: 6px solid rgba(255, 255, 255, 1)
+                border: 6px solid rgba(255, 255, 255, 1);
+                box-shadow: 0 36rpx 40rpx 0rpx rgba(39, 40, 50, 0.1);
             }
         }
         .user-imf {
@@ -153,21 +203,9 @@
         }
     }
     .bottom-bar {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        height: 104rpx;
-        box-sizing: border-box;
-        padding: 12rpx $uni-spacing-col-base;
-        .bottom-btn {
-            text-align: center;
-            font-size: $uni-font-size-lg;
-            color: $uni-text-color;
-            line-height: 80rpx;
-            width: 684rpx;
-            height: 80rpx;
-            background: $uni-color-primary;
-            border-radius: $uni-border-radius-base;
+        bottom-btn {
+            background-color: $uni-color-primary;
+            margin: 0 $uni-spacing-col-base;
         }
     }
     .add-misg {
@@ -186,6 +224,8 @@
         }
         .add-main {
             padding: 18rpx 22rpx;
+            box-sizing: border-box;
+            width: 100%;
             height: 420rpx;
             background: $uni-bg-color-grey;
             border-radius: $uni-border-radius-base;
@@ -195,36 +235,19 @@
         }   
     }
     .add-bt {
-        position: fixed;
+        bottom: -200rpx;
         z-index: 100;
-        bottom: 0;
-        width: 100%;
-        box-sizing: border-box;
-        padding: 12rpx $uni-spacing-col-base;
-        height: 104rpx;
         display: flex;
-        // background-color: #eee;
+        align-items: center;
         .close {
-            text-align: center;
-            font-size: $uni-font-size-lg;
-            color: $uni-text-color;
-            line-height: 80rpx;
             width: 172rpx;
-            height: 80rpx;
             background: $uni-bg-color-hover;
-            border-radius: $uni-border-radius-base;
+            margin-left: $uni-spacing-col-base;
         }
         .send {
             flex: auto;
-            margin-left: $uni-spacing-col-base;
-            text-align: center;
-            font-size: $uni-font-size-lg;
-            color: $uni-text-color;
-            line-height: 80rpx;
-            width: 684rpx;
-            height: 80rpx;
+            margin:0 $uni-spacing-col-base;
             background: $uni-color-primary;
-            border-radius: $uni-border-radius-base;
         }
     }
 </style>

@@ -1,9 +1,9 @@
 <template>
 	<view class="content">
 		<view class="top-bar">
-			<view class="top-bar-left">
+			<navigator url="../home/index?id=aaa" hover-class="none" class="top-bar-left">
 				<image src="/static/5.webp" class="logo"></image>
-			</view>
+			</navigator>
 			<view class="top-bar-center">
 				<text class="title">{{ title }}</text>
 			</view>
