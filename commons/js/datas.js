@@ -2,7 +2,7 @@ const getFriendsList = () => {
     return [
         {
             id: 0,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 0,
             email: '2231321312',
             name: 'Friend 1',
@@ -11,7 +11,7 @@ const getFriendsList = () => {
         },
         {
             id: 1,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 2,
             email: '2231321312',
             name: 'Friend 2',
@@ -20,7 +20,7 @@ const getFriendsList = () => {
         },
         {
             id: 2,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 0,
             email: '2231321312',
             name: 'Friend 3',
@@ -29,7 +29,7 @@ const getFriendsList = () => {
         },
         {
             id: 3,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 1,
             email: '2231321312',
             name: 'Friend 4',
@@ -38,7 +38,7 @@ const getFriendsList = () => {
         },
         {
             id: 4,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 0,
             email: '2231321312',
             name: '的点点滴滴',
@@ -47,7 +47,7 @@ const getFriendsList = () => {
         },
         {
             id: 5,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 2,
             email: '2231321312',
             name: '12312收拾收拾',
@@ -56,7 +56,7 @@ const getFriendsList = () => {
         },
         {
             id: 6,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 0,
             email: '2231321312',
             name: '张张贝贝',
@@ -65,7 +65,7 @@ const getFriendsList = () => {
         },
         {
             id: 7,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 1,
             email: '2231321312',
             name: 'Friend 4',
@@ -74,7 +74,7 @@ const getFriendsList = () => {
         },
         {
             id: 8,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 0,
             email: '2231321312',
             name: '收拾收拾',
@@ -83,7 +83,7 @@ const getFriendsList = () => {
         },
         {
             id: 9,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 2,
             email: '2231321312',
             name: '23121312',
@@ -92,7 +92,7 @@ const getFriendsList = () => {
         },
         {
             id: 10,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 0,
             email: '2231321312',
             name: 'Friend 3',
@@ -101,7 +101,7 @@ const getFriendsList = () => {
         },
         {
             id: 11,
-            imgUrl: '.../../static/6.webp',
+            imgUrl: '6.webp',
             tip: 1,
             email: '2231321312',
             name: 'Friend 4',
