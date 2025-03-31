@@ -2,21 +2,19 @@
     <view class="content">
         <view class="top-bar fixed-top">
             <view class="top-bar-left" @tap="backOne">
-                <image src="/static/logo.png" class="logo"></image>
+                <image src="/static/user/back.png" class="back-img"></image>
             </view>
             <view class="top-bar-center">
-                <view class="title">
-                    {{ title }}
-                </view>
+                <view class="title">{{ title }}</view>
             </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
                 <view class="group-img">
-                    <image src="/static/logo.png" class="logo"></image>
+                    <image src="/static/6.webp"></image>
                 </view>
             </view>
         </view>
-        <scroll-view class="chat" scroll-y="true" :scroll-into-view="scrollToView" scroll-with-animation="true">
+        <scroll-view class="chat" scroll-y="true" scroll-with-animation="true" :scroll-into-view="scrollToView" >
             <view class="chat-main" :style="{ 'padding-bottom': inputh + 'px'}">
                 <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.tip">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
@@ -68,6 +66,11 @@ export default {
     onLoad() {
         this.getMsg();
     },
+    computed: {
+        reversedMsg() {
+            return [...this.msg].reverse(); // 创建一个新数组并反转
+        }
+    },
     methods: {
         dateTime,
         backOne() {
@@ -78,7 +81,6 @@ export default {
         getMsg() {
             // 获取消息列表
             this.msg = getMessage();
-
             // 遍历消息列表，添加时间戳
             this.msg.forEach((item, index) => {
                 item.imgUrl = '/../static/' + item.imgUrl;
@@ -99,13 +101,9 @@ export default {
             });
             // 反转消息列表
             this.msg.reverse();
+
             // 滚动到最底部
-            this.$nextTick(() => {
-                const lastItem = this.msg[this.msg.length - 1];
-                if (lastItem) {
-                    this.scrollToView = 'msg' + lastItem.tip;
-                }
-            });
+            this.scrollToBottom();
         },
         // 预览图片
         previewImg(e) {
@@ -131,78 +129,90 @@ export default {
         },
         sendMessage(message) {
             let len = this.msg.length 
-            // 添加新消息到消息列表
-            this.msg.push({
+            const data = {
                 id: 1, // 假设 1 表示当前用户
                 message: message,
                 types: 0, // 假设 0 表示文本消息
                 time: new Date().toISOString(),
                 imgUrl: '/static/6.webp', // 假设当前用户头像
-                tip: len
-            });
+                tip: len + 1
+            }
+            // 添加新消息到消息列表
+            this.msg.push(data);
             this.$nextTick(() => {
-                const lastItem = this.msg[this.msg.length - 1];
-                if (lastItem) {
-                    this.scrollToView = 'msg' + lastItem.tip;
-                }
-            });
+                this.scrollToView = 'msg' + (len + 1);
+            }); 
         },
         currentHeight(value) {
             this.inputh = value
             this.scrollToBottom()
         },
         scrollToBottom() {
-            this.$nextTick(() => {
-                const lastItem = this.msg[this.msg.length - 1];
-                if (lastItem) {
-                    this.scrollToView = 'msg' + lastItem.tip;
-                }
-            });
+            setTimeout(() => {
+                this.scrollToView = ''
+                this.$nextTick(() => {
+                    const lastItem = this.msg[this.msg.length - 1];
+                    if (lastItem) {
+                        this.scrollToView = 'msg' + lastItem.tip;
+                    }
+                });     
+            }, 50);
         }
     }
 }
 </script>
 <style lang="scss">
 @import "../../commons/css/mycss.scss"; // 引入公共样式
-.fixed-top {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    box-sizing: border-box; // 确保 padding 不影响宽度
+page {
+    height: 100%;
+}
+.content {
+    height: 100%;
+    background: rgba(244, 244, 244 ,1)
+}
+.top-bar {
+    background: rgba(244, 244, 244 ,1);
+    border-bottom: 1px solid $uni-border-color;
+    .group-img {
+        position: absolute;
+        bottom: 10rpx;
+        right: $uni-spacing-col-base;
+        width: 78rpx;
+        height: 78rpx;
+        image {
+            border-radius: 16rpx
+        }
+    }
 }
 .chat {
-    height: 1688rpx; // 减去头部高度
-    margin-top: 50px; // 避免内容被固定头部遮挡
-    overflow-y: auto; // 确保滚动生效
-    overflow-anchor: none; // 防止滚动跳动
+    height: 100%; // 减去头部高度
     .padbt {
-        height: 100rpx;
+        height: var(--status-bar-height);
         width: 100%;
     }
     .chat-main {
         padding-left: $uni-spacing-col-base;
         padding-right: $uni-spacing-col-base;
-        padding-top: 20rpx;
+        padding-top: 100rpx;
         display: flex;
         flex-direction: column;        
     }
     .chat-ls {
         .chat-time {
-            font-size: 24rpx;
-            color: #999;
+            font-size: $uni-font-size-sm;
+            color: rgba(39, 40, 50, 0.3);
+            line-height: 34rpx;
+            padding: 20rpx 0;
             text-align: center;
-            margin-bottom: 20rpx;
         }
         .msg-m {
             display: flex;
             padding: 20rpx 0;
             .user-img {
                 flex: none;
-                width: 60rpx;
-                height: 60rpx;
-                border-radius: 50%;
-                margin-right: 20rpx;
+                width: 58rpx;
+                height: 58rpx;
+                border-radius: $uni-border-radius-base;
             }
             .message {
                flex: none;

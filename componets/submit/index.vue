@@ -36,7 +36,8 @@
             getElementHeight() {
                 const query = uni.createSelectorQuery().in(this)
                 query.select('.submit').boundingClientRect(data => {
-                    this.$emit('currentHeight',data.height)
+                    const height = this.isEmoji ? data.height : data.height + 60
+                    this.$emit('currentHeight', height)
                 }).exec()
             },
             // 点击切换音频
