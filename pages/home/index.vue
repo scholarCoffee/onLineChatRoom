@@ -30,6 +30,14 @@
         <view class="bottom-bar">
             <view class="bottom-btn">加为好友</view>
         </view>
+        <view class="add-misg" :style="{ height: addHeight + 'px' }">
+            <view class="name"> {{ user.name }}</view>
+            <textarea :value="myname + '请求加为好友~'" maxlength="120" class="add-main"></textarea>
+        </view>
+        <view class="add-bt">
+            <view class="close">取消</view>
+            <view class="send">发送</view>            
+        </view>
 	</view>
 </template>
 
@@ -37,6 +45,8 @@
 	export default {
 		data() {
 			return {
+                myname: '春雨',
+                addHeight: 0, // 弹出框高度
                 sexColor: 'rgb(255, 93, 91 ,1)', // 性别颜色
                 user: {
                     name: '张三',
@@ -47,12 +57,21 @@
 		},
 		computed: {
 		},
+        onReady(){
+            this.getElementStyle();
+        },
 		methods: {
 			navigateBack() {
 				uni.navigateBack({
                     delta: 1
                 });
-			}
+			},
+            getElementStyle() {
+                const query = uni.createSelectorQuery().in(this);
+                query.select('.bg').boundingClientRect((rect) => {
+                    this.addHeight = rect.height - 186; // 获取元素的高度
+                }).exec();
+            }
 		}
 	}
 </script>
@@ -104,6 +123,7 @@
                 }
             }
             .user-img {
+                z-index: 10;
                 width: 400rpx;
                 height: 400rpx;
                 border-radius: 48rpx;
@@ -137,14 +157,66 @@
         bottom: 0;
         width: 100%;
         height: 104rpx;
-        // background-color: #eee;
+        box-sizing: border-box;
+        padding: 12rpx $uni-spacing-col-base;
         .bottom-btn {
-            position:absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-            margin: auto;
+            text-align: center;
+            font-size: $uni-font-size-lg;
+            color: $uni-text-color;
+            line-height: 80rpx;
+            width: 684rpx;
+            height: 80rpx;
+            background: $uni-color-primary;
+            border-radius: $uni-border-radius-base;
+        }
+    }
+    .add-misg {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 0 56rpx;
+        background: rgba(255,255,255, 1);
+        border-radius: 40rpx 40rpx 0rpx 0rpx;
+        .name {
+            padding-top: 168rpx 0 40rpx;
+            font-size: 52rpx;
+            color: $uni-text-color;
+            line-height: 74rpx;
+        }
+        .add-main {
+            padding: 18rpx 22rpx;
+            height: 420rpx;
+            background: $uni-bg-color-grey;
+            border-radius: $uni-border-radius-base;
+            font-size: $uni-font-size-lg;
+            line-height: 44px;
+            color: $uni-text-color;
+        }   
+    }
+    .add-bt {
+        position: fixed;
+        z-index: 100;
+        bottom: 0;
+        width: 100%;
+        box-sizing: border-box;
+        padding: 12rpx $uni-spacing-col-base;
+        height: 104rpx;
+        display: flex;
+        // background-color: #eee;
+        .close {
+            text-align: center;
+            font-size: $uni-font-size-lg;
+            color: $uni-text-color;
+            line-height: 80rpx;
+            width: 172rpx;
+            height: 80rpx;
+            background: $uni-bg-color-hover;
+            border-radius: $uni-border-radius-base;
+        }
+        .send {
+            flex: auto;
+            margin-left: $uni-spacing-col-base;
             text-align: center;
             font-size: $uni-font-size-lg;
             color: $uni-text-color;
