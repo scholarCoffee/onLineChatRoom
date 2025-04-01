@@ -5,7 +5,7 @@
                 <view class="bt-img" @tap="onClickRecords">
                     <image :src="toc" class="icon gray"></image>
                 </view>
-                <textarea v-model="msg" auto-height="true" class="chat-send btn" :class="{ displayNone: isRecord}" @input="onClickInput"></textarea>
+                <textarea v-model="msg" auto-height="true" class="chat-send btn" :class="{ displayNone: isRecord}" @input="onClickInput" @focus="focus"></textarea>
                 <view class="record btn" :class="{ displayNone: !isRecord }">按住说话</view>
                 <view class="bt-img emoji-icon" @tap="onClickEmoji">
                     <image src="../../static/emoji.png" class="icon gray"></image>
@@ -18,7 +18,7 @@
         <view class="emoji" :class="{ displayNone: isEmoji }">
             <view class="emoji-send">
                 <view class="emoji-send-det">
-                    <image src="delete.png"></image>
+                    <image src="../../static/emojiDel.png"></image>
                 </view>
                 <view class="emoji-send-bt" @tap="emojiSend">发送</view>
             </view>
@@ -30,7 +30,7 @@
     import emoji from './../emoji/index.vue'
     export default {
         name: 'Submit',
-        componets: {
+        components: {
             emoji
         },
         data() {
@@ -46,16 +46,16 @@
             getElementHeight() {
                 const query = uni.createSelectorQuery().in(this)
                 query.select('.submit').boundingClientRect(data => {
-                    const height = this.isEmoji ? data.height : data.height + 60
+                    const height = this.isEmoji ? data.height : data.height + 260
                     this.$emit('currentHeight', height)
                 }).exec()
             },
             // 点击切换音频
             onClickRecords() {
                 if(this.isRecord) {
-                    this.toc = "../../static/yy.png"
+                    this.toc = "../../static/clickSpeak.png"
                 } else {
-                    this.toc = "../../static/jp.png"
+                    this.toc = "../../static/speak.png"
                 }
                 this.isRecord = !this.isRecord
             },
@@ -68,6 +68,12 @@
             },
             emotion(e) {
                 this.msg = this.msg + e
+            },
+            focus() {
+                this.isEmoji = true;
+                setTimeout(() => {
+                    this.msg = ''
+                }, 0)
             },
             // 
             onClickInput(e) {
@@ -115,7 +121,7 @@
 }
 .record {
     text-align: center;
-    line-height: 40px;
+    line-height: 23px;
     background-color: #f0f0f0;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -164,12 +170,12 @@
             background: #fff;
             font-size: 32rpx;
             text-align: center;
-            line-height: 80rpx;
+            line-height: 106rpx;
             padding-top: 4rpx;
             border-radius: 12rpx;
             image {
-                width: 42rpx;
-                height: 32rpx;
+                width: 62rpx;
+                height: 62rpx;
             }
         }
     }

@@ -66,11 +66,6 @@ export default {
     onLoad() {
         this.getMsg();
     },
-    computed: {
-        reversedMsg() {
-            return [...this.msg].reverse(); // 创建一个新数组并反转
-        }
-    },
     methods: {
         dateTime,
         backOne() {
@@ -156,7 +151,7 @@ export default {
                         this.scrollToView = 'msg' + lastItem.tip;
                     }
                 });     
-            }, 50);
+            }, 100);
         }
     }
 }
