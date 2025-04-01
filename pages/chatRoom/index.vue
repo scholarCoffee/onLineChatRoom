@@ -38,7 +38,7 @@
                     </view>
                 </view>
             </view>
-            <view class="padbt"></view>
+            <!-- <view class="padbt"></view> -->
         </scroll-view>
         <view class="submit-container">
             <submit @currentHeight="currentHeight" @sendMsg="sendMessage"></submit>
@@ -57,7 +57,7 @@ export default {
             imgMsg: [],
             scrollToView: '',
             oldTime: new Date(),
-            inputh: '60'
+            inputh: '66'
         }
     },
     components: {

@@ -17,7 +17,7 @@
         </view>
         <view class="emoji" :class="{ displayNone: isEmoji }">
             <view class="emoji-send">
-                <view class="emoji-send-det">
+                <view class="emoji-send-det" @tap="emojiDel">
                     <image src="../../static/emojiDel.png"></image>
                 </view>
                 <view class="emoji-send-bt" @tap="emojiSend">发送</view>
@@ -73,7 +73,7 @@
                 this.isEmoji = true;
                 setTimeout(() => {
                     this.msg = ''
-                }, 0)
+                }, 10)
             },
             // 
             onClickInput(e) {
@@ -84,6 +84,11 @@
                     setTimeout(() => {
                         this.msg = ''
                     }, 0)
+                }
+            },
+            emojiDel() {
+                if (this.msg?.length > 0) {
+                    this.msg = this.msg.substring(0, this.msg.length - 1)
                 }
             },
             emojiSend() {
@@ -99,9 +104,13 @@
 </script>
 <style lang="scss">
 .submit {
-    padding: 10px;
-    background-color: #f8f8f8;
+    background: rgba(244,244,244,0.96);
     border-top: 1px solid #eaeaea;
+    width: 100%;
+    // position: fixed;
+    // bottom: 0;
+    // z-index: 100;
+    padding-bottom: env(safe-area-inset-bottom);
 }
 .submit-chat {
     display: flex;
@@ -145,34 +154,36 @@
     background: rgba(236, 237, 238, 1);
     box-shadow: 0 -1rpx 0 0 rgba(0,0,0,0.1);
     .emoji-send {
-        width: 280rpx;
+        width: 300rpx;
         height: 104rpx;
         padding-top: 24rpx;
         background-color: rgba(236,237,238,0.8);
         position: fixed;
-        bottom: 0;
+        bottom: env(safe-area-inset-bottom);
         right: 0;
         display: flex;
         .emoji-send-bt {
             flex: 1;
             margin: 0 32rpx 0 20rpx;
-            height: 80rpx;
+            height: 88rpx;
             background: rgba(255,228, 49, 1);
             font-size: 32rpx;
             text-align: center;
-            line-height: 80rpx;
+            line-height: 88rpx;
             border-radius: 12rpx;
         }
         .emoji-send-det {
             flex: 1;
             margin: 0 32rpx 0 20rpx;
-            height: 76rpx;
+            height: 88rpx;
             background: #fff;
             font-size: 32rpx;
             text-align: center;
-            line-height: 106rpx;
-            padding-top: 4rpx;
+            line-height: 88rpx;
             border-radius: 12rpx;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             image {
                 width: 62rpx;
                 height: 62rpx;

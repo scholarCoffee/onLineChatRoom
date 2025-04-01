@@ -78,7 +78,7 @@
     height: 104rpx;
     box-sizing: border-box;
     padding-top: 10rpx;
-    padding-bottom: var(--status-bar-height);
+    padding-bottom: env(safe-area-inset-bottom);
 }
 
 .btn1 {

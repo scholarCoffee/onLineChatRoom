@@ -56,8 +56,8 @@
             .emoji-line-item {
                 flex: 1;
                 text-align: center;
-                font-size: 44rpx;
-                line-height: 72rpx;
+                font-size: 52rpx;
+                line-height: 80rpx;
             }
         }
     }

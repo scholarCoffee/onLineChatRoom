@@ -1,7 +1,7 @@
 <template>
 	<view class="content">
 		<view class="top-bar">
-			<navigator url="../home/index?id=aaa" hover-class="none" class="top-bar-left">
+			<navigator url="../userDetail/index?id=aaa" hover-class="none" class="top-bar-left">
 				<image src="/static/5.webp" class="logo"></image>
 			</navigator>
 			<view class="top-bar-center">
@@ -14,7 +14,7 @@
 		</view>
 		<view class="main">
 			<view class="friends">
-				<view class="friends-list" v-for="(friend, index) in friendsList" :key="index">
+				<navigator url="../chatRoom/index" class="friends-list" v-for="(friend, index) in friendsList" :key="index">
                     <view class="friends-list-l">
                         <text class="tip">{{ friend.tip }}</text>
                         <image :src="friend.avatar" class="avatar"></image>
@@ -26,7 +26,7 @@
                         </view>
                         <view class="news">{{ friend.news }}</view>
                     </view>
-                </view>
+                </navigator>
 			</view>
 			<view class="friends">
 				<view class="friends-list">
