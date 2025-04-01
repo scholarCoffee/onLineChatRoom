@@ -26,6 +26,14 @@
                         <view class="message" v-if="item.types === 1">
                             <image :src="item.message" class="msg-img" @tap="previewImg(item.message)" mode="widthFix"></image>
                         </view>
+                        <view class="message" v-if="item.types === 2">
+                            <view class="msg-text voice" :style="{
+                                'width': item.message.time*4 + 'px'
+                            }" @tap="playVoice(item.message.voice)"> 
+                                <image src="../../static/yy.png" class="voice-img"></image>
+                                {{ item.message.time }}〞
+                            </view>    
+                        </view> 
                     </view>
                     <view class="msg-m msg-right" v-else>
                         <image :src="item.imgUrl" class="user-img"></image>
@@ -35,6 +43,14 @@
                         <view class="message" v-if="item.types === 1">
                             <image :src="item.message" class="msg-img" @tap="previewImg(item.message)" mode="widthFix"></image>
                         </view>
+                        <view class="message" v-if="item.types === 2">
+                            <view class="msg-text voice" :style="{
+                                'width': item.message.time*4 + 'px'
+                            }" @tap="playVoice(item.message.voice)">
+                                <image src="../../static/yy.png" class="voice-img"></image>
+                                {{ item.message }} 〞
+                            </view>    
+                        </view> 
                     </view>
                 </view>
             </view>
@@ -122,12 +138,21 @@ export default {
                 }
             });
         },
-        sendMessage(message) {
+        playVoice(e) {
+            const innerAudioContext = uni.createInnerAudioContext()
+            innerAudioContext.autoplay = true
+            innerAudioContext.src = e
+            innerAudioContext.onPlay(() => {
+                console.log('开始播放')
+            })
+        },
+        sendMessage(e) {
+            const { message, types } = e || {}
             let len = this.msg.length 
             const data = {
                 id: 1, // 假设 1 表示当前用户
                 message: message,
-                types: 0, // 假设 0 表示文本消息
+                types: types, // 假设 0 表示文本消息
                 time: new Date().toISOString(),
                 imgUrl: '/static/6.webp', // 假设当前用户头像
                 tip: len + 1
@@ -137,6 +162,9 @@ export default {
             this.$nextTick(() => {
                 this.scrollToView = 'msg' + (len + 1);
             }); 
+            if (types === 1) {
+                this.imgMsg.push(data.message)
+            }
         },
         currentHeight(value) {
             this.inputh = value
@@ -225,6 +253,15 @@ page {
                 max-width: 400rpx;
                 border-radius: $uni-border-radius-base;
             }
+            .voice {
+                width: 200rpx;
+                min-width: 80rpx;
+                max-width: 400rpx;
+            }
+            .voice-img {
+                width: 28rpx;
+                height: 36rpx;
+            }
         }
         .msg-left {
             flex-direction: row;
@@ -237,6 +274,16 @@ page {
             .msg-img {
                 margin-left: 16rpx;
             }
+            .voice {
+                text-align: right;
+            }
+            .voice-img {
+                float: left;
+                transform: rotate(180deg);
+                padding-bottom: 4rpx;
+                width: 28rpx;
+                height: 36rpx;
+            }
         }
         .msg-right {
             flex-direction: row-reverse;
@@ -248,6 +295,15 @@ page {
             }
             .msg-img {
                 margin-right: 16rpx;
+            }
+            .voice {
+                text-align: left;
+            }
+            .voice-img {
+                float: right;
+                padding-bottom: 4rpx;
+                width: 28rpx;
+                height: 36rpx;
             }
         }
     }

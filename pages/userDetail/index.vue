@@ -92,7 +92,7 @@
             </view>
             <view class="bt2">退出登录</view>
         </view>
-        <view class="modify" :style="{ bottom:-+widHeight + 'px' }" :animation="animation">
+        <view class="modify" :style="{ bottom:-widHeight + 'px' }" :animation="animation">
             <view class="modify-header">
                 <view class="close" @tap="modify">取消</view>
                 <view class="title">签名</view>

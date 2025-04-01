@@ -133,8 +133,11 @@ const getMessage = function() {
         {
             id: 2,
             imgUrl: '6.webp',
-            message: '5.webp',
-            types: 1,
+            message: {
+                voice: 'a',
+                time: 60
+            },
+            types: 2,
             time: new Date() - 1000*60*60*24,
             tip: 3,
         },
@@ -157,8 +160,11 @@ const getMessage = function() {
         {
             id: 2,
             imgUrl: '6.webp',
-            message: '3.webp',
-            types: 1,
+            message: {
+                voice: '222',
+                time: 60
+            },
+            types: 2,
             time: new Date() - 1000*60*60*24*3,
             tip: 6,
         },
@@ -169,7 +175,18 @@ const getMessage = function() {
             types: 0,
             time: new Date() - 1000*60*60*24*7,
             tip: 7,
-        }
+        },
+        {
+            id: 1,
+            imgUrl: '6.webp',
+            message: {
+                voice: '222',
+                time: 60
+            },
+            types: 0, // 内容类型（0-文字，1-图片链接， 2-语音）
+            time: new Date() - 1000,
+            tip: 8,
+        },
     ]
    }
 

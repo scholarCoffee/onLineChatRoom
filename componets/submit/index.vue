@@ -6,11 +6,11 @@
                     <image :src="toc" class="icon gray"></image>
                 </view>
                 <textarea v-model="msg" auto-height="true" class="chat-send btn" :class="{ displayNone: isRecord}" @input="onClickInput" @focus="focus"></textarea>
-                <view class="record btn" :class="{ displayNone: !isRecord }">按住说话</view>
+                <view class="record btn" :class="{ displayNone: !isRecord }" @touchstart="touchstart" @touchend="touchend">按住说话</view>
                 <view class="bt-img emoji-icon" @tap="onClickEmoji">
                     <image src="../../static/emoji.png" class="icon gray"></image>
                 </view>
-                <view class="bt-img add-icon">
+                <view class="bt-img add-icon" @tap="moreFun">
                     <image src="../../static/add.png" class="icon gray"></image>
                 </view>
             </view>
@@ -24,10 +24,17 @@
             </view>
             <emoji @emotion="emotion" :height="260"></emoji>
         </view>
+        <view class="more" :class="{ displayNone: isMore }">
+            <view class="more-list"  v-for="(item, index) in moreList" :key="index" @tap="onClickMore(item)">
+                <image :src="item.imgUrl"></image>
+                <view class="more-list-text">{{ item.text }}</view>
+            </view>
+        </view>
     </view>
 </template>
 <script>
     import emoji from './../emoji/index.vue'
+    const recorderManager = uni.getRecorderManager()
     export default {
         name: 'Submit',
         components: {
@@ -35,23 +42,49 @@
         },
         data() {
             return {
+                moreList: [{
+                    imgUrl: '../../static/img.png',
+                    key: 1,
+                    text: '图片'
+                }, {
+                    imgUrl: '../../static/photo.png',
+                    key: 2,
+                    text: '拍照'
+                }, {
+                    imgUrl: '../../static/location.png',
+                    key: 3,
+                    text: '定位'
+                }, {
+                    imgUrl: '../../static/video.png',
+                    key: 4,
+                    text: '视频'
+                }, {
+                    imgUrl: '../../static/file.png',
+                    key: 5,
+                    text: '文件'
+                }],
                 isRecord: false,
                 isEmoji: true,
+                isMore: true,
                 msg: '',
-                toc: '../../static/yy.png'
+                toc: '../../static/yy.png',
+                timer: '',
+                vlength: 0,
             }
         },
         methods: {
             // 获取模块高度
-            getElementHeight() {
+            getElementHeight(value) {
                 const query = uni.createSelectorQuery().in(this)
                 query.select('.submit').boundingClientRect(data => {
-                    const height = this.isEmoji ? data.height : data.height + 260
+                    const height = this.isEmoji && this.isMore ? data.height : (data.height + value)
                     this.$emit('currentHeight', height)
                 }).exec()
             },
             // 点击切换音频
             onClickRecords() {
+                this.isEmoji = true
+                this.isMore = true
                 if(this.isRecord) {
                     this.toc = "../../static/clickSpeak.png"
                 } else {
@@ -62,28 +95,102 @@
             // 点击表情
             onClickEmoji() {
                 this.isEmoji = !this.isEmoji
+                this.isMore = true
+                this.isRecord = false
+                this.toc = "../../static/clickSpeak.png"
                 setTimeout(() => { 
-                    this.getElementHeight()
+                    this.getElementHeight(250)
                 }, 0)
             },
             emotion(e) {
                 this.msg = this.msg + e
             },
+            onClickMore(item) {
+              const { key } = item || {}
+              switch(key) {
+                case 1:
+                    this.sendImg(item)
+                    break
+                case 2:
+                    this.$emit('sendPhoto', item)
+                    break
+                case 3:
+                    this.$emit('sendLocation', item)
+                    break
+                case 4:
+                    this.$emit('sendVideo', item)
+                    break
+                case 5:
+                    this.$emit('sendFile', item)
+                    break
+                default:
+                    break
+              }
+            },
+            sendImg(e) {
+                const { key } = e || {}
+                let sourceType = ['album', 'camera']
+                let count = 9
+                if (key === 1 ) {
+                    count = 9
+                    sourceType = ['album']
+                } else {
+                    count = 1
+                    sourceType = ['camera']
+                }
+                uni.chooseImage({
+                    count: count,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: sourceType,
+                    success: (res) => {
+                        const filePaths = res.tempFilePaths
+                        for (let i = 0; i < filePaths.length; i++) {
+                            this.send(filePaths[i], 1)
+                        }
+                    },
+                    fail: (err) => {
+                        console.log(err)
+                    }
+                })
+            },
+            touchstart() {
+                let i = 1
+                this.timer = setInterval(() => {
+                    this.vlength = i
+                    i++
+                    if (i > 10) {
+                        clearInterval(this.timer)
+                    }
+                }, 1000)
+                recorderManager.start()
+            },
+            touchend() {
+               clearInterval(this.timer)
+               recorderManager.stop()
+               recorderManager.onStop((res) => {
+                    const { tempFilePath } = res || {}
+                    let data = {
+                        voice: tempFilePath,
+                        time: this.vlength,
+                    }
+                    this.send(data, 2)
+                })
+            },
             focus() {
-                this.isEmoji = true;
+                this.isEmoji = true
+                this.isMore = true
+                this.isRecord = false
+                this.toc = "../../static/clickSpeak.png"
                 setTimeout(() => {
-                    this.msg = ''
+                    this.getElementHeight(250)
                 }, 10)
             },
-            // 
+            // 点击输入框
             onClickInput(e) {
                 const { value } = e.target || {}
                 const pos = value.indexOf('\n')
                 if (pos != -1 && value.length > 0) {
-                    this.$emit('sendMsg', this.msg)
-                    setTimeout(() => {
-                        this.msg = ''
-                    }, 0)
+                    this.send(this.msg, 0)
                 }
             },
             emojiDel() {
@@ -93,11 +200,28 @@
             },
             emojiSend() {
                 if (this.msg?.length > 0) {
-                    this.$emit('sendMsg', this.msg)
-                    setTimeout(() => {
-                        this.msg = ''
-                    }, 0)
+                    this.send(this.msg, 0)
                 }
+            },
+            // 更多
+            moreFun() {
+                this.isMore = !this.isMore
+                this.isRecord = false
+                this.toc = "../../static/clickSpeak.png"
+                this.isEmoji = true
+                setTimeout(() => {
+                    this.getElementHeight(250)
+                }, 0)
+            },
+            send(msg, types) {
+                let data = {
+                    message: msg,
+                    types: types,
+                }
+                this.$emit('sendMsg', data)
+                setTimeout(() => {
+                    this.msg = ''
+                }, 0)
             }
         }
     }
@@ -115,38 +239,33 @@
 .submit-chat {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-}
-.btn {
-    flex: 1;
-    margin: 0 10px;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #fff;
-}
-.chat-send {
-    line-height: 44rpx;
-}
-.record {
-    text-align: center;
-    line-height: 23px;
-    background-color: #f0f0f0;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-.bt-img .icon {
-    width: 30px;
-    height: 30px;
-}
-.bt-img .icon.gray {
-    filter: grayscale(100%);
-}
-.emoji-icon {
-    margin-right: 10px;
-}
-.add-icon {
-    margin-left: 10px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 14rpx;
+    image {
+        width: 56rpx;
+        height: 56rpx;
+        margin: 0 10rpx;
+        flex: auto;
+    }
+    .btn {
+        flex: auto;
+        margin: 0 10rpx;
+        max-height: 160rpx;
+        padding: 20rpx;
+        border: 1px solid #ccc;
+        border-radius: 10rpx;
+        background-color: #fff;
+    }
+    .chat-send {
+        line-height: 44rpx;
+    }
+    .record {
+        font-size: $uni-font-size-lg;
+        color: $uni-text-color-grey;
+        text-align: center;
+        line-height: 44rpx;
+    }
 }
 .emoji {
     width: 100%;
@@ -188,6 +307,33 @@
                 width: 62rpx;
                 height: 62rpx;
             }
+        }
+    }
+}
+.more {
+    width: 100%;
+    height: 436rpx;
+    background: rgba(236, 237, 238, 1);
+    box-shadow: 0 -1rpx 0 0 rgba(0,0,0,0.1);
+    padding: 8rpx 20rpx;
+    box-sizing: border-box;
+    .more-list {
+        width: 25%;
+        text-align: center;
+        float: left;
+        padding-top: 32rpx;
+        image {
+            width: 72rpx;
+            height: 72rpx;
+            padding: 24rpx;
+            background: rgba(255,255,255,1);
+            border-radius: 24rpx;
+        }
+        .more-list-text {
+            font-size: 26rpx;
+            font-weight: 500;
+            color: #888;
+            line-height: 36rpx;
         }
     }
 }

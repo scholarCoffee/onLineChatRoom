@@ -30,7 +30,7 @@
         <view class="bottom-bar">
             <view class="bottom-btn btn1" @tap="addFrinedAnimat">加为好友</view>
         </view>
-        <view class="add-misg" :style="{ 'height': addHeight + 'px', 'bottom': -+ addHeight + 'px' }" :animation="animationData">
+        <view class="add-misg" :style="{ 'height': addHeight + 'px', 'bottom': (-addHeight) + 'px' }" :animation="animationData">
             <view class="name"> {{ user.name }}</view>
             <textarea :value="myname + '请求加为好友~'" maxlength="120" class="add-main"></textarea>
         </view>

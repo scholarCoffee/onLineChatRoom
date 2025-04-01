@@ -32,7 +32,7 @@
 				<view class="friends-list">
 					<view class="friends-list-l">
 						<text class="tip">1</text>
-						<image src="/static/logo.png" class="avatar"></image>
+						<image src="/static/6.webp" class="avatar"></image>
 					</view>
 					<view class="friends-list-r">
 						<view class="top">
@@ -91,7 +91,7 @@
     }
 
     .main {
-        padding: 120rpx 20rpx 0; // 调整顶部和左右间距
+        padding: 180rpx 20rpx 0; // 调整顶部和左右间距
         width: 100%;
     }
 
