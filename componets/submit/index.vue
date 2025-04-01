@@ -16,13 +16,23 @@
             </view>
         </view>
         <view class="emoji" :class="{ displayNone: isEmoji }">
-            表情
+            <view class="emoji-send">
+                <view class="emoji-send-det">
+                    <image src="delete.png"></image>
+                </view>
+                <view class="emoji-send-bt" @tap="emojiSend">发送</view>
+            </view>
+            <emoji @emotion="emotion" :height="260"></emoji>
         </view>
     </view>
 </template>
 <script>
+    import emoji from './../emoji/index.vue'
     export default {
         name: 'Submit',
+        componets: {
+            emoji
+        },
         data() {
             return {
                 isRecord: false,
@@ -56,11 +66,22 @@
                     this.getElementHeight()
                 }, 0)
             },
+            emotion(e) {
+                this.msg = this.msg + e
+            },
             // 
             onClickInput(e) {
                 const { value } = e.target || {}
                 const pos = value.indexOf('\n')
                 if (pos != -1 && value.length > 0) {
+                    this.$emit('sendMsg', this.msg)
+                    setTimeout(() => {
+                        this.msg = ''
+                    }, 0)
+                }
+            },
+            emojiSend() {
+                if (this.msg?.length > 0) {
                     this.$emit('sendMsg', this.msg)
                     setTimeout(() => {
                         this.msg = ''
@@ -89,6 +110,9 @@
     border-radius: 5px;
     background-color: #fff;
 }
+.chat-send {
+    line-height: 44rpx;
+}
 .record {
     text-align: center;
     line-height: 40px;
@@ -110,11 +134,45 @@
     margin-left: 10px;
 }
 .emoji {
-    margin-top: 10px;
-    background-color: #fff;
-    border: 1px solid #eaeaea;
-    border-radius: 5px;
-    padding: 10px;
+    width: 100%;
+    height: 460rpx;
+    background: rgba(236, 237, 238, 1);
+    box-shadow: 0 -1rpx 0 0 rgba(0,0,0,0.1);
+    .emoji-send {
+        width: 280rpx;
+        height: 104rpx;
+        padding-top: 24rpx;
+        background-color: rgba(236,237,238,0.8);
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        display: flex;
+        .emoji-send-bt {
+            flex: 1;
+            margin: 0 32rpx 0 20rpx;
+            height: 80rpx;
+            background: rgba(255,228, 49, 1);
+            font-size: 32rpx;
+            text-align: center;
+            line-height: 80rpx;
+            border-radius: 12rpx;
+        }
+        .emoji-send-det {
+            flex: 1;
+            margin: 0 32rpx 0 20rpx;
+            height: 76rpx;
+            background: #fff;
+            font-size: 32rpx;
+            text-align: center;
+            line-height: 80rpx;
+            padding-top: 4rpx;
+            border-radius: 12rpx;
+            image {
+                width: 42rpx;
+                height: 32rpx;
+            }
+        }
+    }
 }
 .displayNone {
     display: none;
