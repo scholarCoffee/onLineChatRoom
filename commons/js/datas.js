@@ -177,6 +177,19 @@ const getMessage = function() {
             tip: 7,
         },
         {
+            id: 2,
+            imgUrl: '6.webp',
+            message: {
+                name: '222222222222222222222',
+                address: '东昌接asdasdsadasda',
+                latitude: '39.909',
+                longitude: '166.404'
+            },
+            types: 3,
+            time: new Date() - 1000*60*60*24*7,
+            tip: 7,
+        },
+        {
             id: 1,
             imgUrl: '6.webp',
             message: {
@@ -186,6 +199,19 @@ const getMessage = function() {
             types: 2, // 内容类型（0-文字，1-图片链接， 2-语音）
             time: new Date() - 1000,
             tip: 8,
+        },
+        {
+            id: 1,
+            imgUrl: '6.webp',
+            message: {
+                name: '222222222222222222222',
+                address: '东昌接asdasdsadasda',
+                latitude: '39.909',
+                longitude: '166.404'
+            },
+            types: 3,
+            time: new Date() - 1000*60*60*24*7,
+            tip: 7,
         },
     ]
    }

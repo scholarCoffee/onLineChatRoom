@@ -6,7 +6,7 @@
                     <image :src="toc" class="icon gray"></image>
                 </view>
                 <textarea v-model="msg" auto-height="true" class="chat-send btn" :class="{ displayNone: isRecord}" @input="onClickInput" @focus="focus"></textarea>
-                <view class="record btn" :class="{ displayNone: !isRecord }" @touchstart="touchstart" @touchend="touchend" @touchmove="touchmove">按住说话</view>
+                <view class="record btn" :class="{ displayNone: !isRecord }" @longpress="touchstart" @touchend="touchend" @touchmove="touchmove">按住说话</view>
                 <view class="bt-img emoji-icon" @tap="onClickEmoji">
                     <image src="../../static/emoji.png" class="icon gray"></image>
                 </view>
@@ -29,7 +29,7 @@
                         <view class="more-list-text">{{ item.text }}</view>
                     </view>
                 </view>
-            </view>
+        </view>
         <view class="voice-bg" :class="{ displayNone: isVoice }">
             <view class="voice-bg-len">
                 <view class="voice-bg-time" :style="{
@@ -62,14 +62,6 @@
                     imgUrl: '../../static/location.png',
                     key: 3,
                     text: '定位'
-                }, {
-                    imgUrl: '../../static/video.png',
-                    key: 4,
-                    text: '视频'
-                }, {
-                    imgUrl: '../../static/file.png',
-                    key: 5,
-                    text: '文件'
                 }],
                 isRecord: false,
                 isEmoji: true,
@@ -81,20 +73,6 @@
                 vlength: 0,
                 pageY: 0,
             }
-        },
-        onLoad() {
-            recorderManager.onStop((res) => {
-                const { tempFilePath } = res || {}
-                let data = { 
-                    voice: tempFilePath,
-                    time: this.vlength,
-                }
-                if (!this.isVoice) {
-                    this.send(data, 2)
-                }
-                this.vlength = 0
-                this.isVoice = true
-            })
         },
         methods: {
             // 获取模块高度
@@ -136,10 +114,10 @@
                     this.sendImg(item)
                     break
                 case 2:
-                    this.$emit('sendPhoto', item)
+                    this.sendImg(item)
                     break
                 case 3:
-                    this.$emit('sendLocation', item)
+                    this.chooseLocation(item)
                     break
                 case 4:
                     this.$emit('sendVideo', item)
@@ -177,6 +155,23 @@
                     }
                 })
             },
+            chooseLocation() {
+                uni.chooseLocation({
+                    success: (res) => {
+                        const { name, address, latitude, longitude } = res || {}
+                        let data = {
+                            name: name,
+                            address: address,
+                            latitude: latitude,
+                            longitude: longitude
+                        }
+                        this.send(data, 3)
+                    },
+                    fail: (err) => {
+                        console.log(err)
+                    }
+                })
+            },
             touchstart(e) {
                 let i = 1
                 this.pageY = e.changedTouches[0].pageY
@@ -194,6 +189,18 @@
             touchend(e) {
                clearInterval(this.timer)
                recorderManager.stop()
+               recorderManager.onStop((res) => {
+                    const { tempFilePath } = res || {}
+                    let data = { 
+                        voice: tempFilePath,
+                        time: this.vlength,
+                    }
+                    if (!this.isVoice) {
+                        this.send(data, 2)
+                    }
+                    this.vlength = 0
+                    this.isVoice = true
+                })
             },
             touchmove(e) {
                 if (this.pageY - e.changedTouches[0].pageY > 100) {

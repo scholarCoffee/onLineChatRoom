@@ -11,8 +11,11 @@
                 </view>
             </view>
         </view>
-        <scroll-view class="chat" scroll-y="true" scroll-with-animation="true" :scroll-into-view="scrollToView" >
+        <scroll-view class="chat" scroll-y="true" :scroll-with-animation="scrollAnimation" :scroll-into-view="scrollToView" @scrolltoupper="nextPage">
             <view class="chat-main" :style="{ 'padding-bottom': inputh + 'px'}">
+                <view class="loading" :class="{ 'displaynone': isLoading }">
+                    <image src="../../static/user/add.png" class="loading-img" :animation="animationData"></image>
+                </view>
                 <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.tip">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
                     <view class="msg-m msg-left" v-if="item.id !== 1">
@@ -30,7 +33,15 @@
                                 <image src="../../static/yy.png" class="voice-img"></image>
                                 {{ item.message.time }}"
                             </view>    
-                        </view> 
+                        </view>
+                        <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
+                            <view class="msg-map">
+                                <view class="map-name">{{ item.message.name }}</view>
+                                <view class="map-address">{{ item.message.address }}</view>   
+                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image>                
+                                <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
+                            </view>
+                        </view>
                     </view>
                     <view class="msg-m msg-right" v-else>
                         <image :src="item.imgUrl" class="user-img"></image>
@@ -48,6 +59,14 @@
                                 <image src="../../static/yy.png" class="voice-img"></image>
                             </view>    
                         </view> 
+                        <view class="message" v-if="item.types === 3">
+                            <view class="msg-map" @tap="openLocation(item.message)">
+                                <view class="map-name">{{ item.message.name }}</view>
+                                <view class="map-address">{{ item.message.address }}</view>                    
+                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image>
+                                <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
+                            </view>
+                        </view>
                     </view>
                 </view>
             </view>
@@ -62,6 +81,7 @@
 import { getMessage } from '../../commons/js/datas.js'
 import { dateTime, spaceTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 import Submit from './../../componets/submit'
+const innerAudioContext = uni.createInnerAudioContext()
 export default {
     data() {
         return {
@@ -70,14 +90,20 @@ export default {
             scrollToView: '',
             oldTime: new Date(),
             inputh: '166',
-            menuHeight: 0
+            animationData: '',
+            nowpage: 0,
+            loading: '',
+            isLoading: true,
+            scrollAnimation: true,
+            beginLoading: true,
         }
     },
     components: {
         Submit
     },
     onLoad() {
-        this.getMsg()
+        this.getMsg(this.nowpage)
+        // this.nextPage()
     },
     methods: {
         dateTime,
@@ -86,32 +112,72 @@ export default {
                 delta: 1
             });
         },
-        getMsg() {
+        nextPage() {
+            if (this.nowpage > 0  && this.beginLoading) {
+                this.isLoading = false
+                var animation = uni.createAniamtion({
+                    duration: 1000,
+                    timingFunction: 'step-start'
+                })
+                this.beginLoading = false
+                this.animation = animation
+                animation.scale(2,2).rotate(45).step()
+                this.animationData = animation.export()
+                let i = 1;
+                this.loading = setInterval(function(){
+                    animation.translate(i*30).step()
+                    this.animationData = animation.export()
+                    i++
+                    if(i > 20) {
+                        this.getMsg(this.nowpage)
+                    }
+                    
+                }.bind(this), 100)
+            }
+
+        },
+        getMsg(page) {
             // 获取消息列表
             this.msg = getMessage();
-            // 遍历消息列表，添加时间戳
-            this.msg.forEach((item, index) => {
-                item.imgUrl = '/../static/' + item.imgUrl;
-                if (index < this.msg.length - 1) {
-                    let t = spaceTime(this.oldTime, item.time);
+            let maxpages = this.msg.length;
+            if (this.msg.length > page*10 + 10) {
+                maxpages = page*10 + 10
+                this.nowpage++ 
+            } else {
+                this.nowpage = -1
+            }
+            for (var i = page*10; i < maxpages; i++) {
+                this.msg[i].imgUrl = '/../static/' + this.msg[i].imgUrl;
+                if (i < this.msg.length - 1) {
+                    let t = spaceTime(this.oldTime, this.msg[i].time);
                     if (t) {
                         this.oldTime = t
                     }
-                    item.time = t;
-                    if(item.types === 1) {
-                        item.message = '/../static/' + item.message;
-                        this.imgMsg.unshift(item.message)
+                    this.msg[i].time = t;
+                    if(this.msg[i].types === 1) {
+                        this.msg[i].message = '/../static/' + this.msg[i].message;
+                        this.imgMsg.unshift(this.msg[i].message)
                     }
                 } else {
-                    item.time = '';
+                    this.msg[i].time = '';
                 }
-                
-            });
+            }
             // 反转消息列表
             this.msg.reverse();
-
             // 滚动到最底部
-            this.scrollToBottom();
+            setTimeout(() => {
+                this.scrollToView = ''
+                this.scrollAnimation = false
+                this.$nextTick(() => {
+                    const lastItem = this.msg[maxpages- page*10 - 1];
+                    if (lastItem) {
+                        this.scrollToView = 'msg' + lastItem.tip;
+                    }
+                });     
+            }, 100);
+            clearInterval(this.loading)
+            this.isLoading = true
+            this.beginLoading = true
         },
         // 预览图片
         previewImg(e) {
@@ -136,15 +202,36 @@ export default {
             });
         },
         playVoice(e) {
-            const innerAudioContext = uni.createInnerAudioContext()
-            innerAudioContext.autoplay = true
             innerAudioContext.src = e
-            innerAudioContext.onPlay(() => {
-                console.log('开始播放')
-            })
+            innerAudioContext.play();
+        },
+        cover(e) {
+            const { longitude, latitude, name, address } = e || {}
+            let map = [{
+                latitude: latitude,
+                longitude: longitude,
+                iconPath: '/static/6.webp',
+            }] 
+            return map
+        },
+        openLocation(e) {
+            const { longitude, latitude, name, address } = e || {}
+            uni.openLocation({
+                latitude: latitude,
+                longitude: longitude,
+                name: name,
+                address: address,
+                success: function (res) {
+                    console.log(res)
+                },
+                fail: function (res) {
+                    console.log(res.errMsg)
+                }
+            });
         },
         sendMessage(e) {
             const { message, types } = e || {}
+            this.scrollAnimation = true
             let len = this.msg.length
             let nowTime = new Date();
             let t = spaceTime(this.oldTime, nowTime);
@@ -174,6 +261,7 @@ export default {
             this.scrollToBottom()
         },
         scrollToBottom() {
+            this.scrollAnimation = true
             setTimeout(() => {
                 this.scrollToView = ''
                 this.$nextTick(() => {
@@ -189,6 +277,9 @@ export default {
 </script>
 <style lang="scss">
 @import "../../commons/css/mycss.scss"; // 引入公共样式
+.displayNone {
+    display: none;
+}
 page {
     height: 100%;
 }
@@ -219,6 +310,13 @@ page {
     .padbt {
         height: var(--status-bar-height);
         width: 100%;
+    }
+    .loading {
+        text-align: center;
+        .loading-img {
+            width: 60rpx;
+            height: 60rpx;
+        }
     }
     .chat-main {
         padding-left: $uni-spacing-col-base;
@@ -260,6 +358,36 @@ page {
                 max-width: 400rpx;
                 border-radius: $uni-border-radius-base;
             }
+            .msg-map {
+                background: #fff;
+                width: 464rpx;
+                height: 284rpx;
+                overflow: hidden;
+                .map-name {
+                    font-size: $uni-font-size-lg;
+                    color: $uni-text-color;
+                    line-height: 44rpx;
+                    padding: 18rpx 24rpx 0 24rpx;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 1;
+                    overflow: hidden;
+                }
+                .map-address {
+                    font-size: $uni-font-size-sm;
+                    color: $uni-text-color-disable;
+                    padding: 0rpx 24rpx;;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 1;
+                    overflow: hidden;
+                }
+                .map-img {
+                    padding-top: 8rpx;
+                    width: 480rpx;
+                    height: 190rpx;
+                }
+            }
             .voice {
                 min-width: 100rpx;
                 max-width: 400rp;
@@ -275,6 +403,10 @@ page {
             }
             .msg-img {
                 margin-left: 16rpx;
+            }
+            .msg-map {
+                margin-left: 16rpx;
+                border-radius: 0px 20rpx 20rpx 20rpx;
             }
             .voice {
                 text-align: right;
@@ -300,6 +432,10 @@ page {
             }
             .msg-img {
                 margin-right: 16rpx;
+            }
+            .msg-map {
+                margin-right: 16rpx;
+                border-radius: 0px 20rpx 20rpx 20rpx;
             }
             .voice {
                 text-align: left;
