@@ -2,12 +2,9 @@
 	<view>
         <view class="top-bar">
             <view class="search-div">
-				<image src="../../static/user/search.png" class="search-img"></image>
+                <image src="../../static/user/back.png" class="search-img" @tap="back"></image>
                 <input type="text" placeholder="搜索用户/群" class="search" placeholder-style="color:#999;font-weight:400;" @input="onInputUser">
             </view>            
-			<view class="top-bar-right">
-                <view class="text" @tap="back">取消</view>
-			</view>
 		</view>
         <view class="main">
             <view class="search-user result">
@@ -47,11 +44,11 @@
             },
             searchUser(e) {
                 const arr = getFriendsList()
-                const exp = eval("/" + e + "/g")
+                const exp = new RegExp(e, 'g'); 
                 for(let i = 0; i < arr.length ; i++) {
                     if (arr[i].name.search(e) != -1 || arr[i].email.search(e) != -1) {
                         this.isFriend(arr[i])
-                        arr[i].imgUrl = '../../static' + arr[i].imgUrl
+                        arr[i].imgUrl = '../../static/' + arr[i].imgUrl
                         arr[i].name = arr[i].name.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
                         arr[i].email = arr[i].email.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
                         this.qryUserInfo.push(arr[i])
@@ -81,32 +78,29 @@
 
 <style lang="scss">
     @import "../../commons/css/mycss.scss"; // 引入公共样式
-	.top-bar {
+	.top-bar {     
         .search-div {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            z-index: -1;
-            box-sizing: border-box;
-            padding: 14rpx 118rpx 14rpx $uni-spacing-col-base;
-        }
-        .search {
-            padding: 0 60rpx 0 12rpx;
-            height: 60rpx;
-            border-radius: 10rpx;
-            background: $uni-bg-color-grey;
-        }
-        .search-img {
-            position: absolute;
-            right: 128rpx;
-            top: 26rpx;
-            width: 40rpx;
-            height: 40rpx;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            flex-direction: row;
+            .search {
+                padding: 0 60rpx 0 12rpx;
+                height: 60rpx;
+                border-radius: 10rpx;
+                background: $uni-bg-color-grey;
+            }
+            .search-img {
+                width: 40rpx;
+                height: 40rpx;
+                margin-left: 20rpx;
+                margin-right: 40rpx;
+            }
         }
 	}
     .main {
-        padding: 88rpx $uni-spacing-col-base;
+        padding: 168rpx $uni-spacing-col-base;
         .result {
             padding-top: $uni-spacing-col-base;
             .title {

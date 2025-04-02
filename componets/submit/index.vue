@@ -14,22 +14,22 @@
                     <image src="../../static/add.png" class="icon gray"></image>
                 </view>
             </view>
-        </view>
-        <view class="emoji" :class="{ displayNone: isEmoji }">
-            <view class="emoji-send">
-                <view class="emoji-send-det" @tap="emojiDel">
-                    <image src="../../static/emojiDel.png"></image>
+            <view class="emoji" :class="{ displayNone: isEmoji }">
+                <view class="emoji-send">
+                    <view class="emoji-send-det" @tap="emojiDel">
+                        <image src="../../static/emojiDel.png"></image>
+                    </view>
+                    <view class="emoji-send-bt" @tap="emojiSend">发送</view>
                 </view>
-                <view class="emoji-send-bt" @tap="emojiSend">发送</view>
+                <emoji @emotion="emotion" :height="260"></emoji>
+                </view>
+                <view class="more" :class="{ displayNone: isMore }">
+                    <view class="more-list"  v-for="(item, index) in moreList" :key="index" @tap="onClickMore(item)">
+                        <image :src="item.imgUrl"></image>
+                        <view class="more-list-text">{{ item.text }}</view>
+                    </view>
+                </view>
             </view>
-            <emoji @emotion="emotion" :height="260"></emoji>
-        </view>
-        <view class="more" :class="{ displayNone: isMore }">
-            <view class="more-list"  v-for="(item, index) in moreList" :key="index" @tap="onClickMore(item)">
-                <image :src="item.imgUrl"></image>
-                <view class="more-list-text">{{ item.text }}</view>
-            </view>
-        </view>
         <view class="voice-bg" :class="{ displayNone: isVoice }">
             <view class="voice-bg-len">
                 <view class="voice-bg-time" :style="{
@@ -79,7 +79,22 @@
                 toc: '../../static/yy.png',
                 timer: '',
                 vlength: 0,
+                pageY: 0,
             }
+        },
+        onLoad() {
+            recorderManager.onStop((res) => {
+                const { tempFilePath } = res || {}
+                let data = { 
+                    voice: tempFilePath,
+                    time: this.vlength,
+                }
+                if (!this.isVoice) {
+                    this.send(data, 2)
+                }
+                this.vlength = 0
+                this.isVoice = true
+            })
         },
         methods: {
             // 获取模块高度
@@ -108,7 +123,7 @@
                 this.isRecord = false
                 this.toc = "../../static/clickSpeak.png"
                 setTimeout(() => { 
-                    this.getElementHeight(250)
+                    this.getElementHeight(0)
                 }, 0)
             },
             emotion(e) {
@@ -162,8 +177,9 @@
                     }
                 })
             },
-            touchstart() {
+            touchstart(e) {
                 let i = 1
+                this.pageY = e.changedTouches[0].pageY
                 this.isVoice = false
                 this.timer = setInterval(() => {
                     this.vlength = i
@@ -175,22 +191,15 @@
                 }, 1000)
                 recorderManager.start()
             },
-            touchend() {
-               this.isVoice = true
+            touchend(e) {
                clearInterval(this.timer)
                recorderManager.stop()
-               recorderManager.onStop((res) => {
-                    const { tempFilePath } = res || {}
-                    let data = { 
-                        voice: tempFilePath,
-                        time: this.vlength,
-                    }
-                    this.send(data, 2)
-                    this.vlength = 0
-                })
             },
-            touchmove() {
-
+            touchmove(e) {
+                if (this.pageY - e.changedTouches[0].pageY > 100) {
+                    this.isVoice = true
+                    this.vlength = 0
+                } 
             },
             focus() {
                 this.isEmoji = true
@@ -198,7 +207,7 @@
                 this.isRecord = false
                 this.toc = "../../static/clickSpeak.png"
                 setTimeout(() => {
-                    this.getElementHeight(250)
+                    this.getElementHeight(0)
                 }, 10)
             },
             // 点击输入框
@@ -226,7 +235,7 @@
                 this.toc = "../../static/clickSpeak.png"
                 this.isEmoji = true
                 setTimeout(() => {
-                    this.getElementHeight(250)
+                    this.getElementHeight(0)
                 }, 0)
             },
             send(msg, types) {
@@ -247,8 +256,6 @@
     background: rgba(244,244,244,0.96);
     border-top: 1px solid #eaeaea;
     width: 100%;
-    position: fixed;
-    bottom: 0;
     z-index: 10002;
     padding-bottom: env(safe-area-inset-bottom);
 }

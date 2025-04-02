@@ -4,9 +4,6 @@
             <view class="top-bar-left" @tap="backOne">
                 <image src="/static/user/back.png" class="back-img"></image>
             </view>
-            <view class="top-bar-center">
-                <view class="title">{{ title }}</view>
-            </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
                 <view class="group-img">
@@ -68,19 +65,19 @@ import Submit from './../../componets/submit'
 export default {
     data() {
         return {
-            title: 'Hello',
             msg: [],
             imgMsg: [],
             scrollToView: '',
             oldTime: new Date(),
-            inputh: '66'
+            inputh: '166',
+            menuHeight: 0
         }
     },
     components: {
         Submit
     },
     onLoad() {
-        this.getMsg();
+        this.getMsg()
     },
     methods: {
         dateTime,
@@ -202,8 +199,12 @@ page {
 .top-bar {
     background: rgba(244, 244, 244 ,1);
     border-bottom: 1px solid $uni-border-color;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+
     .group-img {
-        position: absolute;
+        // position: absolute;
         bottom: 10rpx;
         right: $uni-spacing-col-base;
         width: 78rpx;
@@ -222,7 +223,7 @@ page {
     .chat-main {
         padding-left: $uni-spacing-col-base;
         padding-right: $uni-spacing-col-base;
-        padding-top: 100rpx;
+        padding-top: 220rpx;
         display: flex;
         flex-direction: column;        
     }

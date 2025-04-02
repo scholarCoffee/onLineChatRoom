@@ -4,12 +4,9 @@
 			<navigator url="../userDetail/index?id=aaa" hover-class="none" class="top-bar-left">
 				<image src="/static/5.webp" class="logo"></image>
 			</navigator>
-			<view class="top-bar-center">
-				<text class="title">{{ title }}</text>
-			</view>
 			<view class="top-bar-right">
 				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
-				<view class="add"><image src="/static/user/add.png"></image></view>
+				<!-- <view class="add"><image src="/static/user/add.png"></image></view> -->
 			</view>
 		</view>
 		<view class="main">
@@ -91,7 +88,7 @@
     }
 
     .main {
-        padding: 180rpx 20rpx 0; // 调整顶部和左右间距
+        margin: 220rpx 20rpx 0; // 调整顶部和左右间距
         width: 100%;
     }
 

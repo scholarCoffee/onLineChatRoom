@@ -4,11 +4,6 @@
 			<view class="top-bar-left" @click="navigateBack">
 				<image src="../../static/user/back.png" class="back-img"></image>
 			</view>
-            <view class="top-bar-center title">
-                <view class="title">
-                    详情
-                </view>
-            </view>
             <view class="top-bar-right pice">
                 <view class="pice"></view>
             </view>
@@ -233,7 +228,7 @@
         border-bottom: 1px solid $uni-border-color;
     }
     .main {
-        padding-top: 86rpx;
+        padding-top: 186rpx;
         display: flex;
         flex-direction: column;
         .column {
@@ -304,7 +299,7 @@
         background: #fff;
         .modify-header {
             width: 100%;
-            height: 88rpx;
+            height: 160rpx; // 调整高度以适配不同屏幕
             padding-top: var(--status-bar-height);
             display: flex;
             flex-direction: row;
