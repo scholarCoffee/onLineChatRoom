@@ -17,7 +17,14 @@
             "delay" : 0
         },
         /* 模块配置 */
-        "modules" : {},
+        "modules" : {
+            "Barcode" : {},
+            "Bluetooth" : {},
+            "Contacts" : {},
+            "Camera" : {},
+            "Geolocation" : {},
+            "Record" : {}
+        },
         /* 应用发布信息 */
         "distribute" : {
             /* android打包配置 */
@@ -41,9 +48,22 @@
                 ]
             },
             /* ios打包配置 */
-            "ios" : {},
+            "ios" : {
+                "privacyDescription" : {
+                    "NSPhotoLibraryUsageDescription" : "我们需要使用您的麦克风，以便您可以进行选择相册",
+                    "NSPhotoLibraryAddUsageDescription" : "我们需要使用您的麦克风，以便您可以进行选择相册",
+                    "NSMicrophoneUsageDescription" : "我们需要使用您的麦克风，以便您可以进行语音"
+                }
+            },
             /* SDK配置 */
-            "sdkConfigs" : {}
+            "sdkConfigs" : {
+                "geolocation" : {
+                    "system" : {
+                        "__platform__" : [ "ios", "android" ]
+                    }
+                },
+                "maps" : {}
+            }
         }
     },
     /* 快应用特有相关 */
@@ -53,7 +73,7 @@
         "appid" : "",
         "setting" : {
             "urlCheck" : false,
-            "es6" : false
+            "es6" : true
         },
         "usingComponents" : true,
         "permission" : {}
