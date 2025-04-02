@@ -6,7 +6,7 @@
                     <image :src="toc" class="icon gray"></image>
                 </view>
                 <textarea v-model="msg" auto-height="true" class="chat-send btn" :class="{ displayNone: isRecord}" @input="onClickInput" @focus="focus"></textarea>
-                <view class="record btn" :class="{ displayNone: !isRecord }" @touchstart="touchstart" @touchend="touchend">按住说话</view>
+                <view class="record btn" :class="{ displayNone: !isRecord }" @touchstart="touchstart" @touchend="touchend" @touchmove="touchmove">按住说话</view>
                 <view class="bt-img emoji-icon" @tap="onClickEmoji">
                     <image src="../../static/emoji.png" class="icon gray"></image>
                 </view>
@@ -29,6 +29,14 @@
                 <image :src="item.imgUrl"></image>
                 <view class="more-list-text">{{ item.text }}</view>
             </view>
+        </view>
+        <view class="voice-bg" :class="{ displayNone: isVoice }">
+            <view class="voice-bg-len">
+                <view class="voice-bg-time" :style="{
+                    'width': vlength/0.6 + '%'
+                }">{{ vlength }}</view>
+            </view>
+            <view class="voice-del">上滑取消录音</view>
         </view>
     </view>
 </template>
@@ -66,6 +74,7 @@
                 isRecord: false,
                 isEmoji: true,
                 isMore: true,
+                isVoice: true,
                 msg: '',
                 toc: '../../static/yy.png',
                 timer: '',
@@ -155,26 +164,33 @@
             },
             touchstart() {
                 let i = 1
+                this.isVoice = false
                 this.timer = setInterval(() => {
                     this.vlength = i
                     i++
-                    if (i > 10) {
+                    if (i > 60) {
                         clearInterval(this.timer)
+                        this.touchend()
                     }
                 }, 1000)
                 recorderManager.start()
             },
             touchend() {
+               this.isVoice = true
                clearInterval(this.timer)
                recorderManager.stop()
                recorderManager.onStop((res) => {
                     const { tempFilePath } = res || {}
-                    let data = {
+                    let data = { 
                         voice: tempFilePath,
                         time: this.vlength,
                     }
                     this.send(data, 2)
+                    this.vlength = 0
                 })
+            },
+            touchmove() {
+
             },
             focus() {
                 this.isEmoji = true
@@ -231,9 +247,9 @@
     background: rgba(244,244,244,0.96);
     border-top: 1px solid #eaeaea;
     width: 100%;
-    // position: fixed;
-    // bottom: 0;
-    // z-index: 100;
+    position: fixed;
+    bottom: 0;
+    z-index: 10002;
     padding-bottom: env(safe-area-inset-bottom);
 }
 .submit-chat {
@@ -335,6 +351,45 @@
             color: #888;
             line-height: 36rpx;
         }
+    }
+}
+.voice-bg {
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0,0,0,0.3);
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    z-index: 1001;
+    .voice-bg-len {
+        height: 84rpx;
+        width: 600rpx;
+        position: absolute;
+        top:0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        margin: auto;
+        background-color: rgba(255,255,255,0.2);
+        border-radius: 42rpx;
+        text-align: center;
+    }
+    .voice-bg-time {
+        display: inline-block ;
+        line-height: 84rpx;
+        width: 120rpx;
+        min-width: 120rpx;
+        border-radius: 42rpx;
+        background-color: $uni-color-primary;
+    }
+    .voice-del {
+        position: absolute;
+        bottom: 148rpx;
+        margin-bottom: env(safe-area-inset-bottom);
+        width: 100%;
+        text-align: center;
+        font-size: $uni-font-size-base;
+        color: #fff;
     }
 }
 .displayNone {

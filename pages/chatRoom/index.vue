@@ -31,7 +31,7 @@
                                 'width': item.message.time*4 + 'px'
                             }" @tap="playVoice(item.message.voice)"> 
                                 <image src="../../static/yy.png" class="voice-img"></image>
-                                {{ item.message.time }}〞
+                                {{ item.message.time }}"
                             </view>    
                         </view> 
                     </view>
@@ -47,8 +47,8 @@
                             <view class="msg-text voice" :style="{
                                 'width': item.message.time*4 + 'px'
                             }" @tap="playVoice(item.message.voice)">
+                                {{ item.message.time }}"
                                 <image src="../../static/yy.png" class="voice-img"></image>
-                                {{ item.message }} 〞
                             </view>    
                         </view> 
                     </view>
@@ -148,12 +148,18 @@ export default {
         },
         sendMessage(e) {
             const { message, types } = e || {}
-            let len = this.msg.length 
+            let len = this.msg.length
+            let nowTime = new Date();
+            let t = spaceTime(this.oldTime, nowTime);
+            if (t) {
+                this.oldTime = t
+            }
+            nowTime = t;
             const data = {
                 id: 1, // 假设 1 表示当前用户
                 message: message,
                 types: types, // 假设 0 表示文本消息
-                time: new Date().toISOString(),
+                time: nowTime,
                 imgUrl: '/static/6.webp', // 假设当前用户头像
                 tip: len + 1
             }
@@ -254,13 +260,8 @@ page {
                 border-radius: $uni-border-radius-base;
             }
             .voice {
-                width: 200rpx;
-                min-width: 80rpx;
-                max-width: 400rpx;
-            }
-            .voice-img {
-                width: 28rpx;
-                height: 36rpx;
+                min-width: 100rpx;
+                max-width: 400rp;
             }
         }
         .msg-left {
@@ -276,12 +277,15 @@ page {
             }
             .voice {
                 text-align: right;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
             .voice-img {
                 float: left;
                 transform: rotate(180deg);
                 padding-bottom: 4rpx;
-                width: 28rpx;
+                width: 36rpx;
                 height: 36rpx;
             }
         }
@@ -298,11 +302,14 @@ page {
             }
             .voice {
                 text-align: left;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
             }
             .voice-img {
                 float: right;
-                padding-bottom: 4rpx;
-                width: 28rpx;
+                padding-bottom: 0rpx;
+                width: 36rpx;
                 height: 36rpx;
             }
         }

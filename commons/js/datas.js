@@ -181,9 +181,9 @@ const getMessage = function() {
             imgUrl: '6.webp',
             message: {
                 voice: '222',
-                time: 60
+                time: 10
             },
-            types: 0, // 内容类型（0-文字，1-图片链接， 2-语音）
+            types: 2, // 内容类型（0-文字，1-图片链接， 2-语音）
             time: new Date() - 1000,
             tip: 8,
         },
