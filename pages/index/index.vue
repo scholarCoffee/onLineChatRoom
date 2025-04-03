@@ -88,7 +88,7 @@
     }
 
     .main {
-        margin: 220rpx 20rpx 0; // 调整顶部和左右间距
+        margin: 240rpx 20rpx 0; // 调整顶部和左右间距
         width: 100%;
     }
 

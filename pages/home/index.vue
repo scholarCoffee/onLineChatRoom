@@ -4,11 +4,6 @@
 			<view class="top-bar-left" @tap="navigateBack">
 				<image src="../../static/user/back.png" class="back-img"></image>
 			</view>
-            <view class="top-bar-right">
-                <view class="more-img">
-                    <image src="../../static/user/more.png"></image>
-                </view>
-            </view>
 		</view>
         <view class="bg">
             <view class="bg-bai" :animation="animationData4"></view>
@@ -111,7 +106,7 @@
                     animation.bottom(-this.addHeight).step(); // 设置动画的初始状态
                     animation1.bottom(-100).step(); // 设置动画的初始状态
                     animation2.width(200).height(200).top(0).step(); // 设置动画的初始状态
-                    animation3.opacity(1).bottom(30).right(30).step(); // 设置动画的初始状态
+                    animation3.opacity(1).step(); // 设置动画的初始状态
                     animation4.backgroundColor('rgba(255, 228, 49, 0)').step();
                 }
                 this.animationData = animation.export();

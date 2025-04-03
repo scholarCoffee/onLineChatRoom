@@ -58,10 +58,6 @@
                     imgUrl: '../../static/photo.png',
                     key: 2,
                     text: '拍照'
-                }, {
-                    imgUrl: '../../static/location.png',
-                    key: 3,
-                    text: '定位'
                 }],
                 isRecord: false,
                 isEmoji: true,

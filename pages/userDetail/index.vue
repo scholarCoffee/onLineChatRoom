@@ -4,30 +4,27 @@
 			<view class="top-bar-left" @click="navigateBack">
 				<image src="../../static/user/back.png" class="back-img"></image>
 			</view>
-            <view class="top-bar-right pice">
-                <view class="pice"></view>
-            </view>
 		</view>
         <view class="main">
             <view class="column heads">
-                <view class="row head">
-                    <view class="title">头像</view>
+                <view class="row" @tap="chooseImage">
+                    <view class="title">头像：</view>
                     <view class="user-header">
-                        <image :src="tempFilePaths" class="user-img" @tap="chooseImage"></image>
+                        <image :src="tempFilePaths" class="user-img"></image>
                     </view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
                 </view>
                 <view class="row" @tap="modify('签名', dataArr.sign, false)">
-                    <view class="title">签名</view>
+                    <view class="title">签名：</view>
                     <view class="cont">{{ dataArr.sign }}</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
                 </view>
                 <view class="row">
-                    <view class="title">注册</view>
+                    <view class="title">注册：</view>
                     <view class="cont">{{ changeTime(dataArr.time) }}</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
@@ -36,14 +33,14 @@
             </view>
             <view class="column">
                 <view class="row" @tap="modify('昵称', dataArr.name, false)">
-                    <view class="title">昵称</view>
+                    <view class="title">昵称：</view>
                     <view class="cont">{{ dataArr.name }}</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
                 </view>
                 <view class="row">
-                    <view class="title">性别</view>
+                    <view class="title">性别：</view>
                     <view class="cont">
                         <picker @change="onChangeSex" mode="selector" :range="sexList" value="0">
                             <view class="picker">{{ sexList[index] }}</view>
@@ -54,7 +51,7 @@
                     </view>
                 </view>
                 <view class="row">
-                    <view class="title">生日</view>
+                    <view class="title">生日：</view>
                     <view class="more">
                         <picker mode="date" :value="date" :start="startDate" :end="endDate" @change="bindPickerChange">
                             <view class="uni-input">{{ date }}</view>
@@ -62,14 +59,14 @@
                     </view>
                 </view>
                 <view class="row">
-                    <view class="title">电话</view>
+                    <view class="title">电话：</view>
                     <view class="cont">{{ dataArr.tell }}</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
                 </view>
                 <view class="row"  @tap="modify('邮箱', dataArr.mail, false)">
-                    <view class="title">邮箱</view>
+                    <view class="title">邮箱：</view>
                     <view class="cont">{{ dataArr.mail }}</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
@@ -78,19 +75,18 @@
             </view>
             <view class="column">
                 <view class="row">
-                    <view class="title">密码</view>
+                    <view class="title">密码：</view>
                     <view class="cont">**********</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
                 </view>
             </view>
-            <view class="bt2">退出登录</view>
+            <view class="bt2" @tap="backLogin">退出登录</view>
         </view>
-        <view class="modify" :style="{ bottom:-widHeight + 'px' }" :animation="animation">
+        <view class="modify" :style="{ bottom:-widHeight + 'px', 'display': isModify ? 'block' : 'none'  }" :animation="animation">
             <view class="modify-header">
                 <view class="close" @tap="modify">取消</view>
-                <view class="title">签名</view>
                 <view class="define" @tap="modifySubmit">确定</view>
             </view>
             <view class="modify-main">
@@ -145,6 +141,11 @@
             this.getElementStyle()
         },
         methods: {
+            backLogin() {
+                uni.navigateTo({
+                    url: '/pages/signIn/index'
+                });
+            },
 			navigateBack() {
 				uni.navigateBack({
 					delta: 1
@@ -228,7 +229,7 @@
         border-bottom: 1px solid $uni-border-color;
     }
     .main {
-        padding-top: 186rpx;
+        padding-top: 240rpx;
         display: flex;
         flex-direction: column;
         .column {
@@ -236,10 +237,12 @@
             flex-direction: column;
             padding-top: 12rpx;
             width: 100%;
-            border-bottom: 1px solid $uni-border-color;
             .row {
                 display: flex;
                 flex-direction: row;
+                align-items: center;
+                justify-content: flex-start;
+                border-bottom: 1px solid $uni-border-color; 
             }
             .title {
                 flex: none;
@@ -252,7 +255,7 @@
                 flex: auto;
             }
             .head {
-                height: 148rpx;
+                height: 108rpx;
                 display: flex;
                 align-items: center;
             }
@@ -307,6 +310,7 @@
             border-bottom: 1px solid $uni-border-color;
             .close {
                 padding-left: $uni-spacing-col-base;
+                padding-right: 20rpx;
                 font-size: $uni-font-size-lg;
                 color: $uni-text-color;
                 line-height: 88rpx;

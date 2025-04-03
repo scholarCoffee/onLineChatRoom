@@ -176,19 +176,19 @@ const getMessage = function() {
             time: new Date() - 1000*60*60*24*7,
             tip: 7,
         },
-        {
-            id: 2,
-            imgUrl: '6.webp',
-            message: {
-                name: '222222222222222222222',
-                address: '东昌接asdasdsadasda',
-                latitude: '39.909',
-                longitude: '166.404'
-            },
-            types: 3,
-            time: new Date() - 1000*60*60*24*7,
-            tip: 7,
-        },
+        // {
+        //     id: 2,
+        //     imgUrl: '6.webp',
+        //     message: {
+        //         name: '222222222222222222222',
+        //         address: '东昌接asdasdsadasda',
+        //         latitude: '39.909',
+        //         longitude: '166.404'
+        //     },
+        //     types: 3,
+        //     time: new Date() - 1000*60*60*24*7,
+        //     tip: 7,
+        // },
         {
             id: 1,
             imgUrl: '6.webp',
@@ -200,19 +200,19 @@ const getMessage = function() {
             time: new Date() - 1000,
             tip: 8,
         },
-        {
-            id: 1,
-            imgUrl: '6.webp',
-            message: {
-                name: '222222222222222222222',
-                address: '东昌接asdasdsadasda',
-                latitude: '39.909',
-                longitude: '166.404'
-            },
-            types: 3,
-            time: new Date() - 1000*60*60*24*7,
-            tip: 7,
-        },
+        // {
+        //     id: 1,
+        //     imgUrl: '6.webp',
+        //     message: {
+        //         name: '222222222222222222222',
+        //         address: '东昌接asdasdsadasda',
+        //         latitude: '39.909',
+        //         longitude: '166.404'
+        //     },
+        //     types: 3,
+        //     time: new Date() - 1000*60*60*24*7,
+        //     tip: 7,
+        // },
     ]
    }
 

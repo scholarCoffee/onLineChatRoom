@@ -13,8 +13,8 @@
         </view>
         <scroll-view class="chat" scroll-y="true" :scroll-with-animation="scrollAnimation" :scroll-into-view="scrollToView" @scrolltoupper="nextPage">
             <view class="chat-main" :style="{ 'padding-bottom': inputh + 'px'}">
-                <view class="loading" :class="{ 'displaynone': isLoading }">
-                    <image src="../../static/user/add.png" class="loading-img" :animation="animationData"></image>
+                <view class="loading" :class="{ 'displayNone': isLoading }">
+                    <image src="../../static/loading.png" class="loading-img" :animation="animationData"></image>
                 </view>
                 <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.tip">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
@@ -34,14 +34,14 @@
                                 {{ item.message.time }}"
                             </view>    
                         </view>
-                        <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
+                        <!-- <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
                             <view class="msg-map">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>   
-                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image>                
+                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image>                 -->
                                 <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
-                            </view>
-                        </view>
+                            <!-- </view> -->
+                        <!-- </view> -->
                     </view>
                     <view class="msg-m msg-right" v-else>
                         <image :src="item.imgUrl" class="user-img"></image>
@@ -59,14 +59,14 @@
                                 <image src="../../static/yy.png" class="voice-img"></image>
                             </view>    
                         </view> 
-                        <view class="message" v-if="item.types === 3">
+                        <!-- <view class="message" v-if="item.types === 3">
                             <view class="msg-map" @tap="openLocation(item.message)">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>                    
-                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image>
+                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image> -->
                                 <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
-                            </view>
-                        </view>
+                            <!-- </view> -->
+                        <!-- </view> -->
                     </view>
                 </view>
             </view>
@@ -89,7 +89,7 @@ export default {
             imgMsg: [],
             scrollToView: '',
             oldTime: new Date(),
-            inputh: '166',
+            inputh: '96',
             animationData: '',
             nowpage: 0,
             loading: '',

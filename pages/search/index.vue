@@ -10,15 +10,15 @@
             <view class="search-user result">
                 <view class="title" v-if="qryUserInfo.length > 0">用户</view>
                 <view class="list user" v-for="(item, index) in qryUserInfo" :key="index">
-                    <navigator url="../home/index?id=aaa">
+                    <view>
                         <image :src="item.imgUrl"></image>
-                    </navigator>
+                    </view>
                     <view class="names">
                         <view class="name" v-html="item.name"></view>
                         <view class="email" v-html="item.email"></view>
                     </view>
                     <view class="right-bt send" v-if="item.tip === 1">发消息</view>
-                    <view class="right-bt add" v-if="item.tip === 0">加好友</view>
+                    <view class="right-bt add" v-if="item.tip === 0" @tap="onAddFriend">加好友</view>
                 </view>
             </view>
         </view>
@@ -67,6 +67,11 @@
                 }
                 e.tip = tip
             },
+            onAddFriend() {
+                uni.navigateTo({
+                    url: '../home/index'
+                })
+            },
             back() {
                 uni.navigateBack({
                     delta: 1
@@ -100,7 +105,7 @@
         }
 	}
     .main {
-        padding: 168rpx $uni-spacing-col-base;
+        padding: 240rpx $uni-spacing-col-base;
         .result {
             padding-top: $uni-spacing-col-base;
             .title {
