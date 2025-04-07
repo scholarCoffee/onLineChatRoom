@@ -4,6 +4,9 @@ import App from './App'
 import Vue from 'vue'
 import './uni.promisify.adaptor'
 Vue.config.productionTip = false
+Vue.prototype.serverUrl = 'http://192.168.3.87:3000' // Set your server URL here
+
+
 App.mpType = 'app'
 const app = new Vue({
   ...App

@@ -12,18 +12,18 @@
 			<view class="title">注册</view>
 			<view class="inputs">
 				<view class="inputs-div">
-					<input v-model="userName" type="text" placeholder="请输入用户名" class="user" placeholder-style="color:#999;font-weight:400;" @input="onInputUser"></input>
+					<input v-model="userName" type="text" placeholder="请输入用户名" class="user" placeholder-style="color:#999;font-weight:400;" @blur="onInputUser"></input>
 					<view class="employ" v-if="isUserEmploy">已占用</view>
 					<image src="../../static/user/checked.png" class="ok" v-if="isUser"></image>
 				</view>
 				<view class="inputs-div">
-					<input v-model="email" type="text" placeholder="请输入邮箱" class="email" placeholder-style="color:#999;font-weight:400;" @input="onInupuEmails"></input>
+					<input v-model="email" type="text" placeholder="请输入邮箱" class="email" placeholder-style="color:#999;font-weight:400;" @blur="onInupuEmails"></input>
 					<view class="employ" v-if="isEmailEmploy">已占用</view>
 					<view class="invalid" v-if="isInvalid">邮箱无效</view>
 					<image src="../../static/user/checked.png" class="ok" v-if="isEmail"></image>
 				</view>
 				<view class="inputs-div">
-					<input :type="type" placeholder="设置密码" class="password" placeholder-style="color:#999;font-weight:400;" @input="onInputPassword"></input>
+					<input :type="type" placeholder="设置密码" class="password" placeholder-style="color:#999;font-weight:400;" @Input="onInputPassword"></input>
 					<image :src="lookUrkl" class="look" @tap="looks"></image>
 				</view>
 			</view>
@@ -69,23 +69,83 @@
 				// 邮箱验证逻辑
 				this.email = e.target.value;
 				const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 邮箱正则表达式	
-				if (emailPattern.test(email)) {
-					this.isEmailEmploy = true
+				if (this.email.length > 0 && emailPattern.test(email)) {
 					this.isInvalid = false; // 邮箱无效提示隐藏
+					// 后端验证邮箱是否已被占用
+					this.matchEmail(); // 调用邮箱验证方法
 				} else {
-					this.isEmailEmploy = false; // 邮箱无效
 					this.isInvalid = true; // 显示邮箱无效提示
+					this.isEmail = false; // 邮箱无效
+					this.isEmailEmploy = false; // 隐藏邮箱已占用提示
 				}
+			},
+			matchEmail() {
+				uni.request({
+						url: this.serverUrl + '/signup/judge', // 替换为你的登录接口地址,
+						method: 'POST',
+						data: {
+							data: this.email,
+							type: 'email'
+						},
+						success: (res) => {
+							const { data, code } = res.data
+							// 表示邮箱已存在
+							if (code === 200) {
+								if (data > 0) {
+									this.isEmail = false; // 邮箱无效
+									this.isEmailEmploy = true; // 显示邮箱已占用提示
+								} else {
+									this.isEmail = true; // 邮箱有效
+									this.isEmailEmploy = false; // 显示邮箱已占用提示
+								}
+							}
+							// 表示邮箱不存在
+							else {
+								uni.showToast({
+									title: '系统出现错误',
+									icon: 'none',
+									duration: 2000
+								});
+							}
+						},
+					})
 			},
 			onInputUser(e) {
 				// 用户名验证逻辑
 				this.userName = e.target.value;
 				if (userName.length > 0) {
-					this.isUser = true; // 用户名有效
-					this.isUserEmploy = false; // 用户名已占用提示隐藏
+					uni.request({
+						url: this.serverUrl + '/signup/judge', // 替换为你的登录接口地址,
+						method: 'POST',
+						data: {
+							data: this.user,
+							type: 'name'
+						},
+						success: (res) => {
+							const { data, code } = res.data
+							// 表示用户名已存在
+							if (code === 200) {
+								if (data > 0) {
+									this.isUser = false; // 用户名无效
+									this.isUserEmploy = true; // 显示用户名已占用提示
+								} else {
+									this.isUser = true; // 用户名有效
+									this.isUserEmploy = false; // 显示用户名已占用提示
+								}
+							}
+							// 表示用户名不存在
+							else {
+								uni.showToast({
+									title: '系统出现错误',
+									icon: 'none',
+									duration: 2000
+								});
+							}
+						},
+					})
 				} else {
 					this.isUser = false; // 用户名无效
-					this.isUserEmploy = true; // 显示用户名已占用提示
+					this.isUserEmploy = false; // 显示用户名已占用提示
 				}
 			},
 			onInputPassword(e) {
@@ -109,16 +169,41 @@
 					return;
 				}
 				// 这里可以添加注册请求的逻辑，例如调用API进行注册
-				uni.showToast({
-					title: '注册成功',
-					icon: 'success',
-					duration: 2000
+				uni.request({
+					url: this.serverUrl + '/signup/add', // 替换为你的注册接口地址,
+					method: 'POST',
+					data: {
+						name: this.userName,
+						mail: this.email,
+						pwd: this.password
+					},
+					success: (res) => {
+						const { code } = res.data
+						if (code === 200) {
+							uni.showToast({
+								title: '注册成功',
+								icon: 'none',
+								duration: 2000
+							});
+							uni.redirectTo({
+								url: '/pages/signin/index?user=' + this.userName
+							});
+						} else {
+							uni.showToast({
+								title: '系统出现错误',
+								icon: 'none',
+								duration: 2000
+							});
+						}
+					},
+					fail: () => {
+						uni.showToast({
+							title: '系统出现错误',
+							icon: 'none',
+							duration: 2000
+						});
+					}
 				});
-				setTimeout(() => {
-					uni.redirectTo({
-						url: '/pages/signin/index'
-					});
-				}, 2000);
 			}
 		}
 	}

@@ -30,6 +30,12 @@
 				password: ''
 			}
 		},
+		onLoad(e) {
+			const { user } = e || {}
+			if (user) {
+				this.user = user
+			}
+		},
 		methods: {
 			navigateToRegister() {
 				uni.navigateTo({
