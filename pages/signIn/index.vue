@@ -6,16 +6,16 @@
 			</view>
 		</view>
 		<view class="logo">
-			<image src="/static/6.png"></image>
+			<image src="/static/fire.png"></image>
 		</view>
 		<view class="main">
 			<view class="title">登录</view>
 			<view class="slogan">欢迎回来</view>
 			<view class="inputs">
-				<input type="text" placeholder="请输入用户名/邮箱" class="user" placeholder-style="color:#999;font-weight:400;" @blur="getUserInfo"></input>
-				<input type="password" placeholder="请输入密码" class="psw" placeholder-style="color:#999;font-weight:400;" @blur="getPassword"></input>
+				<input type="text" v-model="username" placeholder="请输入用户名/邮箱" class="user" placeholder-style="color:#999;font-weight:400;"></input>
+				<input type="password" v-model="password" placeholder="请输入密码" class="psw" placeholder-style="color:#999;font-weight:400;"></input>
 			</view>
-			<view class="tips">输入用户或密码错误！</view>
+			<view class="tips" v-show="isOk">输入用户或密码错误！</view>
 		</view>
 
 		<view class="submit" @tap="navigateToLogin">登录</view>
@@ -26,14 +26,15 @@
 	export default {
 		data() {
 			return {
-				user: '',
-				password: ''
+				username: '',
+				password: '',
+				isOk: false
 			}
 		},
 		onLoad(e) {
-			const { user } = e || {}
-			if (user) {
-				this.user = user
+			const { username } = e || {}
+			if (username) {
+				this.username = username
 			}
 		},
 		methods: {
@@ -43,26 +44,54 @@
 				});
 			},
 			navigateToLogin() {
+				if (this.username.length === 0 || this.password.length === 0) {
+					uni.showToast({
+						title: '用户名或密码不能为空',
+						icon: 'none',
+						duration: 2000
+					});
+					return;
+				}
 				uni.request({
-					url: 'http://192.168.3.87:3000/friend/applyFriend', // 替换为你的登录接口地址,
+					url: this.serverUrl + '/signin/match', // 替换为你的登录接口地址,
 					method: 'POST',
 					data: {
-						uid: '67f168e6e57862f05c687d06', // 张北北
-						fid: '67f168e6e57862f05c687d07', // 咖啡
-						msg: '测试好友请求'
+						name: this.username,
+						pwd: this.password
 					},
 					success: (res) => {
-						console.log(res.data)
+						this.isOk = false; // 隐藏错误提示
+						const { data, code } = res.data
+						if (code === 200) {
+							uni.setStorageSync('userInfo', {
+								name: data.name,
+								imgurl: data.imgurl,
+								token: data.token,
+								id: data.id
+							}); // 存储用户信息
+							uni.showToast({
+								title: '登录成功',
+								icon: 'success',
+								duration: 2000
+							});
+							uni.navigateTo({
+								url: '/pages/index/index'
+							});
+						} else {
+							this.isOk = true; // 显示错误提示
+							this.password = ''; // 清空密码
+						}
 					},
+					fail: (err) => {
+						this.isOk = true
+						this.password = ''; // 清空密码
+						uni.showToast({
+							title: '登录失败，请稍后再试',
+							icon: 'none',
+							duration: 2000
+						});
+					}
 				})
-			},
-			getUserInfo(e) {
-				const { value } = e.target || {}
-				this.user = value
-			},
-			getPassword(e) {
-				const { value } = e.target || {}
-				this.password = value
 			}
 		}
 	}

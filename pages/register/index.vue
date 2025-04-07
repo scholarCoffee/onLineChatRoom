@@ -6,7 +6,7 @@
 			</view>
 		</view>
 		<view class="logo">
-			<image src="/static/6.png" class="logo"></image>
+			<image src="/static/fire.png" class="logo"></image>
 		</view>
 		<view class="main">
 			<view class="title">注册</view>
@@ -23,7 +23,7 @@
 					<image src="../../static/user/checked.png" class="ok" v-if="isEmail"></image>
 				</view>
 				<view class="inputs-div">
-					<input :type="type" placeholder="设置密码" class="password" placeholder-style="color:#999;font-weight:400;" @Input="onInputPassword"></input>
+					<input :type="type" placeholder="设置密码" class="password" placeholder-style="color:#999;font-weight:400;" @input="onInputPassword"></input>
 					<image :src="lookUrkl" class="look" @tap="looks"></image>
 				</view>
 			</view>
@@ -45,7 +45,6 @@
 				email: '', // 邮箱输入值
 				userName: '', // 用户名输入值
 				password: '', // 密码输入值
-				isOk: false, // 注册按钮是否可用
 				isLook: false, // 密码是否可见
 				isInvalid: false, // 邮箱是否无效
 				isUserEmploy: false, // 用户名是否已占用
@@ -69,7 +68,7 @@
 				// 邮箱验证逻辑
 				this.email = e.target.value;
 				const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 邮箱正则表达式	
-				if (this.email.length > 0 && emailPattern.test(email)) {
+				if (this.email.length > 0 && emailPattern.test(this.email)) {
 					this.isInvalid = false; // 邮箱无效提示隐藏
 					// 后端验证邮箱是否已被占用
 					this.matchEmail(); // 调用邮箱验证方法
@@ -89,8 +88,8 @@
 						},
 						success: (res) => {
 							const { data, code } = res.data
-							// 表示邮箱已存在
 							if (code === 200) {
+								// 表示邮箱已存在
 								if (data > 0) {
 									this.isEmail = false; // 邮箱无效
 									this.isEmailEmploy = true; // 显示邮箱已占用提示
@@ -113,12 +112,12 @@
 			onInputUser(e) {
 				// 用户名验证逻辑
 				this.userName = e.target.value;
-				if (userName.length > 0) {
+				if (this.userName.length > 0) {
 					uni.request({
 						url: this.serverUrl + '/signup/judge', // 替换为你的登录接口地址,
 						method: 'POST',
 						data: {
-							data: this.user,
+							data: this.userName,
 							type: 'name'
 						},
 						success: (res) => {
@@ -160,7 +159,7 @@
 			},
 			register() {
 				// 注册逻辑
-				if (!this.isOk) {
+				if (!this.isSubmitOk) {
 					uni.showToast({
 						title: '请填写完整信息',
 						icon: 'none',
@@ -185,8 +184,8 @@
 								icon: 'none',
 								duration: 2000
 							});
-							uni.redirectTo({
-								url: '/pages/signin/index?user=' + this.userName
+							uni.navigateTo({
+								url: '/pages/signIn/index?username=' + this.userName
 							});
 						} else {
 							uni.showToast({

@@ -1,8 +1,8 @@
 <template>
 	<view class="content">
 		<view class="top-bar">
-			<navigator url="../userDetail/index?id=aaa" hover-class="none" class="top-bar-left">
-				<image src="/static/fire.png" class="logo"></image>
+			<navigator :url="'../userDetail/index?id=' + uid" hover-class="none" class="top-bar-left">
+				<image :src="imgurl" class="logo"></image>
 			</navigator>
 			<view class="top-bar-right">
 				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
@@ -36,8 +36,11 @@
 	export default {
 		data() {
 			return {
-				title: '首页',
                 friendsList: [], // 好友列表
+                uid: '', // 用户ID
+                userName: '', // 用户名
+                imgurl: '', // 头像URL
+                token: '', // 用户token
                 imageMap: {
                     '1.png': '/static/1.png',
                     '2.png': '/static/2.png',
@@ -48,11 +51,27 @@
                 }
 			}
 		},
-		created() {
+		onLoad() {
             // 页面加载时获取好友列表
             this.getFriendsList()
+            this.getStorages()
 		},
 		methods: {
+            getStorages() {
+                // 获取本地存储的用户信息
+                const userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                    const { uid, userName, imgurl, token } = userInfo;
+                    this.uid = uid; // 用户ID
+                    this.userName = userName; // 用户名
+                    this.imgurl = this.serverUrl + imgurl; // 头像URL
+                    this.token = token; // 用户token
+                } else {
+                    uni.navigateTo({
+                        url: '/pages/signIn/index'
+                    });
+                } 
+            },
             getFriendsList() {
                 const rawList = getFriendsList();
                 this.friendsList = rawList.map(friend => {
