@@ -6,7 +6,7 @@
 			</view>
 		</view>
 		<view class="logo">
-			<image src="/static/6.webp" class="logo"></image>
+			<image src="/static/6.png" class="logo"></image>
 		</view>
 		<view class="main">
 			<view class="title">注册</view>

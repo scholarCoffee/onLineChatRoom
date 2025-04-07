@@ -7,14 +7,14 @@
 		</view>
         <view class="bg">
             <view class="bg-bai" :animation="animationData4"></view>
-            <image src="../../static/1.webp" class="bg-img" mode="aspectFill"></image>
+            <image src="../../static/1.png" class="bg-img" mode="aspectFill"></image>
         </view>
         <view class="main">
             <view class="user-header">
                 <view class="sex" :style=" {'background-color': sexColor}" :animation="animationData3">
                     <image src="../../static/user/male.png"></image>
                 </view>
-                <image src="../../static/1.webp" class="user-img" mode="aspectFill" :animation="animationData2"></image>
+                <image src="../../static/1.png" class="user-img" mode="aspectFill" :animation="animationData2"></image>
             </view>
             <view class="user-imf">
                 <view class="name"> {{ user.name }}</view>

@@ -2,7 +2,7 @@
 	<view class="content">
 		<view class="top-bar">
 			<navigator url="../userDetail/index?id=aaa" hover-class="none" class="top-bar-left">
-				<image src="/static/5.webp" class="logo"></image>
+				<image src="/static/fire.png" class="logo"></image>
 			</navigator>
 			<view class="top-bar-right">
 				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
@@ -14,7 +14,7 @@
 				<navigator url="../chatRoom/index" class="friends-list" v-for="(friend, index) in friendsList" :key="index">
                     <view class="friends-list-l">
                         <text class="tip">{{ friend.tip }}</text>
-                        <image :src="friend.avatar" class="avatar"></image>
+                        <image :src="friend.imgUrl" class="avatar"></image>
                     </view>
                     <view class="friends-list-r">
                         <view class="top">
@@ -24,21 +24,6 @@
                         <view class="news">{{ friend.news }}</view>
                     </view>
                 </navigator>
-			</view>
-			<view class="friends">
-				<view class="friends-list">
-					<view class="friends-list-l">
-						<text class="tip">1</text>
-						<image src="/static/6.webp" class="avatar"></image>
-					</view>
-					<view class="friends-list-r">
-						<view class="top">
-							<view class="name">2</view>
-							<view class="time">13:43</view>
-						</view>
-						<view class="news">3</view>
-					</view>
-				</view>
 			</view>
 		</view>
 	</view>
@@ -53,19 +38,31 @@
 			return {
 				title: '首页',
                 friendsList: [], // 好友列表
+                imageMap: {
+                    '1.png': '/static/1.png',
+                    '2.png': '/static/2.png',
+                    'fire.png': '/static/fire.png',
+                    'fire-kt.png': '/static/fire-kt.png',
+                    'fire-lb.png': '/static/fire-lb.png',
+                    '5.png': '/static/5.png',
+                }
 			}
 		},
-		onLoad() {
+		created() {
             // 页面加载时获取好友列表
             this.getFriendsList()
 		},
 		methods: {
             getFriendsList() {
                 const rawList = getFriendsList();
-                this.friendsList = rawList.map(friend => ({
-                    ...friend,
-                    time: dateTime(friend.time) // 格式化时间
-                }));
+                this.friendsList = rawList.map(friend => {
+                    return {
+                        ...friend,
+                        time: dateTime(friend.time), // 格式化时间
+                        imgUrl: this.imageMap[friend.imgUrl], // 默认头像
+                        tip: friend.tip || '1' // 默认提示
+                    };
+                });
             },
             toSearch() {
                 uni.navigateTo({
@@ -147,13 +144,13 @@
                 }
             }
             .news {
-				display: flex;
                 font-size: 26rpx; // 调整字体大小
                 color: #666666;
                 line-height: 36rpx; // 调整行高
-				overflow: hidden;
-				text-overflow: ellipsis;
-				white-space: nowrap; // 单行显示并省略
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 1;
+                overflow: hidden;
             }
         }
     }

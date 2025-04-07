@@ -7,7 +7,7 @@
             <view class="top-bar-right">
                 <view class="pice"></view>
                 <view class="group-img">
-                    <image src="/static/6.webp"></image>
+                    <image src="/static/fire.png"></image>
                 </view>
             </view>
         </view>
@@ -38,7 +38,7 @@
                             <view class="msg-map">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>   
-                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image>                 -->
+                                <image src="../../static/6.png" class="msg-img" mode="aspectFit"></image>                 -->
                                 <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
                             <!-- </view> -->
                         <!-- </view> -->
@@ -63,7 +63,7 @@
                             <view class="msg-map" @tap="openLocation(item.message)">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>                    
-                                <image src="../../static/6.webp" class="msg-img" mode="aspectFit"></image> -->
+                                <image src="../../static/6.png" class="msg-img" mode="aspectFit"></image> -->
                                 <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
                             <!-- </view> -->
                         <!-- </view> -->
@@ -96,6 +96,15 @@ export default {
             isLoading: true,
             scrollAnimation: true,
             beginLoading: true,
+            imageMap: {
+                '1.png': '/static/1.png',
+                '2.png': '/static/2.png',
+                'fire.png': '/static/fire.png',
+                'fire-kt.png': '/static/fire-kt.png',
+                'fire-lb.png': '/static/fire-lb.png',
+                '5.png': '/static/5.png',
+                '4.png': '/static/4.png',
+            }
         }
     },
     components: {
@@ -147,7 +156,7 @@ export default {
                 this.nowpage = -1
             }
             for (var i = page*10; i < maxpages; i++) {
-                this.msg[i].imgUrl = '/../static/' + this.msg[i].imgUrl;
+                this.msg[i].imgUrl = this.imageMap[this.msg[i].imgUrl];
                 if (i < this.msg.length - 1) {
                     let t = spaceTime(this.oldTime, this.msg[i].time);
                     if (t) {
@@ -155,7 +164,7 @@ export default {
                     }
                     this.msg[i].time = t;
                     if(this.msg[i].types === 1) {
-                        this.msg[i].message = '/../static/' + this.msg[i].message;
+                        this.msg[i].message =  this.imageMap[this.msg[i].message];
                         this.imgMsg.unshift(this.msg[i].message)
                     }
                 } else {
@@ -210,7 +219,7 @@ export default {
             let map = [{
                 latitude: latitude,
                 longitude: longitude,
-                iconPath: '/static/6.webp',
+                iconPath: '/static/6.png',
             }] 
             return map
         },
@@ -244,7 +253,7 @@ export default {
                 message: message,
                 types: types, // 假设 0 表示文本消息
                 time: nowTime,
-                imgUrl: '/static/6.webp', // 假设当前用户头像
+                imgUrl: '/static/6.png', // 假设当前用户头像
                 tip: len + 1
             }
             // 添加新消息到消息列表

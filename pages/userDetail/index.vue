@@ -108,17 +108,17 @@
             return {
                 dataArr: {
                     name: 'xxx',
-                    sign: 'zxxx',
+                    sign: '这家伙很懒，什么都没有留下',
                     time: new Date(),   
                     sex: '男',
-                    birth: '1998-4-12',
+                    birth: '1993-4-12',
                     tell: '12312312312',
                     mail: '2312321@qq.com'
                 },// 模拟数据
                 sexList: ['男', '女', '未知'], // 性别列表
                 index: 0,
                 date: currentDate,
-                tempFilePaths: '/static/1.webp',
+                tempFilePaths: '/static/1.png',
                 headImg: '',
                 pwd: '', // 密码
                 modifyTitle: '',

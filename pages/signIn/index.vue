@@ -6,7 +6,7 @@
 			</view>
 		</view>
 		<view class="logo">
-			<image src="/static/6.webp"></image>
+			<image src="/static/6.png"></image>
 		</view>
 		<view class="main">
 			<view class="title">登录</view>
@@ -37,16 +37,18 @@
 				});
 			},
 			navigateToLogin() {
-				if (this.user.length == 0 || this.password.length == 0) {
-					uni.showToast({
-						title: '请输入用户名或密码',
-						icon: 'none'
-					})
-					return
-				}
-				uni.navigateTo({
-					url: '/pages/index/index'
-				});
+				uni.request({
+					url: 'http://192.168.3.87:3000/friend/applyFriend', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						uid: '67f168e6e57862f05c687d06', // 张北北
+						fid: '67f168e6e57862f05c687d07', // 咖啡
+						msg: '测试好友请求'
+					},
+					success: (res) => {
+						console.log(res.data)
+					},
+				})
 			},
 			getUserInfo(e) {
 				const { value } = e.target || {}
