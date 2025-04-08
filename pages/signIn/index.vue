@@ -17,7 +17,6 @@
 			</view>
 			<view class="tips" v-show="isOk">输入用户或密码错误！</view>
 		</view>
-
 		<view class="submit" @tap="navigateToLogin">登录</view>
 	</view>
 </template>
@@ -32,9 +31,21 @@
 			}
 		},
 		onLoad(e) {
-			const { username } = e || {}
+			const { username, oldName } = e || {}
 			if (username) {
 				this.username = username
+				uni.showToast({
+					title: '注册成功请登录',
+					icon: 'none',
+					duration: 2000
+				});
+			} else if (oldName) {
+				this.username = oldName
+				uni.showToast({
+					title: '登录过期请重新登录',
+					icon: 'none',
+					duration: 2000
+				});
 			}
 		},
 		methods: {

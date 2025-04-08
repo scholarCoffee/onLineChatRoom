@@ -10,72 +10,234 @@
             <view class="search-user result">
                 <view class="title" v-if="qryUserInfo.length > 0">用户</view>
                 <view class="list user" v-for="(item, index) in qryUserInfo" :key="index">
-                    <view>
+                    <navigator :url="'../home/index.vue?id=' + item._id" hover-class="none">
                         <image :src="item.imgUrl"></image>
-                    </view>
+                    </navigator>
                     <view class="names">
                         <view class="name" v-html="item.name"></view>
                         <view class="email" v-html="item.email"></view>
                     </view>
                     <view class="right-bt send" v-if="item.tip === 1">发消息</view>
-                    <view class="right-bt add" v-if="item.tip === 0" @tap="onAddFriend">加好友</view>
+                    <view class="right-bt add" v-if="item.tip === 0" @tap="onAddFriend(item._id)">加好友</view>
                 </view>
+            </view>
+        </view>
+        <view class="modify" :style="{ bottom:-widHeight + 'px', 'display': isModify ? 'block' : 'none'  }" :animation="animation">
+            <view class="modify-header">
+                <view class="close" @tap="modify">取消</view>
+                <view class="title">添加好友</view>
+                <view class="define" @tap="addSubmit">确定</view>
+            </view>
+            <view class="modify-main">
+                <textarea v-model="msg" class="modify-content" ></textarea>
             </view>
         </view>
 	</view>
 </template>
 
 <script>
-    import { getFriendsList, isFriendShip } from '../../commons/js/datas.js'
+    import { debounce } from '../../commons/js/utils.js'
 	export default {
 		data() {
 			return {
                 qryUserInfo: [], // 搜索用户
+                uid: '', // 用户ID
+                fid: '', // 好友ID
+                userName: '', // 用户名
+                token: '', // 用户token
+                msg: '', // 添加好友
+                animation: {}, // 动画对象
+                isModify: false, // 是否显示修改弹窗
+                widHeight: 0, // 组件高度
 			}
 		},
+        onLoad() {
+            // 页面加载时获取好友列表
+            this.getStorages()
+        },
+        onReady() {
+            this.getElementStyle()
+        },
 		methods: {
+            getStorages() {
+                // 获取本地存储的用户信息
+                const userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                    const { uid, userName, token } = userInfo;
+                    this.uid = uid; // 用户ID
+                    this.userName = userName; // 用户名
+                    this.token = token; // 用户token
+                } else {
+                    uni.navigateTo({
+                        url: '/pages/signIn/index'
+                    });
+                } 
+            },
             onInputUser(e) {
                 this.qryUserInfo = []
                 const { value } = e.target || {}
                 if (value.length > 0) {
-                    this.searchUser(value)
+                    this.searchUserDb(value)
+                } else {
+                    this.qryUserInfo = []
                 }
-                
             },
+            // 防抖函数
+            searchUserDb: debounce(function (e) {
+                this.qryUserInfo = []
+                this.searchUser(e)
+            }, 500),
             searchUser(e) {
-                const arr = getFriendsList()
-                const exp = new RegExp(e, 'g'); 
-                for(let i = 0; i < arr.length ; i++) {
-                    if (arr[i].name.search(e) != -1 || arr[i].email.search(e) != -1) {
-                        this.isFriend(arr[i])
-                        arr[i].imgUrl = '../../static/' + arr[i].imgUrl
-                        arr[i].name = arr[i].name.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
-                        arr[i].email = arr[i].email.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
-                        this.qryUserInfo.push(arr[i])
+                // 搜索用户
+                uni.request({
+                    url: this.serverUrl + '/search/user', // 替换为你的登录接口地址,
+                    method: 'POST',
+                    data: {
+                        data: e,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { data, code } = res.data
+                        if (code === 200) {
+                            const arr = data.data 
+                            for(let i = 0; i < arr.length ; i++) {
+                                this.isFriend(arr[i], e)
+                            }
+                        } else if (code === 300) {
+                            uni.navigateTo({
+                                url: '/pages/signIn/index?oldName=' + this.userName
+                            });
+                        } else {
+                            uni.showToast({
+                                title: '没有搜索到相关用户',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '没有搜索到相关用户',
+                            icon: 'none',
+                            duration: 2000
+                        });
                     }
-                }
+                })
             },
             // 判断是否是好友
-            isFriend(e) {
+            isFriend(arr, e) {
                 let tip = 0
-                const arr = isFriendShip()
-                for (let i = 0 ;i < arr.length ; i++) {
-                    if (arr[i].friend == e.id) {
-                        tip = 1
-                        break
-                    }
+                const exp = new RegExp(e, 'g');
+                if(arr._id === this.uid) {
+                    tip = 2
+                    arr.tip = tip
+                    arr.imgUrl = this.serverUrl + arr.imgUrl
+                    arr.name = arr.name.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
+                    arr.email = arr.email.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
+                    this.qryUserInfo.push(arr)
+                    return
                 }
-                e.tip = tip
-            },
-            onAddFriend() {
-                uni.navigateTo({
-                    url: '../home/index'
+                // 搜索用户
+                uni.request({
+                    url: this.serverUrl + '/search/isfriend', // 替换为你的登录接口地址,
+                    method: 'POST',
+                    data: {
+                        uid: this.uid,
+                        fid: e._id,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { code } = res.data
+                        if (code === 200) {
+                           tip = 1
+                        }
+                        arr.tip = tip
+                        arr.imgUrl = this.serverUrl + arr.imgUrl
+                        arr.name = arr.name.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
+                        arr.email = arr.email.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
+                        this.qryUserInfo.push(arr)
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '没有搜索到相关用户',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
                 })
+            },
+            onAddFriend(fid) {
+                this.fid = fid
+                this.msg = this.username + ' 请求添加好友~'
+                this.modify()
+            },
+            addSubmit() {
+                if (this.msg.length > 0) {
+                    this.modify()
+                    // 搜索用户
+                    uni.request({
+                        url: this.serverUrl + '/friend/applyfriend', // 替换为你的登录接口地址,
+                        method: 'POST',
+                        data: {
+                            uid: this.uid,
+                            fid: this.fid,
+                            token: this.token,
+                            msg: this.msg
+                        },
+                        success: (res) => {
+                            const { data, code } = res || {}
+                            if (code === 200) {
+                                // 是好友
+                                uni.showToast({
+                                    title: '添加好友成功',
+                                    icon: 'success',
+                                    duration: 2000
+                                });
+                            }
+                        },
+                        fail: (err) => {
+                            uni.showToast({
+                                title: '没有搜索到相关用户',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                    })
+                }
             },
             back() {
                 uni.navigateBack({
                     delta: 1
                 });
+            },
+            getElementStyle() {
+                const query = uni.createSelectorQuery().in(this)
+                query.select('.modify').boundingClientRect((rect) => {
+                    this.widHeight = rect.height
+                }).exec()
+            },
+            modify(type, data, ispwd) {
+                if (ispwd) {
+                    this.ispwd ='block'
+                } else {
+                    this.ispwd = 'none'
+                }
+                this.modifyTitle = type
+                this.data = data
+                this.isModify = !this.isModify
+                const animation = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease',
+                })
+                if (this.isModify) {
+                    animation.bottom(0).step()
+                } else {
+                    animation.bottom(-this.widHeight).step()
+                }
+                this.animation = animation.export()
+            },
+            modifySubmit() {
+                this.modify()
             }
 		}
 	}
@@ -159,6 +321,73 @@
         .add {
             color: $uni-color-success;
             background: rgba(74, 170, 255, 0.1);
+        }
+    }
+    .modify {
+        position:fixed; 
+        z-index: 1002;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        .modify-header {
+            width: 100%;
+            height: 160rpx; // 调整高度以适配不同屏幕
+            padding-top: var(--status-bar-height);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-bottom: 1px solid $uni-border-color;
+            .close {
+                padding-left: $uni-spacing-col-base;
+                padding-right: 20rpx;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 88rpx;
+            }
+            .title {
+                flex: auto;
+                text-align: center;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 88rpx;
+            }
+            .define {
+                padding-right: $uni-spacing-col-base;
+                font-size: $uni-font-size-lg;
+                color: $uni-color-success;
+                line-height: 88rpx;
+            }
+        }
+        .modify-main {
+            display: flex;
+            padding: $uni-spacing-col-base;
+            flex-direction: column;
+            .modify-pwd {
+                margin-bottom: $uni-spacing-col-base;
+                padding: 12rpx 20rpx;
+                box-sizing: border-box;
+                flex: auto;
+                width: 100%;
+                height: 88rpx;
+                background-color: $uni-bg-color-grey;
+                border-radius: $uni-border-radius-base;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 88rpx;
+            }
+            .modify-content {
+                padding: 16rpx 20rpx;
+                flex: auto;
+                width: 100%;
+                box-sizing: border-box;
+                height: 386rpx;
+                background: $uni-bg-color-grey;
+                border-radius: $uni-border-radius-base;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 44rpx;
+            }
         }
     }
 </style>

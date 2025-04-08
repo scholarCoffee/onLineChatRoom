@@ -4,34 +4,41 @@
 			<view class="top-bar-left" @tap="navigateBack">
 				<image src="../../static/user/back.png" class="back-img"></image>
 			</view>
+            <view class="top-bar-title">用户信息</view>
+            <view class="top-bar-right">
+                <view class="more-img" v-if="relation === 1 || realation === 0" @tap="userDetail">
+                    <image src="../../static/user/more.png"></image>
+                </view>
+            </view>
 		</view>
         <view class="bg">
             <view class="bg-bai" :animation="animationData4"></view>
-            <image src="../../static/1.png" class="bg-img" mode="aspectFill"></image>
+            <image :src="user.imgurl" class="bg-img" mode="aspectFill"></image>
         </view>
         <view class="main">
             <view class="user-header">
                 <view class="sex" :style=" {'background-color': sexColor}" :animation="animationData3">
-                    <image src="../../static/user/male.png"></image>
+                    <image :src="sexImg"></image>
                 </view>
-                <image src="../../static/1.png" class="user-img" mode="aspectFill" :animation="animationData2"></image>
+                <image :src="user.imgurl" class="user-img" mode="aspectFill" :animation="animationData2"></image>
             </view>
             <view class="user-imf">
-                <view class="name"> {{ user.name }}</view>
-                <view class="nick">昵称： {{ user.nick }}</view>
-                <view class="intr"> {{ user.intr }}</view>
+                <view class="name"> {{ markname }}</view>
+                <view class="nick">昵称： {{ user.name }}</view>
+                <view class="intr"> {{ user.explain }}</view>
             </view>
         </view>
         <view class="bottom-bar">
-            <view class="bottom-btn btn1" @tap="addFrinedAnimat">加为好友</view>
+            <view class="bottom-btn btn1" @tap="onAddFriend" v-if="relation === 2">加为好友</view>
+            <view class="bottom-btn btn1" @tap="sendMessage" v-if="relation === 1">发送消息</view>
         </view>
         <view class="add-misg" :style="{ 'height': addHeight + 'px', 'bottom': (-addHeight) + 'px' }" :animation="animationData">
             <view class="name"> {{ user.name }}</view>
-            <textarea :value="myname + '请求加为好友~'" maxlength="120" class="add-main"></textarea>
+            <textarea v-mode="msg" maxlength="120" class="add-main" :cursor-spacing="0" ></textarea>
         </view>
         <view class="add-bt bottom-bar" :animation="animationData1">
             <view class="close btn1" @tap="addFrinedAnimat">取消</view>
-            <view class="send btn1">发送</view>            
+            <view class="send btn1" @tap="addSubmit">发送</view>            
         </view>
 	</view>
 </template>
@@ -40,7 +47,16 @@
 	export default {
 		data() {
 			return {
-                myname: '春雨',
+                id: '', // 对象
+                uid: '', // 用户ID
+                token: '', // 用户token
+                user: {},
+                sexImg: '../../static/user/male.png', // 性别
+                sexColor: 'rgb(255, 93, 91 ,1)', // 性别颜色
+                relation: '', // 用户关系 0-自己，1-好友，2-陌生人
+                myname: '', // 用户名
+                markname: '',
+                msg: '', // 消息内容
                 addHeight: 0, // 弹出框高度
                 animationData: {}, // 动画
                 animationData1: {}, // 动画
@@ -48,20 +64,152 @@
                 animationData3: {}, // 动画
                 animationData4: {}, // 动画
                 isAdd: false,
-                sexColor: 'rgb(255, 93, 91 ,1)', // 性别颜色
-                user: {
-                    name: '张三',
-                    nick: '秋之果',
-                    intr: 'do yourself'
-                }
+                
 			};
 		},
 		computed: {
 		},
+        onLoad(e) {
+            const { id } = e || {}
+            this.id = id
+            this.getStorages(); // 获取本地存储的用户信息
+            this.getUser(); // 获取用户信息、
+            this.judgeFriend(); // 判断用户关系
+        },
         onReady(){
             this.getElementStyle();
         },
 		methods: {
+            getStorages() {
+                // 获取本地存储的用户信息
+                const userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                    const { uid, token, name } = userInfo;
+                    this.uid = uid; // 用户ID
+                    this.token = token; // 用户token
+                    this.myname = name
+                } else {
+                    uni.navigateTo({
+                        url: '/pages/signIn/index'
+                    });
+                } 
+            },
+            // 获取用户信息
+            getUser() {
+                uni.request({
+					url: this.serverUrl + '/user/detail', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						id: this.id,
+						token: this.token
+					},
+					success: (res) => {
+						const { data, code } = res.data
+						if (code === 200) {
+							let { sex, name, imgurl, explain } = data || {}
+                            imgurl = this.serverUrl + imgurl; // 头像URL
+                            if (!explain) {
+                                explain = '这个人很懒，什么都没有留下~'
+                            }
+                            // 处理markname
+                            if (this.markname.length === 0) {
+                                this.markname = name
+                            }
+                            this.sexJudge(sex)
+                            this.user = {
+                                ...data,
+                                imgurl,
+                                explain
+                            }
+						} else {
+							uni.showToast({
+                                title: '获取用户信息失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取用户信息失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
+            },
+            // 性别判断
+            sexJudge(e) {
+                if (e == 'male') {
+                    this.sexImg = '../../static/user/male.png'
+                    this.sexColor = 'rgb(255, 93, 91 ,1)'
+                } else if (e == 'female') {
+                    this.sexImg = '../../static/user/female.png'
+                    this.sexColor = 'rgb(87, 153, 255 ,1)'
+                } else {
+                    this.sexImg = '../../static/user/asexual.png'
+                    this.sexColor = 'rgb(39, 40, 50 ,1)'
+                }
+            },
+            // 判断用户关系
+            judgeFriend() {
+                if (this.id == this.uid) {
+                    this.relation = 0
+                } else {
+                    uni.request({
+                        url: this.serverUrl + '/search/isfriend', // 替换为你的登录接口地址,
+                        method: 'POST',
+                        data: {
+                            uid: this.uid,
+                            fid: this.id,
+                            token: this.token
+                        },
+                        success: (res) => {
+                            const { data, code } = res.data
+                            if (code === 200) {
+                               this.relation = 1
+                            } else {
+                               this.relation = 2
+                            }
+                        },
+                        fail: (err) => {
+                            uni.showToast({
+                                title: '获取用户关系失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                    })
+                }
+            },
+            // 获取好友昵称
+            getMarkName() {
+                uni.request({
+                    url: this.serverUrl + '/user/getmarkname', // 替换为你的登录接口地址,
+                    method: 'POST',
+                    data: {
+                        uid: this.uid,
+                        fid: this.id,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { data, code } = res.data
+                        if (code === 200) {
+                           const { markname } = data
+                           if (!this.markname) {
+                             this.marname = markname
+                           }
+                        }
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '获取好友昵称失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
+            },
 			navigateBack() {
 				uni.navigateBack({
                     delta: 1
@@ -114,6 +262,50 @@
                 this.animationData2 = animation2.export();
                 this.animationData3 = animation3.export();
                 this.animationData4 = animation4.export();
+            },
+            onAddFriend() {
+                this.msg = this.username + ' 请求添加好友~'
+                this.addFrinedAnimat() // 弹出添加好友框
+            },
+            addSubmit() {
+                if (this.msg.length > 0) {
+                    this.addFrinedAnimat() // 关闭添加好友框
+                    // 搜索用户
+                    uni.request({
+                        url: this.serverUrl + '/friend/applyfriend', // 替换为你的登录接口地址,
+                        method: 'POST',
+                        data: {
+                            uid: this.uid,
+                            fid: this.id,
+                            token: this.token,
+                            msg: this.msg
+                        },
+                        success: (res) => {
+                            const { data, code } = res || {}
+                            if (code === 200) {
+                                // 是好友
+                                uni.showToast({
+                                    title: '添加好友成功',
+                                    icon: 'success',
+                                    duration: 2000
+                                });
+                            }
+                        },
+                        fail: (err) => {
+                            uni.showToast({
+                                title: '没有搜索到相关用户',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                    })
+                }
+            },
+            // 跳转到用户详情页
+            userDetail() {
+                uni.navigateTo({
+                    url: '/pages/userDetail/index?id=' + this.id
+                });
             }
 		}
 	}

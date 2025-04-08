@@ -34,3 +34,23 @@ export const spaceTime = (old, now) => {
     } // 5分钟内不显示
     return '';
 }
+
+// 搜索延时
+export const debounce = (fn, delay = 500) => {
+    let timer = null;
+    return function (...args) {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(() => {
+            fn.apply(this, args);
+        }, delay);
+    };
+}
+
+// 处理时间格式，展示时间，格式为YYYY-MM-DD
+export const formatDate = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0'); // 月份从0开始，所以要加1
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
