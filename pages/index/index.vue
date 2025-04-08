@@ -2,7 +2,7 @@
 	<view class="content">
 		<view class="top-bar">
 			<navigator :url="'../userDetail/index?id=' + uid" hover-class="none" class="top-bar-left">
-				<image :src="imgurl" class="logo"></image>
+				<image :src="imgUrl" class="logo"></image>
 			</navigator>
 			<view class="top-bar-right">
 				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
@@ -39,7 +39,7 @@
                 friendsList: [], // 好友列表
                 uid: '', // 用户ID
                 userName: '', // 用户名
-                imgurl: '', // 头像URL
+                imgUrl: '', // 头像URL
                 token: '', // 用户token
                 imageMap: {
                     '1.png': '/static/1.png',
@@ -64,7 +64,7 @@
                     const { userId, userName, imgUrl, token } = userInfo;
                     this.uid = userId; // 用户ID
                     this.userName = userName; // 用户名
-                    this.imgurl = this.serverUrl + imgUrl; // 头像URL
+                    this.imgUrl = this.serverUrl + imgUrl; // 头像URL
                     this.token = token; // 用户token
                 } else {
                     uni.navigateTo({

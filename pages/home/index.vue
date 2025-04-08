@@ -23,8 +23,8 @@
                 <image :src="user.imgurl" class="user-img" mode="aspectFill" :animation="animationData2"></image>
             </view>
             <view class="user-imf">
-                <view class="name"> {{ markname }}</view>
-                <view class="nick">昵称： {{ user.name }}</view>
+                <view class="name"> {{ user.name }}</view>
+                <view class="nick" v-if="markname">昵称： {{ markname }}</view>
                 <view class="intr"> {{ user.explain }}</view>
             </view>
         </view>
@@ -73,7 +73,7 @@
             const { id } = e || {}
             this.id = id
             this.getStorages(); // 获取本地存储的用户信息
-            this.getUser(); // 获取用户信息、
+            this.getUser(); // 获取用户信息
             this.judgeFriend(); // 判断用户关系
         },
         onReady(){
@@ -106,14 +106,10 @@
 					success: (res) => {
 						const { data, code } = res.data
 						if (code === 200) {
-							let { sex, name, imgurl, explain } = data || {}
+							let { sex, imgurl, explain } = data || {}
                             imgurl = this.serverUrl + imgurl; // 头像URL
                             if (!explain) {
                                 explain = '这个人很懒，什么都没有留下~'
-                            }
-                            // 处理markname
-                            if (this.markname.length === 0) {
-                                this.markname = name
                             }
                             this.sexJudge(sex)
                             this.user = {
@@ -121,6 +117,7 @@
                                 imgurl,
                                 explain
                             }
+                            this.getMarkName()
 						} else {
 							uni.showToast({
                                 title: '获取用户信息失败',
@@ -197,7 +194,7 @@
                         if (code === 200) {
                            const { markname } = data
                            if (!this.markname) {
-                             this.marname = markname
+                             this.markname = markname
                            }
                         }
                     },

@@ -7,7 +7,7 @@
 		</view>
         <view class="main">
             <view class="column heads">
-                <view class="row" @tap="chooseImage">
+                <view class="row" @tap="chooseImage" v-if="id == uid">
                     <view class="title">头像：</view>
                     <view class="user-header" v-if="id == uid">
                         <image :src="tempFilePaths" class="user-img"></image>
@@ -16,6 +16,10 @@
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
                     <image v-else :src="tempFilePaths" class="user-img"></image>
+                </view>
+                <view class="row" v-else>
+                    <view class="title">头像：</view>
+                    <image :src="tempFilePaths" class="user-img"></image>
                 </view>
                 <view class="row" @tap="modify('explain', '签名', user.explain, false)" v-if="id == uid">
                     <view class="title">签名：</view>
@@ -34,16 +38,12 @@
                 </view>
             </view>
             <view class="column">
-                <view class="row" @tap="modify('markname', '昵称', user.markname, false)" v-if="id == uid">
+                <view class="row" @tap="modify('markname', '昵称', user.markname, false)" v-if="id !== uid">
                     <view class="title">昵称：</view>
                     <view class="cont">{{ user.markname }}</view>
                     <view class="more">
                         <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
                     </view>
-                </view>
-                <view class="row" v-else>
-                    <view class="title">昵称：</view>
-                    <view class="cont">{{ markname }}</view>
                 </view>
                 <view class="row">
                     <view class="title">性别：</view>
@@ -60,10 +60,10 @@
                 <view class="row">
                     <view class="title">生日：</view>
                     <view class="more">
-                        <picker mode="date" :value="date" :start="startDate" :end="endDate" @change="bindPickerChange" v-if="id == uid">
-                            <view class="uni-input">{{ date }}</view>
+                        <picker mode="date" :value="user.birth" :start="startDate" :end="endDate" @change="bindPickerChange" v-if="id == uid">
+                            <view class="uni-input">{{ user.birth }}</view>
                         </picker>
-                        <view class="uni-input" v-else>{{ date }}</view>
+                        <view class="uni-input" v-else>{{ user.birth }}</view>
                     </view>
                 </view>
                 <view class="row" v-if="id == uid" @tap="modify('phone', '电话', user.phone, false)">
@@ -116,21 +116,16 @@
     </view>
 </template>
 <script>
-    import { dateTime, formatDate, formatDateTime2 } from './../../commons/js/utils.js'; // 导入 dateTime 函数
+    import { formatDate, formatDateTime2 } from './../../commons/js/utils.js'; // 导入 dateTime 函数
     export default {
         data() {
-            const currentDate = this.getDate({
-                format: true
-            })
             return {
                 uid: '', // 用户ID
                 token: '', // 用户token
                 myname: '', // 用户名
-                user: '',
-                markname: '', // 昵称
+                user: {},
                 sexList: ['男', '女', '未知'], // 性别列表
                 index: 0,
-                date: currentDate,
                 tempFilePaths: '/static/1.png',
                 pwd: '', // 密码
                 oldData: '',
@@ -160,7 +155,6 @@
             this.id = id
             this.getStorages(); // 获取本地存储的用户信息
             this.getUser(); // 获取用户信息
-            this.getMarkName(); // 获取好友昵称
         },
         methods: {
             formatDateTime2,
@@ -194,8 +188,8 @@
                             const { data, code } = res.data
                             if (code === 200) {
                                 const { markname } = data
-                                if (!this.markname) {
-                                    this.marname = markname
+                                if (!this.user.markname) {
+                                    this.user.markname = markname
                                 }
                             }
                         },
@@ -227,25 +221,24 @@
                                 explain = '这个人很懒，什么都没有留下~'
                             }
                             if (!birth) {
-                                this.date = '0000-00-00'
+                                birth = '0000-00-00'
                             } else {
-                                this.date = formatDate(birth)
+                                birth = formatDate(birth)
                             }
 
                             if (!phone) {
                                 phone = '000'
                             }
 
-                            // 处理markname
-                            if (this.markname.length === 0) {
-                                this.markname = name
-                            }
                             this.sexJudge(sex)
                             this.user = {
                                 ...data,
                                 explain,
-                                phone
+                                phone,
+                                birth,
+                                markname: ''
                             }
+                            this.getMarkName(); // 获取好友昵称
 						} else {
 							uni.showToast({
                                 title: '获取用户信息失败',
@@ -331,17 +324,17 @@
                     this.index = value
                     let sex = 'asexual'
                     if (this.index === 0) {
-                        sex = 'male'
-                    } else if (this.index ===1 ) {
                         sex = 'female'
+                    } else if (this.index ===1 ) {
+                        sex = 'male'
                     }
                     this.update(sex, 'sex', undefined )
                 }
             },
             bindPickerChange(e) {
                 const { value } = e.target || {}
-                if (value !== this.date) {
-                    this.update(this.date, 'birth', undefined )
+                if (value !== this.user.birth) {
+                    this.update(value, 'birth', undefined )
                 }
             },
             getDate(type) {
@@ -481,10 +474,10 @@
                 if (this.data.length > 0 && this.data != this.oldData) {
                     if (this.type == 'markname') {
                         this.updateFriendName()
-                        this.markname = this.data
+                        this.user.markname = this.data
                     } else if (this.type == 'email') {
                         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 邮箱正则表达式
-                        if (this.email.length > 0 && emailPattern.test(this.email)) {
+                        if (this.user.email.length > 0 && emailPattern.test(this.user.email)) {
                             this.update(this.data, this.type, this.pwd)
                         } else {
                             uni.showToast({
@@ -514,9 +507,9 @@
                             token: this.token
                         },
                         success: (res) => {
-                            const { data, code } = res.data
+                            const { data, code } = res.data || {}
                             if (code === 200) {
-
+                                this.user.markname = data.markname
                             }
                         },
                         fail: (err) => {
