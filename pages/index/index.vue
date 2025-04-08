@@ -61,10 +61,10 @@
                 // 获取本地存储的用户信息
                 const userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                    const { uid, userName, imgurl, token } = userInfo;
-                    this.uid = uid; // 用户ID
+                    const { userId, userName, imgUrl, token } = userInfo;
+                    this.uid = userId; // 用户ID
                     this.userName = userName; // 用户名
-                    this.imgurl = this.serverUrl + imgurl; // 头像URL
+                    this.imgurl = this.serverUrl + imgUrl; // 头像URL
                     this.token = token; // 用户token
                 } else {
                     uni.navigateTo({

@@ -10,8 +10,8 @@
             <view class="search-user result">
                 <view class="title" v-if="qryUserInfo.length > 0">用户</view>
                 <view class="list user" v-for="(item, index) in qryUserInfo" :key="index">
-                    <navigator :url="'../home/index.vue?id=' + item._id" hover-class="none">
-                        <image :src="item.imgUrl"></image>
+                    <navigator :url="'../home/index?id=' + item._id" hover-class="none">
+                        <image :src="item.imgurl"></image>
                     </navigator>
                     <view class="names">
                         <view class="name" v-html="item.name"></view>
@@ -63,8 +63,8 @@
                 // 获取本地存储的用户信息
                 const userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                    const { uid, userName, token } = userInfo;
-                    this.uid = uid; // 用户ID
+                    const { userId, userName, token } = userInfo;
+                    this.uid = userId; // 用户ID
                     this.userName = userName; // 用户名
                     this.token = token; // 用户token
                 } else {
@@ -87,21 +87,21 @@
                 this.qryUserInfo = []
                 this.searchUser(e)
             }, 500),
-            searchUser(e) {
+            searchUser(inputVal) {
                 // 搜索用户
                 uni.request({
                     url: this.serverUrl + '/search/user', // 替换为你的登录接口地址,
                     method: 'POST',
                     data: {
-                        data: e,
+                        data: inputVal,
                         token: this.token
                     },
                     success: (res) => {
-                        const { data, code } = res.data
-                        if (code === 200) {
-                            const arr = data.data 
-                            for(let i = 0; i < arr.length ; i++) {
-                                this.isFriend(arr[i], e)
+                        const { code } = res.data
+                        const result = res.data.data || []
+                        if (code === 200 ) { 
+                            for(let i = 0; i < result.length ; i++) {
+                                this.isFriend(result[i], inputVal)
                             }
                         } else if (code === 300) {
                             uni.navigateTo({
@@ -125,16 +125,17 @@
                 })
             },
             // 判断是否是好友
-            isFriend(arr, e) {
+            isFriend(item, inputVal) {
+                console.log(item)
                 let tip = 0
-                const exp = new RegExp(e, 'g');
-                if(arr._id === this.uid) {
+                const exp = new RegExp(inputVal, 'g');
+                if(item._id === this.uid) {
                     tip = 2
-                    arr.tip = tip
-                    arr.imgUrl = this.serverUrl + arr.imgUrl
-                    arr.name = arr.name.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
-                    arr.email = arr.email.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
-                    this.qryUserInfo.push(arr)
+                    item.tip = tip
+                    item.imgurl = this.serverUrl + item.imgurl
+                    item.name = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                    item.email = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                    this.qryUserInfo.push(item)
                     return
                 }
                 // 搜索用户
@@ -143,7 +144,7 @@
                     method: 'POST',
                     data: {
                         uid: this.uid,
-                        fid: e._id,
+                        fid: item._id,
                         token: this.token
                     },
                     success: (res) => {
@@ -151,11 +152,11 @@
                         if (code === 200) {
                            tip = 1
                         }
-                        arr.tip = tip
-                        arr.imgUrl = this.serverUrl + arr.imgUrl
-                        arr.name = arr.name.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
-                        arr.email = arr.email.replace(exp, "<span style='color: #4A4AFF;'>" + e + "</span>")
-                        this.qryUserInfo.push(arr)
+                        item.tip = tip
+                        item.imgurl = this.serverUrl + item.imgurl
+                        item.name = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                        item.email = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                        this.qryUserInfo.push(item)
                     },
                     fail: (err) => {
                         uni.showToast({
@@ -168,7 +169,7 @@
             },
             onAddFriend(fid) {
                 this.fid = fid
-                this.msg = this.username + ' 请求添加好友~'
+                this.msg = this.userName + ' 请求添加好友~'
                 this.modify()
             },
             addSubmit() {
@@ -185,7 +186,7 @@
                             msg: this.msg
                         },
                         success: (res) => {
-                            const { data, code } = res || {}
+                            const { data, code } = res.data || {}
                             if (code === 200) {
                                 // 是好友
                                 uni.showToast({

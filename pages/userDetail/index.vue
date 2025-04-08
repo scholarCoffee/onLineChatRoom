@@ -30,10 +30,7 @@
                 </view>
                 <view class="row">
                     <view class="title">注册：</view>
-                    <view class="cont">{{ changeTime(user.time) }}</view>
-                    <view class="more">
-                        <image src="../../static/user/arrow-right.png" mode="aspectFit"></image>
-                    </view>
+                    <view class="cont">{{ formatDateTime2(user.register) }}</view>
                 </view>
             </view>
             <view class="column">
@@ -119,7 +116,7 @@
     </view>
 </template>
 <script>
-    import { dateTime, formatDate } from './../../commons/js/utils.js'; // 导入 dateTime 函数
+    import { dateTime, formatDate, formatDateTime2 } from './../../commons/js/utils.js'; // 导入 dateTime 函数
     export default {
         data() {
             const currentDate = this.getDate({
@@ -135,7 +132,6 @@
                 index: 0,
                 date: currentDate,
                 tempFilePaths: '/static/1.png',
-                headImg: '',
                 pwd: '', // 密码
                 oldData: '',
                 modifyTitle: '',
@@ -167,14 +163,15 @@
             this.getMarkName(); // 获取好友昵称
         },
         methods: {
+            formatDateTime2,
             getStorages() {
                 // 获取本地存储的用户信息
                 const userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                    const { uid, token, name } = userInfo;
-                    this.uid = uid; // 用户ID
+                    const { userId, token, userName } = userInfo;
+                    this.uid = userId; // 用户ID
                     this.token = token; // 用户token
-                    this.myname = name
+                    this.myname = userName
                 } else {
                     uni.navigateTo({
                         url: '/pages/signIn/index'
@@ -341,9 +338,6 @@
                     this.update(sex, 'sex', undefined )
                 }
             },
-            changeTime(date) {
-                return dateTime(date)
-            },
             bindPickerChange(e) {
                 const { value } = e.target || {}
                 if (value !== this.date) {
@@ -407,21 +401,21 @@
                     }
                 })
             },
-            update(data, type, pwd) {
+            update(value, type, pwd) {
                 uni.request({
                     url: this.serverUrl + '/user/update', // 替换为你的登录接口地址,
                     method: 'POST',
                     data: {
                         uid: this.uid,
-                        data: data,
+                        data: value,
                         type: type,
                         pwd: pwd,
                         token: this.token
                     },
                     success: (res) => {
-                        const { code } = res.data
-                        if (code === 200) {
-                            this.user[type] = res.data.data
+                        const { code, data } = res.data
+                        if (code === 200) { 
+                            this.user[type] = data[type]
                             if (type === 'pwd') {
                                 // 用户需重新登录
                                 // 清楚缓存

@@ -6,7 +6,7 @@
 			</view>
             <view class="top-bar-title">用户信息</view>
             <view class="top-bar-right">
-                <view class="more-img" v-if="relation === 1 || realation === 0" @tap="userDetail">
+                <view class="more-img" v-if="relation === 1 || relation === 0" @tap="userDetail">
                     <image src="../../static/user/more.png"></image>
                 </view>
             </view>
@@ -34,7 +34,7 @@
         </view>
         <view class="add-misg" :style="{ 'height': addHeight + 'px', 'bottom': (-addHeight) + 'px' }" :animation="animationData">
             <view class="name"> {{ user.name }}</view>
-            <textarea v-mode="msg" maxlength="120" class="add-main" :cursor-spacing="0" ></textarea>
+            <textarea v-model="msg" maxlength="120" class="add-main" :cursor-spacing="0" ></textarea>
         </view>
         <view class="add-bt bottom-bar" :animation="animationData1">
             <view class="close btn1" @tap="addFrinedAnimat">取消</view>
@@ -54,7 +54,7 @@
                 sexImg: '../../static/user/male.png', // 性别
                 sexColor: 'rgb(255, 93, 91 ,1)', // 性别颜色
                 relation: '', // 用户关系 0-自己，1-好友，2-陌生人
-                myname: '', // 用户名
+                userName: '', // 用户名
                 markname: '',
                 msg: '', // 消息内容
                 addHeight: 0, // 弹出框高度
@@ -84,10 +84,10 @@
                 // 获取本地存储的用户信息
                 const userInfo = uni.getStorageSync('userInfo');
                 if (userInfo) {
-                    const { uid, token, name } = userInfo;
-                    this.uid = uid; // 用户ID
+                    const { userId, token, userName } = userInfo;
+                    this.uid = userId; // 用户ID
                     this.token = token; // 用户token
-                    this.myname = name
+                    this.userName = userName
                 } else {
                     uni.navigateTo({
                         url: '/pages/signIn/index'
@@ -264,7 +264,7 @@
                 this.animationData4 = animation4.export();
             },
             onAddFriend() {
-                this.msg = this.username + ' 请求添加好友~'
+                this.msg = this.userName + ' 请求添加好友~'
                 this.addFrinedAnimat() // 弹出添加好友框
             },
             addSubmit() {
@@ -281,7 +281,7 @@
                             msg: this.msg
                         },
                         success: (res) => {
-                            const { data, code } = res || {}
+                            const { data, code } = res.data || {}
                             if (code === 200) {
                                 // 是好友
                                 uni.showToast({

@@ -75,10 +75,10 @@
 						const { data, code } = res.data
 						if (code === 200) {
 							uni.setStorageSync('userInfo', {
-								name: data.name,
-								imgurl: data.imgurl,
+								userName: data.name,
+								imgUrl: data.imgurl,
 								token: data.token,
-								id: data.id
+								userId: data.id
 							}); // 存储用户信息
 							uni.showToast({
 								title: '登录成功',
