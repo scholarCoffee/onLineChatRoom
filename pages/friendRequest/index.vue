@@ -15,19 +15,19 @@
 		<view class="main">
             <view class="requester" v-for="(item, index) in requesters" :key="index">
                 <view class="request-top">
-                   <view class="reject btn">拒绝 </view>
+                   <view class="reject btn" @tap="refuse(item.id)">拒绝 </view>
                    <view class="header-img">
                         <image :src="item.imgUrl"></image> 
                    </view>
-                   <view class="aggree btn">同意 </view>
+                   <view class="aggree btn" @tap="agree(item.id)">同意 </view>
                 </view>
                 <view class="request-center">
                     <view class="title">{{ item.name }}</view>
-                    <view class="time">{{ changeTime(item.time) }}</view>
+                    <view class="time">{{ changeTime(item.lastTime) }}</view>
                 </view>
                 <view class="notic">
                     <text>留言：</text>
-                    {{ item.news }}
+                    {{ item.message }}
                 </view>
             </view>
         </view>
@@ -41,14 +41,33 @@
 		data() {
 			return {
                 requesters: [],
+                uid: '',
+                userName: '',
+                token: ''
 			};
 		},
 		computed: {
 		},
         onLoad() {
-            this.getRequesters()
+            this.getStorages()
+            this.friendRequest()
         },
 		methods: {
+            getStorages() {
+                // 获取本地存储的用户信息
+                const userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                    const { userId, userName, imgUrl, token } = userInfo;
+                    this.uid = userId; // 用户ID
+                    this.userName = userName; // 用户名
+                    this.imgUrl = this.serverUrl + imgUrl; // 头像URL
+                    this.token = token; // 用户token
+                } else {
+                    uni.navigateTo({
+                        url: '/pages/signIn/index'
+                    });
+                } 
+            },
 			navigateBack() {
 				uni.navigateBack({
 					delta: 1
@@ -62,6 +81,141 @@
                 for(let i = 0; i < this.requesters.length; i++) {
                     this.requesters[i].imgUrl = '../../static/' + this.requesters[i].imgUrl
                 }
+            },
+            friendRequest() {
+                uni.request({
+					url: this.serverUrl + '/index/getFriend', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						uid: this.uid,
+                        state: 1,
+						token: this.token
+					},
+					success: (res) => {
+						const { data, code } = res.data
+						if (code === 200) {
+                            for(let i = 0 ; i < data.length; i ++) {
+                                data[i].imgurl = this.serverUrl + data[i].imgurl
+                                this.getLeave(res, i)
+                            }
+                            this.requesters = data
+						} else {
+							uni.showToast({
+                                title: '获取好友请求失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取好友请求失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
+            },
+            // 获取留言
+            getLeave(arr, i) {
+                uni.request({
+					url: this.serverUrl + '/index/getlastmsg', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						uid: this.uid,
+                        fid: arr[i].fid, // 2表示好友申请
+						token: this.token
+					},
+					success: (res) => {
+						const { data, code } = res.data
+						if (code === 200) {
+                            arr[i].message = data.message
+                            arr.splice(i, 1, arr[i])
+						} else {
+							uni.showToast({
+                                title: '获取好友请求失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取好友请求失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
+            },
+            // 拒绝好友申请
+            refuse(fid) {
+                uni.request({
+					url: this.serverUrl + '/friend/deleteFriend', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						uid: this.uid,
+                        fid: fid, // 2表示好友申请
+						token: this.token
+					},
+					success: (res) => {
+						const { data, code } = res.data
+						if (code === 200) {
+                            for(let i = 0 ; i < this.requesters.length; i++) {
+                                if (this.requesters[i].id == fid) {
+                                    this.requesters.splice(i, 1)
+                                }
+                            }
+						} else {
+							uni.showToast({
+                                title: '获取好友请求失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取好友请求失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
+            },
+            agree(fid) {
+                uni.request({
+					url: this.serverUrl + '/friend/updateFriendState', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						uid: this.uid,
+                        fid: fid, // 2表示好友申请
+						token: this.token
+					},
+					success: (res) => {
+						const { data, code } = res.data
+						if (code === 200) {
+                            for(let i = 0 ; i < this.requesters.length; i++) {
+                                if (this.requesters[i].id == fid) {
+                                    this.requesters.splice(i, 1)
+                                }
+                            }
+						} else {
+							uni.showToast({
+                                title: '获取好友请求失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取好友请求失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
             }
 		}
 	}

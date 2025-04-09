@@ -10,6 +10,22 @@
 			</view>
 		</view>
 		<view class="main">
+            <!-- 好友申请数量 -->
+            <view class="friends" v-if="requestData > 0" @tap="goFriendRequest">
+				<view class="friends-list">
+                    <view class="friends-list-l">
+                        <text class="tip">{{ requestData }}</text>
+                        <image src="../../static/1.png" class="avatar"></image>
+                    </view>
+                    <view class="friends-list-r">
+                        <view class="top">
+                            <view class="name">好友申请</view>
+                            <view class="time">{{ changeTime(requestTime) }}</view>
+                        </view>
+                        <view class="news">茫茫人海，相聚便是缘分</view>
+                    </view>
+                </view>
+			</view>
 			<view class="friends">
 				<navigator url="../chatRoom/index" class="friends-list" v-for="(friend, index) in friendsList" :key="index">
                     <view class="friends-list-l">
@@ -41,6 +57,8 @@
                 userName: '', // 用户名
                 imgUrl: '', // 头像URL
                 token: '', // 用户token
+                requestData: 0, // 好友申请数
+                requestTime: '', // 最后申请时间
                 imageMap: {
                     '1.png': '/static/1.png',
                     '2.png': '/static/2.png',
@@ -53,7 +71,7 @@
 		},
 		onLoad() {
             // 页面加载时获取好友列表
-            this.getFriendsList()
+            this.getFriendsRequest()
             this.getStorages()
 		},
 		methods: {
@@ -72,22 +90,55 @@
                     });
                 } 
             },
-            getFriendsList() {
-                const rawList = getFriendsList();
-                this.friendsList = rawList.map(friend => {
-                    return {
-                        ...friend,
-                        time: dateTime(friend.time), // 格式化时间
-                        imgUrl: this.imageMap[friend.imgUrl], // 默认头像
-                        tip: friend.tip || '1' // 默认提示
-                    };
-                });
+            // 好友申请
+            getFriendsRequest() {
+                uni.request({
+					url: this.serverUrl + '/index/getFriend', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						id: this.uid,
+                        state: 1, // 2表示好友申请
+						token: this.token
+					},
+					success: (res) => {
+						const { data, code } = res.data
+						if (code === 200) {
+                            this.requestData = data.length; // 更新好友申请数量
+                            if (res.length > 0) {
+                                this.requestTime = res[0].lastTime
+                                for(let i = 0 ; i < data.length; i++) {
+                                    if (this.requestTime < data[i].lastTime) {
+                                        this.requestTime = data[i].lastTime; // 更新最后申请时间
+                                    }
+                                }
+                            }
+						} else {
+							uni.showToast({
+                                title: '获取好友请求失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取好友请求失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
             },
             toSearch() {
                 uni.navigateTo({
                     url: '/pages/search/index'
                 });
             },
+            goFriendRequest() {
+                uni.navigateTo({
+                    url: '/pages/friendRequest/index'
+                });
+            }
 		}
 	}
 </script>
