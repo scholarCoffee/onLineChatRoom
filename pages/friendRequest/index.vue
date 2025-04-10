@@ -12,7 +12,7 @@
                 <view class="pice"></view>
             </view>
 		</view>
-		<view class="main">
+		<view class="main" v-if="requesters.length > 0">
             <view class="requester" v-for="(item, index) in requesters" :key="index">
                 <view class="request-top">
                    <view class="reject btn" @tap="refuse(item.id)">拒绝 </view>
@@ -31,11 +31,23 @@
                 </view>
             </view>
         </view>
+        <view class="main" v-else>
+            <view class="requester">
+                <view class="request-top">
+                   <view class="header-img">
+                        <image src="../../static/user/empty.png"></image> 
+                   </view>
+                </view>
+                <view class="request-center">
+                    <view class="title">暂无好友请求</view>
+                </view>
+            </view>
+        </view>
 	</view>
 </template>
 
 <script>
-    import { getFriendsList } from '../../commons/js/datas.js'
+import { getFriendsList } from '../../commons/js/datas.js'
     import { dateTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 	export default {
 		data() {
@@ -96,7 +108,7 @@
 						if (code === 200) {
                             for(let i = 0 ; i < data.length; i ++) {
                                 data[i].imgurl = this.serverUrl + data[i].imgurl
-                                this.getLeave(res, i)
+                                this.getLeave(data, i)
                             }
                             this.requesters = data
 						} else {
@@ -123,7 +135,7 @@
 					method: 'POST',
 					data: {
 						uid: this.uid,
-                        fid: arr[i].fid, // 2表示好友申请
+                        fid: arr[i].id, // 2表示好友申请
 						token: this.token
 					},
 					success: (res) => {

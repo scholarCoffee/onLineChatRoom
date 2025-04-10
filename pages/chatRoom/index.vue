@@ -85,6 +85,10 @@ const innerAudioContext = uni.createInnerAudioContext()
 export default {
     data() {
         return {
+            uid: '',
+            uimgurl: '',
+            token: '',
+            uname: '',
             msg: [],
             imgMsg: [],
             scrollToView: '',
@@ -116,6 +120,21 @@ export default {
     },
     methods: {
         dateTime,
+        getStorages() {
+            // 获取本地存储的用户信息
+            const userInfo = uni.getStorageSync('userInfo');
+            if (userInfo) {
+                const { userId, userName, imgUrl, token } = userInfo;
+                this.uid = userId; // 用户ID
+                this.uname = userName; // 用户名
+                this.uimgurl = this.serverUrl + imgUrl; // 头像URL
+                this.token = token; // 用户token
+            } else {
+                uni.navigateTo({
+                    url: '/pages/signIn/index'
+                });
+            } 
+        },
         backOne() {
             uni.navigateBack({
                 delta: 1
