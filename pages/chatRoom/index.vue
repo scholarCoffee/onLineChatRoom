@@ -4,10 +4,13 @@
             <view class="top-bar-left" @tap="backOne">
                 <image src="/static/user/back.png" class="back-img"></image>
             </view>
+            <view class="top-bar-center">
+                <view class="top-bar-name">{{ fname }}</view>
+            </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
-                <view class="group-img">
-                    <image src="/static/fire.png"></image>
+                <view class="group-img" v-if="type === 1">
+                    <image :src="fimgurl"></image>
                 </view>
             </view>
         </view>
@@ -16,9 +19,9 @@
                 <view class="loading" :class="{ 'displayNone': isLoading }">
                     <image src="../../static/loading.png" class="loading-img" :animation="animationData"></image>
                 </view>
-                <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.tip">     
+                <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.id">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
-                    <view class="msg-m msg-left" v-if="item.id !== 1">
+                    <view class="msg-m msg-left" v-if="item.fromId !== item.id">
                         <image :src="item.imgUrl" class="user-img"></image>
                         <view class="message" v-if="item.types === 0">
                             <view class="msg-text">{{ item.message }}</view>
@@ -86,6 +89,10 @@ export default {
     data() {
         return {
             uid: '',
+            fid: '',
+            fname: '',
+            fimgurl: '',
+            type: '',
             uimgurl: '',
             token: '',
             uname: '',
@@ -96,6 +103,7 @@ export default {
             inputh: '96',
             animationData: '',
             nowpage: 0,
+            pagesize: 10,
             loading: '',
             isLoading: true,
             scrollAnimation: true,
@@ -114,8 +122,16 @@ export default {
     components: {
         Submit
     },
-    onLoad() {
-        this.getMsg(this.nowpage)
+    onLoad(e) {
+        const { id, name, type, img } = e || {}
+        this.fid = id
+        this.fname = name
+        this.type = type
+        this.fimgurl = this.serverUrl + img
+    },
+    onShow() {
+        this.getStorages()
+        this.getMsg()
         // this.nextPage()
     },
     methods: {
@@ -157,14 +173,88 @@ export default {
                     this.animationData = animation.export()
                     i++
                     if(i > 20) {
-                        this.getMsg(this.nowpage)
+                        this.getMsg()
                     }
                     
                 }.bind(this), 100)
             }
 
         },
-        getMsg(page) {
+        getMsg() {
+            // 获取消息列表
+            uni.request({
+                url: this.serverUrl + '/chat/getMsg', // 替换为你的登录接口地址,
+                method: 'POST',
+                data: {
+                    uid: this.uid,
+                    fid: this.fid,
+                    nowPage: this.nowpage,
+                    pageSize: this.pagesize,
+                    state: 1, // 2表示好友申请
+                    token: this.token
+                },
+                success: (res) => {
+                    const { data, code } = res.data
+                    if (code === 200) {
+                        let maxpages = data.length;
+                        if (data.length > 0) {
+                            for (var i = 0; i < data.length; i++) {
+                                data[i].imgUrl = this.serverUrl + data[i].imgUrl;
+                                if (i < data.length - 1) {
+                                    let t = spaceTime(this.oldTime, data[i].time);
+                                    if (t) {
+                                        this.oldTime = t
+                                    }
+                                    data[i].time = t;
+                                    if(data[i].types === 1) {
+                                        data[i].message =  this.serverUrl + msg[i].message;
+                                        this.imgMsg.unshift(data[i].message)
+                                    }
+                                } else {
+                                    data[i].time = '';
+                                }
+                            }
+                            if (data.length == 10) {
+                                this.nowpage++ 
+                            } else {
+                                this.nowpage = -1
+                            }
+                        }
+                        // 反转消息列表
+                        data.reverse();
+                        this.msg = data
+                        // 滚动到最底部
+                        setTimeout(() => {
+                            this.scrollToView = ''
+                            this.scrollAnimation = false
+                            this.$nextTick(() => {
+                                const lastItem = this.msg[data.length -1].id;
+                                if (lastItem) {
+                                    this.scrollToView = 'msg' + lastItem.tip;
+                                }
+                            });     
+                        }, 100);
+                        clearInterval(this.loading)
+                        this.isLoading = true
+                        this.beginLoading = true
+                    } else {
+                        uni.showToast({
+                            title: '获取聊天信息失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                },
+                fail: (err) => {
+                    uni.showToast({
+                        title: '获取聊天信息失败',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            })
+        },
+        getMsg1(page) {
             // 获取消息列表
             this.msg = getMessage();
             let maxpages = this.msg.length;
@@ -258,6 +348,11 @@ export default {
             });
         },
         sendMessage(e) {
+           this.receiveMsg(e, this.uid, this.uimgurl, 0)
+        },
+        // 接收消息
+        receiveMsg(e, id, img, tip) {
+            // tip = 0 表示自己发送消息
             const { message, types } = e || {}
             this.scrollAnimation = true
             let len = this.msg.length
@@ -266,14 +361,17 @@ export default {
             if (t) {
                 this.oldTime = t
             }
+            if (tip == 1) {
+
+            }
             nowTime = t;
             const data = {
-                id: 1, // 假设 1 表示当前用户
+                fromId: id, // 假设 1 表示当前用户
                 message: message,
                 types: types, // 假设 0 表示文本消息
                 time: nowTime,
-                imgUrl: '/static/6.png', // 假设当前用户头像
-                tip: len + 1
+                imgUrl: img, // 假设当前用户头像
+                id: len
             }
             // 添加新消息到消息列表
             this.msg.push(data);
