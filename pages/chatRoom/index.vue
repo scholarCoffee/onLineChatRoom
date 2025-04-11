@@ -99,7 +99,7 @@ export default {
             msg: [],
             imgMsg: [],
             scrollToView: '',
-            oldTime: new Date(),
+            oldTime: 0,
             inputh: '96',
             animationData: '',
             nowpage: 0,
@@ -196,33 +196,40 @@ export default {
                 success: (res) => {
                     const { data, code } = res.data
                     if (code === 200) {
-                        let maxpages = data.length;
+                        // 反转消息列表
+                        data.reverse();
                         if (data.length > 0) {
-                            for (var i = 0; i < data.length; i++) {
+                            let oldTime = data[0].time
+                            let msgArr = []
+                            for (var i = 1; i < data.length; i++) {
                                 data[i].imgUrl = this.serverUrl + data[i].imgUrl;
                                 if (i < data.length - 1) {
-                                    let t = spaceTime(this.oldTime, data[i].time);
+                                    let t = spaceTime(oldTime, data[i].time);
                                     if (t) {
-                                        this.oldTime = t
+                                        oldTime = t
                                     }
                                     data[i].time = t;
+                                    if (this.nowPage === 0) {
+                                        if (data[i].time > this.oldTime) {
+                                            this.oldTime = data[i].time
+                                        }
+                                    }
                                     if(data[i].types === 1) {
                                         data[i].message =  this.serverUrl + msg[i].message;
-                                        this.imgMsg.unshift(data[i].message)
+                                        msgArr.push(data[i].message)
                                     }
                                 } else {
                                     data[i].time = '';
                                 }
                             }
-                            if (data.length == 10) {
-                                this.nowpage++ 
-                            } else {
-                                this.nowpage = -1
-                            }
+                            this.msg = data.concat(this.msg);
+                            this.imgMsg = this.imgMsg.concat(msgArr)
                         }
-                        // 反转消息列表
-                        data.reverse();
-                        this.msg = data
+                        if (data.length == 10) {
+                            this.nowpage++ 
+                        } else {
+                            this.nowpage = -1
+                        }
                         // 滚动到最底部
                         setTimeout(() => {
                             this.scrollToView = ''

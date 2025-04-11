@@ -29,7 +29,7 @@ export const spaceTime = (old, now) => {
     now = new Date(now)
     const told = old.getTime()
     const tnow = now.getTime()
-    if (told > tnow + 1000*60*5) {
+    if (tnow > told + 1000*60*5) {
         return now;
     } // 5分钟内不显示
     return '';
