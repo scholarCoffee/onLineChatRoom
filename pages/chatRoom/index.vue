@@ -21,8 +21,8 @@
                 </view>
                 <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.id">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
-                    <view class="msg-m msg-left" v-if="item.fromId !== item.id">
-                        <image :src="item.imgUrl" class="user-img"></image>
+                    <view class="msg-m msg-left" v-if="item.fromId !== uid">
+                        <image :src="item.imgurl" class="user-img"></image>
                         <view class="message" v-if="item.types === 0">
                             <view class="msg-text">{{ item.message }}</view>
                         </view>
@@ -37,17 +37,17 @@
                                 {{ item.message.time }}"
                             </view>    
                         </view>
-                        <!-- <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
+                        <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
                             <view class="msg-map">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>   
                                 <image src="../../static/6.png" class="msg-img" mode="aspectFit"></image>                 -->
-                                <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
-                            <!-- </view> -->
-                        <!-- </view> -->
+                                <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>    
+                            </view>
+                        </view>
                     </view>
                     <view class="msg-m msg-right" v-else>
-                        <image :src="item.imgUrl" class="user-img"></image>
+                        <image :src="item.imgurl" class="user-img"></image>
                         <view class="message" v-if="item.types === 0">
                             <view class="msg-text">{{ item.message }}</view>
                         </view>
@@ -62,14 +62,14 @@
                                 <image src="../../static/yy.png" class="voice-img"></image>
                             </view>    
                         </view> 
-                        <!-- <view class="message" v-if="item.types === 3">
+                        <view class="message" v-if="item.types === 3">
                             <view class="msg-map" @tap="openLocation(item.message)">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>                    
                                 <image src="../../static/6.png" class="msg-img" mode="aspectFit"></image> -->
-                                <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>     -->
-                            <!-- </view> -->
-                        <!-- </view> -->
+                                <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>    
+                            </view>
+                        </view>
                     </view>
                 </view>
             </view>
@@ -82,7 +82,7 @@
 </template>
 <script>
 import { getMessage } from '../../commons/js/datas.js'
-import { dateTime, spaceTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
+import { dateTime, spaceTime, fileNameTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 import Submit from './../../componets/submit'
 const innerAudioContext = uni.createInnerAudioContext()
 export default {
@@ -92,7 +92,7 @@ export default {
             fid: '',
             fname: '',
             fimgurl: '',
-            type: '',
+            type: '', // 0-好友，1-群
             uimgurl: '',
             token: '',
             uname: '',
@@ -102,37 +102,26 @@ export default {
             oldTime: 0,
             inputh: '96',
             animationData: '',
-            nowpage: 0,
+            nowpage: 1,
             pagesize: 10,
             loading: '',
             isLoading: true,
             scrollAnimation: true,
-            beginLoading: true,
-            imageMap: {
-                '1.png': '/static/1.png',
-                '2.png': '/static/2.png',
-                'fire.png': '/static/fire.png',
-                'fire-kt.png': '/static/fire-kt.png',
-                'fire-lb.png': '/static/fire-lb.png',
-                '5.png': '/static/5.png',
-                '4.png': '/static/4.png',
-            }
+            beginLoading: true
         }
     },
     components: {
         Submit
     },
     onLoad(e) {
-        const { id, name, type, img } = e || {}
+        const { id, name, type, imgurl } = e || {}
         this.fid = id
         this.fname = name
         this.type = type
-        this.fimgurl = this.serverUrl + img
-    },
-    onShow() {
+        this.fimgurl = this.serverUrl + imgurl
         this.getStorages()
         this.getMsg()
-        // this.nextPage()
+        this.receiveSocketMsg()
     },
     methods: {
         dateTime,
@@ -201,15 +190,15 @@ export default {
                         if (data.length > 0) {
                             let oldTime = data[0].time
                             let msgArr = []
-                            for (var i = 1; i < data.length; i++) {
-                                data[i].imgUrl = this.serverUrl + data[i].imgUrl;
-                                if (i < data.length - 1) {
+                            for (var i = 0; i < data.length; i++) {
+                                data[i].imgurl = this.serverUrl + data[i].imgurl;
+                                if (i < data.length) {
                                     let t = spaceTime(oldTime, data[i].time);
                                     if (t) {
                                         oldTime = t
                                     }
                                     data[i].time = t;
-                                    if (this.nowPage === 0) {
+                                    if (this.nowPage === 1) {
                                         if (data[i].time > this.oldTime) {
                                             this.oldTime = data[i].time
                                         }
@@ -272,7 +261,7 @@ export default {
                 this.nowpage = -1
             }
             for (var i = page*10; i < maxpages; i++) {
-                this.msg[i].imgUrl = this.imageMap[this.msg[i].imgUrl];
+                this.msg[i].imgurl = this.imageMap[this.msg[i].imgurl];
                 if (i < this.msg.length - 1) {
                     let t = spaceTime(this.oldTime, this.msg[i].time);
                     if (t) {
@@ -377,16 +366,122 @@ export default {
                 message: message,
                 types: types, // 假设 0 表示文本消息
                 time: nowTime,
-                imgUrl: img, // 假设当前用户头像
+                imgurl: img, // 假设当前用户头像
                 id: len
             }
             // 添加新消息到消息列表
             this.msg.push(data);
             this.$nextTick(() => {
-                this.scrollToView = 'msg' + (len + 1);
+                this.scrollToView = 'msg' + len;
             }); 
-            if (types === 1) {
-                this.imgMsg.push(data.message)
+            // socket提交
+            if (e.types === 0 || e.types === 3) {
+                this.sendSocekt(e)
+            } else if (e.types === 1) {
+                this.imgMsg.push(e.message)
+                const uploadTask = uni.uploadFile({
+                    url: this.serverUrl + '/files/upload', // 仅为示例，非真实的接口地址
+                    filePath: e.message,
+                    name: 'file',
+                    formData: {
+                        url: fileNameTime(new Date()),
+                        name: new Date().getTime() + this.uid + Math.ceil(Math.random()*10),
+                    },
+                    success: (res) => {
+                        // 处理返回的数据
+                        res = JSON.parse(res.data)
+                        console.log('上传成功', res)
+                        let data = {
+                            message: res.data,
+                            types: e.types
+                        }
+                        this.sendSocekt(data)
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '图片上传失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
+
+                uploadTask.onProgressUpdate((res) => {
+                    console.log('上传进度', res.progress)
+                })
+            } else if (e.types === 2) {
+                let url = fileNameTime(new Date())
+                const uploadTask = uni.uploadFile({
+                    url: this.serverUrl + '/files/upload', // 仅为示例，非真实的接口地址
+                    filePath: e.message.voice,
+                    name: 'file',
+                    formData: {
+                        url: url,
+                        name: new Date().getTime() + this.uid + Math.ceil(Math.random()*10),
+                    },
+                    success: (res) => {
+                        // 处理返回的数据
+                        res = JSON.parse(res.data)
+                        console.log('上传成功', res)
+                        let data = {
+                            message: res.data,
+                            types: e.types
+                        }
+                        this.sendSocekt(data)
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '语音上传失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
+
+                uploadTask.onProgressUpdate((res) => {
+                    console.log('上传进度', res.progress)
+                })
+            }
+        },
+        // socekt聊天接受数据
+        receiveSocketMsg() {
+            this.socket.on('msg', (msg, fromid) => {
+                console.log(msg + '---' + fromid)
+                this.scrollAnimation = true
+                let len = this.msg.length
+                let nowTime = new Date();
+                let t = spaceTime(this.oldTime, nowTime);
+                if (t) {
+                    this.oldTime = t
+                }
+                if (msg.types == 1 || msg.types == 2) {
+                    msg.message = this.serverUrl + msg.message
+                }
+                nowTime = t;
+                const data = {
+                    fromId: fromid, // 假设 1 表示当前用户
+                    message: msg.message,
+                    types: msg.types, // 假设 0 表示文本消息
+                    time: nowTime,
+                    imgurl: this.fimgurl, // 假设当前用户头像
+                    id: len
+                }
+                // 添加新消息到消息列表
+                this.msg.push(data);
+                if (msg.types === 1) {
+                    this.imgMsg.push(msg.message)
+                }
+                this.$nextTick(() => {
+                    this.scrollToView = 'msg' + len;
+                }); 
+            })
+        },
+        // 聊天数据发送给后端
+        sendSocekt(e) {
+            if(this.type == 0) {
+                this.socket.emit('msg', e, this.uid, this.fid)
+            } else {
+                this.socket.emit('groupMsg', e, this.uid, this.fid)
             }
         },
         currentHeight(value) {

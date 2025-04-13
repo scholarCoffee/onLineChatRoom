@@ -84,6 +84,7 @@
             this.getFriendsRequest()
             // 页面加载获取好友
             this.getFriendsList()
+            this.join(this.uid)
         },
 		methods: {
             onPullDownRefresh() {
@@ -158,12 +159,17 @@
 					}
 				})
             },
+            // socket模块
+            join(uid) {
+                this.socket.emit('login', uid)
+            },
             toSearch() {
                 uni.navigateTo({
                     url: '/pages/search/index'
                 });
             },
             goFriendRequest() {
+                this.join()
                 uni.navigateTo({
                     url: '/pages/friendRequest/index'
                 });
@@ -183,8 +189,8 @@
                         this.isRefresh = true
 						const { data, code } = res.data
 						if (code === 200) {
-                            if (data.length == 0) {
-                                this.isNoone = true
+                            if (data.length > 0) {
+                                this.isNoone = false
                                 for(let i = 0; i < data.length ; i++) {
                                     data[i].imgUrl = this.serverUrl + data[i].imgUrl
                                     this.friendsList.push(data[i])
@@ -196,7 +202,7 @@
                                 }
                                 // this.getGroup()
                             } else {
-                                this.isNoone = false
+                                this.isNoone = true
                             }
 						} else {
 							uni.showToast({

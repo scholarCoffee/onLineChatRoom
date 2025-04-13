@@ -5,6 +5,7 @@
 			"style": {
 				"navigationStyle": "custom",
 				"enablePullDownRefresh": true
+			}
 		},
 		{
 			"path": "pages/signIn/index",
