@@ -85,6 +85,7 @@
             // 页面加载获取好友
             this.getFriendsList()
             this.join(this.uid)
+            this.receiveSocketMsg()
         },
 		methods: {
             onPullDownRefresh() {
@@ -162,6 +163,32 @@
             // socket模块
             join(uid) {
                 this.socket.emit('login', uid)
+            },
+            receiveSocketMsg() {
+                this.socket.on('msg', (msg, fromid) => {
+                    let nmsg = ''
+                    let e = {}
+                    let i = 0
+                    if (msg.types === 0) {
+                        nmsg = msg.message
+                    } else if (msg.types === 1) {
+                        nmsg = '[图片]'
+                    } else if (msg.types === 2) {
+                        nmsg = '[音频]'
+                    } else if (msg.types === 3) {
+                        nmsg = '[位置]'
+                    }
+                    for(let i = 0 ; i < this.friendsList.length ; i++) {
+                        if (this.friendsList[i].id === fromid) {
+                            e = this.friendsList[i]
+                            e.lastTime = new Date()
+                            e.msg = nmsg 
+                            i = i
+                        }
+                    }
+                    this.friendsList.splice(i, 1, e)
+                    this.friendsList.unshift(e)
+                })
             },
             toSearch() {
                 uni.navigateTo({

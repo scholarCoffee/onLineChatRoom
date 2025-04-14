@@ -446,34 +446,36 @@ export default {
         // socekt聊天接受数据
         receiveSocketMsg() {
             this.socket.on('msg', (msg, fromid) => {
-                console.log(msg + '---' + fromid)
-                this.scrollAnimation = true
-                let len = this.msg.length
-                let nowTime = new Date();
-                let t = spaceTime(this.oldTime, nowTime);
-                if (t) {
-                    this.oldTime = t
-                }
-                if (msg.types == 1 || msg.types == 2) {
-                    msg.message = this.serverUrl + msg.message
-                }
-                nowTime = t;
-                const data = {
-                    fromId: fromid, // 假设 1 表示当前用户
-                    message: msg.message,
-                    types: msg.types, // 假设 0 表示文本消息
-                    time: nowTime,
-                    imgurl: this.fimgurl, // 假设当前用户头像
-                    id: len
-                }
-                // 添加新消息到消息列表
-                this.msg.push(data);
-                if (msg.types === 1) {
-                    this.imgMsg.push(msg.message)
-                }
-                this.$nextTick(() => {
-                    this.scrollToView = 'msg' + len;
-                }); 
+                if (fromid == this.fid) {
+                    console.log(msg + '---' + fromid)
+                    this.scrollAnimation = true
+                    let len = this.msg.length
+                    let nowTime = new Date();
+                    let t = spaceTime(this.oldTime, nowTime);
+                    if (t) {
+                        this.oldTime = t
+                    }
+                    if (msg.types == 1 || msg.types == 2) {
+                        msg.message = this.serverUrl + msg.message
+                    }
+                    nowTime = t;
+                    const data = {
+                        fromId: fromid, // 假设 1 表示当前用户
+                        message: msg.message,
+                        types: msg.types, // 假设 0 表示文本消息
+                        time: nowTime,
+                        imgurl: this.fimgurl, // 假设当前用户头像
+                        id: len
+                    }
+                    // 添加新消息到消息列表
+                    this.msg.push(data);
+                    if (msg.types === 1) {
+                        this.imgMsg.push(msg.message)
+                    }
+                    this.$nextTick(() => {
+                        this.scrollToView = 'msg' + len;
+                    });
+                } 
             })
         },
         // 聊天数据发送给后端
