@@ -1,7 +1,7 @@
 <template>
 	<view class="content">
 		<view class="top-bar">
-			<view class="top-bar-right" @click="navigateToRegister">
+			<view class="top-bar-right" @tap="navigateToRegister">
 				<view class="text">注册</view>
 			</view>
 		</view>

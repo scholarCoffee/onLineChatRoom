@@ -1,7 +1,7 @@
 <template>
     <view class="content">
 		<view class="top-bar">
-			<view class="top-bar-left" @click="navigateBack">
+			<view class="top-bar-left" @tap="navigateBack">
 				<image src="../../static/user/back.png" class="back-img"></image>
 			</view>
 		</view>

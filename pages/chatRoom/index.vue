@@ -9,7 +9,7 @@
             </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
-                <view class="group-img" v-if="type === 1">
+                <view class="group-img" v-if="type === 0" @tap="goGroupHome">
                     <image :src="fimgurl"></image>
                 </view>
             </view>
@@ -143,6 +143,11 @@ export default {
             uni.navigateBack({
                 delta: 1
             });
+        },
+        goGroupHome() {
+            uni.navigateTo({
+                url: '../grouphome/grouphome?gid=' + this.fid + '&gimg=' + this.fimgurl
+            })
         },
         nextPage() {
             if (this.nowpage > 0  && this.beginLoading) {

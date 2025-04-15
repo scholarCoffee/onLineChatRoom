@@ -22,7 +22,7 @@
                 </view>
                 <image :src="user.imgurl" class="user-img" mode="aspectFill" :animation="animationData2"></image>
             </view>
-            <view class="user-imf">
+            <view class="user-img">
                 <view class="name"> {{ user.name }}</view>
                 <view class="nick" v-if="markname">昵称： {{ markname }}</view>
                 <view class="intr"> {{ user.explain }}</view>

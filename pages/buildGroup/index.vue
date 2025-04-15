@@ -1,13 +1,15 @@
 <template>
-    <view class="top-bar">
-        <view class="top-bar-left" @click="navigateBack">
-            <image src="../../static/user/back.png" class="back-img"></image>
-        </view>
-        <view class="top-bar-center">
-
-        </view>
-        <view class="top-bar-right">
-            <view class="pice"></view>
+    <view>
+        <view class="top-bar">
+            <view class="top-bar-left" @tap="navigateBack">
+                <image src="../../static/user/back.png" class="back-img"></image>
+            </view>
+            <view class="top-bar-center">
+                创建群聊
+            </view>
+            <view class="top-bar-right">
+                <view class="pice"></view>
+            </view>
         </view>
         <view class="main">
             <view class="top">
@@ -17,38 +19,54 @@
                 </view>
                 <!-- 群名字 -->
                 <view class="group-name">
-                    <input class="group-name-input" type="text" placeholder="为群取个名字吧" placeholder-style="color:#aaa;" />
+                    <input v-model="name" class="group-name-input" type="text" placeholder="为群取个名字吧" placeholder-style="color:#aaa;" />
                 </view>
             <view class="title">用户</view>
             </view>
-            
             <!-- 选择用户 -->
             <view class="friends">
-                <view class="user" v-for="(item, index) in user" :key="index">
+                <view class="user" v-for="(item, index) in user" :key="index" @tap="selectFriend(index)">
                     <view class="selected" :class="{
                         'isselected':item.selected
                     }">
-                        <image src="../../static/choose.png" class="selected-img" v-if="item.selected"></image>
+                        <image src="../../static/choose_bold.png" class="selected-img" v-if="item.selected"></image>
                     </view>
                     <image class="user-img" :src="item.imgurl"></image>
                     <view class="user-name">{{item.name}}</view>
                 </view>
             </view>
         </view>
-    </view>
+        <view class="bottom-bar">
+            <view class="bottom-btn btn1" :class="{
+                'selected': selectedNo > 0 && name.length > 0
+            }">创建({{ selectedNo }})</view>
+        </view>
+    </view> 
 </template>
 <script>
     export default {
         data() {
             return {
-                tempFilePaths: '../../static/user/user.png',
+                tempFilePaths: '../../static/1.png',
                 user: [
-                    { seleceted: false, imgurl: '../../static/1.png', name :'这是哪里' },
-                    { seleceted: true, imgurl: '../../static/2.png', name :'这是哪里23123' },
-                    { seleceted: true, imgurl: '../../static/3.png', name :'这是哪里1111' },
-                    { seleceted: true, imgurl: '../../static/4.png', name :'这是哪里2222' },
-                ]
+                    { selected: false, imgurl: '../../static/1.png', name :'这是哪里' },
+                    { selected: true, imgurl: '../../static/2.png', name :'这是哪里23123' },
+                    { selected: true, imgurl: '../../static/3.png', name :'这是哪里1111' },
+                    { selected: true, imgurl: '../../static/4.png', name :'这是哪里2222' },
+                    { selected: false, imgurl: '../../static/1.png', name :'这是哪里' },
+                    { selected: true, imgurl: '../../static/2.png', name :'这是哪里23123' },
+                    { selected: true, imgurl: '../../static/3.png', name :'这是哪里1111' },
+                    { selected: true, imgurl: '../../static/4.png', name :'这是哪里2222' },
+                ],
+                selectedNo: 0,
+                name: '',
             }
+        },
+        onReady() {
+
+        },
+        onLoad() {
+            this.onSelectNumber()
         },
         methods: {
             navigateBack() {
@@ -88,6 +106,23 @@
                     }
                 })
             },
+            // 获取已选择个数
+            onSelectNumber() {
+                for(let i = 0; i < this.user.length; i++) {
+                    if(this.user[i].selected) {
+                        this.selectedNo++
+                    }
+                }
+            },
+            selectFriend(e) {
+                if (this.user[e].selected) {
+                    this.user[e].selected = false
+                    this.selectedNo--
+                } else {
+                    this.selectedNo++
+                    this.user[e].selected = true
+                }
+            }
         }
     }
 </script>
@@ -102,10 +137,10 @@
         flex-direction: column;
         .top {
             position: fixed;
-            padding-top: 148rpx;
+            padding-top: 188rpx;
             background-color: #fff;
             width: 100%;
-            z-index: 100;
+            z-index: 99;
         }
         .group-img {
             width: 196rpx;
@@ -139,7 +174,7 @@
             line-height: 60px;
         }
         .friends {
-            padding: 600rpx $uni-spacing-row-base 100rpx;
+            padding: 700rpx $uni-spacing-row-base 100rpx;
             .user {
                 display: flex;
                 flex-direction: row;
@@ -169,9 +204,9 @@
                     height: 80rpx;
                     border-radius: $uni-border-radius-base;
                 }
-                .name {
+                .user-name {
                     padding-left: 32rpx;
-                    font-size: 36rpx;
+                    font-size: 30rpx;
                     color: $uni-text-color;
                     display: -webkit-box;
                     -webkit-box-orient: vertical;
@@ -179,6 +214,17 @@
                     overflow: hidden;
                 }
             }
+        }
+    }
+    .bottom-bar {
+        background: rgba(250, 250, 250, 0.9);
+        box-shadow: 0px 1px 0px 0px rgba(0, 0, 0 , 0.25);
+        .bottom-btn {
+            background: $uni-bg-color-grey;
+            margin: 0 $uni-spacing-col-base;
+        }
+        .selected {
+            background: $uni-color-primary;
         }
     }
 </style>
