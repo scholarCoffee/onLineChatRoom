@@ -81,7 +81,6 @@
     </view>
 </template>
 <script>
-import { getMessage } from '../../commons/js/datas.js'
 import { dateTime, spaceTime, fileNameTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 import Submit from './../../componets/submit'
 const innerAudioContext = uni.createInnerAudioContext()
@@ -207,6 +206,10 @@ export default {
                                         data[i].message =  this.serverUrl + msg[i].message;
                                         msgArr.push(data[i].message)
                                     }
+                                    if(data[i].types === 3) {
+                                        data[i].message =  JSON.parse(data[i].message)
+                                        msgArr.push(data[i].message)
+                                    }
                                 } else {
                                     data[i].time = '';
                                 }
@@ -226,7 +229,7 @@ export default {
                             this.$nextTick(() => {
                                 const lastItem = this.msg[data.length -1].id;
                                 if (lastItem) {
-                                    this.scrollToView = 'msg' + lastItem.tip;
+                                    this.scrollToView = 'msg' + lastItem.id;
                                 }
                             });     
                         }, 100);
@@ -249,49 +252,6 @@ export default {
                     });
                 }
             })
-        },
-        getMsg1(page) {
-            // 获取消息列表
-            this.msg = getMessage();
-            let maxpages = this.msg.length;
-            if (this.msg.length > page*10 + 10) {
-                maxpages = page*10 + 10
-                this.nowpage++ 
-            } else {
-                this.nowpage = -1
-            }
-            for (var i = page*10; i < maxpages; i++) {
-                this.msg[i].imgurl = this.imageMap[this.msg[i].imgurl];
-                if (i < this.msg.length - 1) {
-                    let t = spaceTime(this.oldTime, this.msg[i].time);
-                    if (t) {
-                        this.oldTime = t
-                    }
-                    this.msg[i].time = t;
-                    if(this.msg[i].types === 1) {
-                        this.msg[i].message =  this.imageMap[this.msg[i].message];
-                        this.imgMsg.unshift(this.msg[i].message)
-                    }
-                } else {
-                    this.msg[i].time = '';
-                }
-            }
-            // 反转消息列表
-            this.msg.reverse();
-            // 滚动到最底部
-            setTimeout(() => {
-                this.scrollToView = ''
-                this.scrollAnimation = false
-                this.$nextTick(() => {
-                    const lastItem = this.msg[maxpages- page*10 - 1];
-                    if (lastItem) {
-                        this.scrollToView = 'msg' + lastItem.tip;
-                    }
-                });     
-            }, 100);
-            clearInterval(this.loading)
-            this.isLoading = true
-            this.beginLoading = true
         },
         // 预览图片
         previewImg(e) {
@@ -349,31 +309,6 @@ export default {
         // 接收消息
         receiveMsg(e, id, img, tip) {
             // tip = 0 表示自己发送消息
-            const { message, types } = e || {}
-            this.scrollAnimation = true
-            let len = this.msg.length
-            let nowTime = new Date();
-            let t = spaceTime(this.oldTime, nowTime);
-            if (t) {
-                this.oldTime = t
-            }
-            if (tip == 1) {
-
-            }
-            nowTime = t;
-            const data = {
-                fromId: id, // 假设 1 表示当前用户
-                message: message,
-                types: types, // 假设 0 表示文本消息
-                time: nowTime,
-                imgurl: img, // 假设当前用户头像
-                id: len
-            }
-            // 添加新消息到消息列表
-            this.msg.push(data);
-            this.$nextTick(() => {
-                this.scrollToView = 'msg' + len;
-            }); 
             // socket提交
             if (e.types === 0 || e.types === 3) {
                 this.sendSocekt(e)
@@ -442,11 +377,37 @@ export default {
                     console.log('上传进度', res.progress)
                 })
             }
+            const { message, types } = e || {}
+            this.scrollAnimation = true
+            let len = this.msg.length
+            let nowTime = new Date();
+            let t = spaceTime(this.oldTime, nowTime);
+            if (t) {
+                this.oldTime = t
+            }
+            nowTime = t;
+            if (e.types == 3 ) {
+                e.message = JSON.parse(e.message)
+            }
+            const data = {
+                fromId: id, // 假设 1 表示当前用户
+                message: message,
+                types: types, // 假设 0 表示文本消息
+                time: nowTime,
+                imgurl: img, // 假设当前用户头像
+                id: len
+            }
+            // 添加新消息到消息列表
+            this.msg.push(data);
+            this.$nextTick(() => {
+                this.scrollToView = 'msg' + len;
+            }); 
+            
         },
         // socekt聊天接受数据
         receiveSocketMsg() {
-            this.socket.on('msg', (msg, fromid) => {
-                if (fromid == this.fid) {
+            this.socket.on('msg', (msg, fromid, tip) => {
+                if (fromid == this.fid && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
                     let len = this.msg.length
@@ -497,7 +458,7 @@ export default {
                 this.$nextTick(() => {
                     const lastItem = this.msg[this.msg.length - 1];
                     if (lastItem) {
-                        this.scrollToView = 'msg' + lastItem.tip;
+                        this.scrollToView = 'msg' + lastItem.id;
                     }
                 });     
             }, 100);

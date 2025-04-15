@@ -6,7 +6,7 @@
 			</navigator>
 			<view class="top-bar-right">
 				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
-				<!-- <view class="add"><image src="/static/user/add.png"></image></view> -->
+				<view class="add" @tap="toBuildGroup"><image src="/static/user/add.png"></image></view>
 			</view>
 		</view>
 		<view class="main">
@@ -167,8 +167,6 @@
             receiveSocketMsg() {
                 this.socket.on('msg', (msg, fromid) => {
                     let nmsg = ''
-                    let e = {}
-                    let i = 0
                     if (msg.types === 0) {
                         nmsg = msg.message
                     } else if (msg.types === 1) {
@@ -180,25 +178,29 @@
                     }
                     for(let i = 0 ; i < this.friendsList.length ; i++) {
                         if (this.friendsList[i].id === fromid) {
-                            e = this.friendsList[i]
+                            let e = this.friendsList[i]
                             e.lastTime = new Date()
-                            e.msg = nmsg 
-                            i = i
+                            e.message = nmsg 
+                            e.tip++
+                            this.friendsList.splice(i, 1)
+                            this.friendsList.unshift(e)
                         }
                     }
-                    this.friendsList.splice(i, 1, e)
-                    this.friendsList.unshift(e)
                 })
             },
             toSearch() {
                 uni.navigateTo({
-                    url: '/pages/search/index'
+                    url: '../search/index'
+                });
+            },
+            toBuildGroup() {
+                uni.navigateTo({
+                    url: '../buildGroup/index'
                 });
             },
             goFriendRequest() {
-                this.join()
                 uni.navigateTo({
-                    url: '/pages/friendRequest/index'
+                    url: '../friendRequest/index'
                 });
             },
             // 好友列表

@@ -173,7 +173,7 @@
                             latitude: latitude,
                             longitude: longitude
                         }
-                        this.send(data, 3)
+                        this.send(JSON.stringify(data), 3)
                     },
                     fail: (err) => {
                         console.log(err)
