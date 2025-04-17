@@ -21,7 +21,7 @@
                 </view>
                 <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.id">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
-                    <view class="msg-m msg-left" v-if="item.fromId !== uid">
+                    <view class="msg-m msg-left" v-if="item.fromId !== uid"  @tap="goUserHome(item.fromId)">
                         <image :src="item.imgurl" class="user-img"></image>
                         <view class="message" v-if="item.types === 0">
                             <view class="msg-text">{{ item.message }}</view>
@@ -47,7 +47,7 @@
                         </view>
                     </view>
                     <view class="msg-m msg-right" v-else>
-                        <image :src="item.imgurl" class="user-img"></image>
+                        <image :src="item.imgurl" class="user-img"  @tap="goUserHome(item.fromId)"></image>
                         <view class="message" v-if="item.types === 0">
                             <view class="msg-text">{{ item.message }}</view>
                         </view>
@@ -121,6 +121,7 @@ export default {
         this.getStorages()
         this.getMsg()
         this.receiveSocketMsg()
+        this.groupSocketMsg()
     },
     methods: {
         dateTime,
@@ -144,9 +145,14 @@ export default {
                 delta: 1
             });
         },
+        goUserHome(fromId) {
+            uni.navigateTo({
+                url: '../userDetail/index?id=' + fromId
+            })
+        },
         goGroupHome() {
             uni.navigateTo({
-                url: '../grouphome/grouphome?gid=' + this.fid + '&gimg=' + this.fimgurl
+                url: '../grouphome/index?gid=' + this.fid + '&gimg=' + this.fimgurl
             })
         },
         nextPage() {
@@ -316,7 +322,7 @@ export default {
             // tip = 0 表示自己发送消息
             // socket提交
             if (e.types === 0 || e.types === 3) {
-                this.sendSocekt(e)
+                this.sendSocket(e)
             } else if (e.types === 1) {
                 this.imgMsg.push(e.message)
                 const uploadTask = uni.uploadFile({
@@ -335,7 +341,7 @@ export default {
                             message: res.data,
                             types: e.types
                         }
-                        this.sendSocekt(data)
+                        this.sendSocket(data)
                     },
                     fail: (err) => {
                         uni.showToast({
@@ -367,7 +373,7 @@ export default {
                             message: res.data,
                             types: e.types
                         }
-                        this.sendSocekt(data)
+                        this.sendSocket(data)
                     },
                     fail: (err) => {
                         uni.showToast({
@@ -444,12 +450,46 @@ export default {
                 } 
             })
         },
+        groupSocketMsg() {
+            this.socket.on('groupmsg', (msg, fromid, gid, name, img, tip) => {
+                if (gid == this.fid && tip == 0) {
+                    console.log(msg + '---' + fromid)
+                    this.scrollAnimation = true
+                    let len = this.msg.length
+                    let nowTime = new Date();
+                    let t = spaceTime(this.oldTime, nowTime);
+                    if (t) {
+                        this.oldTime = t
+                    }
+                    if (msg.types == 1 || msg.types == 2) {
+                        msg.message = this.serverUrl + msg.message
+                    }
+                    nowTime = t;
+                    const data = {
+                        fromId: fromid, // 假设 1 表示当前用户
+                        message: msg.message,
+                        types: msg.types, // 假设 0 表示文本消息
+                        time: nowTime,
+                        imgurl: img, // 假设当前用户头像
+                        id: len
+                    }
+                    // 添加新消息到消息列表
+                    this.msg.push(data);
+                    if (msg.types === 1) {
+                        this.imgMsg.push(msg.message)
+                    }
+                    this.$nextTick(() => {
+                        this.scrollToView = 'msg' + len;
+                    });
+                } 
+            })
+        },
         // 聊天数据发送给后端
-        sendSocekt(e) {
+        sendSocket(e) {
             if(this.type == 0) {
                 this.socket.emit('msg', e, this.uid, this.fid)
             } else {
-                this.socket.emit('groupMsg', e, this.uid, this.fid)
+                this.socket.emit('groupMsg', e, this.uid, this.fid, this.uname, this.uimgurl)
             }
         },
         currentHeight(value) {
@@ -537,6 +577,7 @@ page {
                 width: 58rpx;
                 height: 58rpx;
                 border-radius: $uni-border-radius-base;
+                background-color: #fff260;
             }
             .message {
                flex: none;

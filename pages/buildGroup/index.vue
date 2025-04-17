@@ -25,7 +25,7 @@
             </view>
             <!-- 选择用户 -->
             <view class="friends">
-                <view class="user" v-for="(item, index) in user" :key="index" @tap="selectFriend(index)">
+                <view class="user" v-for="(item, index) in friends" :key="index" @tap="selectFriend(index)">
                     <view class="selected" :class="{
                         'isselected':item.selected
                     }">
@@ -39,7 +39,7 @@
         <view class="bottom-bar">
             <view class="bottom-btn btn1" :class="{
                 'selected': selectedNo > 0 && name.length > 0
-            }">创建({{ selectedNo }})</view>
+            }" @tap="createGroup">创建({{ selectedNo }})</view>
         </view>
     </view> 
 </template>
@@ -47,17 +47,11 @@
     export default {
         data() {
             return {
+                friends: [],
+                uid: '',
+                token: '',
+                gimgurl: '/group/group.png',
                 tempFilePaths: '../../static/1.png',
-                user: [
-                    { selected: false, imgurl: '../../static/1.png', name :'这是哪里' },
-                    { selected: true, imgurl: '../../static/2.png', name :'这是哪里23123' },
-                    { selected: true, imgurl: '../../static/3.png', name :'这是哪里1111' },
-                    { selected: true, imgurl: '../../static/4.png', name :'这是哪里2222' },
-                    { selected: false, imgurl: '../../static/1.png', name :'这是哪里' },
-                    { selected: true, imgurl: '../../static/2.png', name :'这是哪里23123' },
-                    { selected: true, imgurl: '../../static/3.png', name :'这是哪里1111' },
-                    { selected: true, imgurl: '../../static/4.png', name :'这是哪里2222' },
-                ],
                 selectedNo: 0,
                 name: '',
             }
@@ -67,12 +61,27 @@
         },
         onLoad() {
             this.onSelectNumber()
+            this.getStorages()
+            this.getFriendsList()
         },
         methods: {
             navigateBack() {
                 uni.navigateTo({
                     url: '../index/index'
                 })
+            },
+            getStorages() {
+                // 获取本地存储的用户信息
+                const userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                    const { userId, token } = userInfo;
+                    this.uid = userId; // 用户ID
+                    this.token = token; // 用户token
+                } else {
+                    uni.navigateTo({
+                        url: '/pages/signIn/index'
+                    });
+                } 
             },
             chooseImage() {
                 uni.chooseImage({
@@ -88,12 +97,12 @@
                             fileType: 'image',
                             formData: {
                                 url: 'user',
-                                name: this.uid,
+                                name: this.uid + new Date().getTime(),
                                 token: this.token
                             },
                             success: (res) => {
-                                const backImg = JSON.parse(res.data)
-                               
+                                const backImg = JSON.parse (res.data)
+                                this.gimgurl = backImg;
                             },
                             fail: (err) => {
                                 uni.showToast({
@@ -108,19 +117,118 @@
             },
             // 获取已选择个数
             onSelectNumber() {
-                for(let i = 0; i < this.user.length; i++) {
-                    if(this.user[i].selected) {
+                for(let i = 0; i < this.friendsList.length; i++) {
+                    if(this.friendsList[i].selected) {
                         this.selectedNo++
                     }
                 }
             },
             selectFriend(e) {
-                if (this.user[e].selected) {
-                    this.user[e].selected = false
+                if (this.friendsList[e].selected) {
+                    this.friendsList[e].selected = false
                     this.selectedNo--
                 } else {
                     this.selectedNo++
-                    this.user[e].selected = true
+                    this.friendsList[e].selected = true
+                }
+            },
+            // 好友列表
+            getFriendsList() {
+                this.friendsList = []
+                uni.request({
+					url: this.serverUrl + '/index/getFriend', // 替换为你的登录接口地址,
+					method: 'POST',
+					data: {
+						uid: this.uid,
+                        state: 0, // 2表示好友申请
+						token: this.token
+					},
+					success: (res) => {
+                        this.isRefresh = true
+						const { data, code } = res.data
+						if (code === 200) {
+                            if (data.length > 0) {
+                                // this.isNoone = false
+                                for(let i = 0; i < data.length ; i++) {
+                                    data[i].imgUrl = this.serverUrl + data[i].imgUrl
+                                    data[i].selected = false
+                                    if (data[i].markname) {
+                                        data[i].name = data[i].markname
+                                    }
+                                    this.friendsList.push(data[i])
+                                }
+                                // this.getGroup()
+                            } else {
+                                // this.isNoone = true
+                            }
+						} else {
+							uni.showToast({
+                                title: '获取好友请求失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+						}
+					},
+					fail: (err) => {
+						uni.showToast({
+							title: '获取好友请求失败',
+							icon: 'none',
+							duration: 2000
+						});
+					}
+				})
+            },
+            // 创建群聊
+            createGroup() {
+                if (this.selectedNo > 0 && this.name.length > 0) {
+                    for(let i = 0 ;i < this.friendsList.length; i++) {
+                        if (this.friendsList[i].selected) {
+                            this.user.push(this.friendsList[i].id)
+                        }
+                    }
+                    uni.request({
+                        url: this.serverUrl + '/group/createGroup', // 替换为你的登录接口地址,
+                        method: 'POST',
+                        data: {
+                            uid: this.uid,
+                            token: this.token,
+                            name: this.name,
+                            imgurl: this.gimgurl,
+                            user: this.user
+                        },
+                        success: (res) => {
+                            const { data, code } = res.data
+                            if (code === 200) {
+                                uni.showToast({
+                                    title: '创建成功',
+                                    icon: 'none',
+                                    duration: 2000
+                                });
+                                uni.navigateTo({
+                                    url: '../index/index'
+                                })
+                            } else {
+                                uni.showToast({
+                                    title: '创建失败',
+                                    icon: 'none',
+                                    duration: 2000
+                                });
+                            }
+                        },
+                        fail: (err) => {
+                            uni.showToast({
+                                title: '创建失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                    })
+                } else {
+                    uni.showToast({
+                        title: '请至少选择一个好友并输入群名称',
+                        icon: 'none',
+                        duration: 2000
+                    });
                 }
             }
         }
@@ -202,6 +310,7 @@
                 .user-img {
                     width: 80rpx;
                     height: 80rpx;
+                    background: rgba(255, 228, 49, 1); 
                     border-radius: $uni-border-radius-base;
                 }
                 .user-name {

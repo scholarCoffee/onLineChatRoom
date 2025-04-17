@@ -14,10 +14,10 @@
                         <image :src="item.imgurl"></image>
                     </navigator>
                     <view class="names">
-                        <view class="name" v-html="item.name"></view>
-                        <view class="email" v-html="item.email"></view>
+                        <view class="name" v-html="item.names"></view>
+                        <view class="email" v-html="item.emails"></view>
                     </view>
-                    <view class="right-bt send" v-if="item.tip === 1">发消息</view>
+                    <view class="right-bt send" v-if="item.tip === 1" @tap="toChatRoom(item)">发消息</view>
                     <view class="right-bt add" v-if="item.tip === 0" @tap="onAddFriend(item._id)">加好友</view>
                 </view>
             </view>
@@ -133,8 +133,8 @@
                     tip = 2
                     item.tip = tip
                     item.imgurl = this.serverUrl + item.imgurl
-                    item.name = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
-                    item.email = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                    item.names = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                    item.emails = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
                     this.qryUserInfo.push(item)
                     return
                 }
@@ -153,9 +153,11 @@
                            tip = 1
                         }
                         item.tip = tip
+                        item.id = item._id
+                        item.type = 0
                         item.imgurl = this.serverUrl + item.imgurl
-                        item.name = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
-                        item.email = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                        item.names = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                        item.emails = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
                         this.qryUserInfo.push(item)
                     },
                     fail: (err) => {
@@ -239,6 +241,12 @@
             },
             modifySubmit() {
                 this.modify()
+            },
+            toChatRoom(data) {
+                const { id, name, imgurl, type } = data || {}
+                uni.navigateTo({
+                    url: '/pages/chatRoom/index?id=' + id + '&names=' + name + '&imgurl=' + imgurl + '&type=' + type
+                });
             }
 		}
 	}
@@ -287,6 +295,7 @@
                 width: 80rpx;
                 height: 80rpx;
                 border-radius: $uni-border-radius-base;
+                background-color: rgba(255, 228, 49, 1)
             }
         }
         .names {

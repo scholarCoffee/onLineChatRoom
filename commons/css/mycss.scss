@@ -22,6 +22,21 @@
             height: 40rpx;
             border-radius: 16rpx;
         }
+        .my-img {
+            margin-right: 76rpx;
+            background-color: #fff260;
+        }
+        .back-img {
+            margin-top: 21rpx;
+            padding-right: 32rpx;
+            width: 26rpx;
+            height: 46rpx;
+        }
+        .text {
+            font-size: $uni-font-size-lg;
+            font-weight: 500;
+            line-height: 88rpx;
+        }
     }
     .top-bar-center {
         position: absolute;

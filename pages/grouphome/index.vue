@@ -56,7 +56,7 @@
                     <view class="clear"></view>
                 </view>
                 <view class="mitem">
-                    <view class="row">
+                    <view class="row" @tap="modify('gname', '群名称', '今天天气真好')">
                         <view class="title">群名称</view>
                         <view class="cont">今天天气真好</view>
                         <view class="more">
@@ -65,21 +65,21 @@
                     </view>
                     <view class="row">
                         <view class="title">群头像</view>
-                        <view class="cont">
+                        <view class="cont" @tap="chooseImage">
                             <image :src="gimg" class="bg-img" mode="aspectFill"></image>
                         </view>
                         <view class="more">
                             <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
                         </view>
                     </view>
-                    <view class="row">
+                    <view class="row" @tap="modify('gnotice ', '群公告', '今天天气真好')">
                         <view class="title">群公告</view>
                         <view class="cont">今天天气真好</view>
                         <view class="more">
                             <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
                         </view>
                     </view>
-                    <view class="row">
+                    <view class="row" @tap="modify('giname', '群内名', '今天天气真好')">
                         <view class="title">群内名</view>
                         <view class="cont">1111</view>
                         <view class="more">
@@ -97,6 +97,15 @@
                 <view class="bt2">解散群</view>
             </view>
         </view>
+        <view class="modify" :style="{ bottom:-widHeight + 'px', 'display': isModify ? 'block' : 'none'  }" :animation="animation">
+            <view class="modify-header">
+                <view class="close" @tap="modify">取消</view>
+                <view class="define" @tap="modifySubmit">确定</view>
+            </view>
+            <view class="modify-main">
+                <textarea v-model="data" class="modify-content" ></textarea>
+            </view>
+        </view>
     </view>
 </template>
 <script>
@@ -109,7 +118,13 @@
                 swit: false,
                 groupmember: [],
                 top: 0,
-                animationData1: {}
+                animationData1: {},
+                modifyTitle: '',
+                data: '修改的内容', // 签名内容
+                type: '', // 修改类型
+                animation: {}, // 动画对象
+                isModify: false, // 是否显示修改弹窗
+                widHeight: 1000, // 组件高度
             }
         },
         onLoad(e) {
@@ -129,7 +144,43 @@
                 })
             },
             switchChange(e) {
-
+                this.swit = e.detail.value
+                uni.showToast({
+                    title: this.swit ? '已开启免打扰' : '已关闭免打扰',
+                    icon: 'none',
+                    duration: 2000
+                })
+            },
+            chooseImage() {
+                uni.chooseImage({
+                    count: 1,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: (res) => {
+                         this.gimg = res.tempFilePaths[0]
+                         uni.uploadFile({
+                            url: this.serverUrl + 'files/upload', // 替换为你的上传接口地址
+                            filePath: this.tempFilePaths,
+                            name: 'file',
+                            fileType: 'image',
+                            formData: {
+                                url: 'group',
+                                name: this.uid,
+                                token: this.token
+                            },
+                            success: (res) => {
+                                
+                            },
+                            fail: (err) => {
+                                uni.showToast({
+                                    title: '头像修改失败',
+                                    icon: 'none',
+                                    duration: 2000
+                                });
+                            }
+                        })
+                    }
+                })
             },
             getMemberList() {
                 let members = getFriendsList(this.gid)
@@ -155,7 +206,49 @@
                 } else {
                     animation.opacity(0).step()
                 }
-            }
+                this.animationData1 = animation.export()
+            },
+            modify(type, title, data) {
+                this.type = type
+                this.modifyTitle = title
+                this.oldData = data
+                this.data = data
+                this.isModify = !this.isModify
+                const animation = uni.createAnimation({
+                    duration: 300,
+                    timingFunction: 'ease',
+                })
+                if (this.isModify) {
+                    animation.bottom(0).step()
+                } else {
+                    animation.bottom(-this.widHeight).step()
+                }
+                this.animation = animation.export()
+            },
+            modifySubmit() {
+                if (this.data.length > 0 && this.data != this.oldData) {
+                    if (this.type == 'markname') {
+                        this.updateFriendName()
+                        this.user.markname = this.data
+                    } else if (this.type == 'email') {
+                        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 邮箱正则表达式
+                        if (this.user.email.length > 0 && emailPattern.test(this.user.email)) {
+                            this.update(this.data, this.type)
+                        } else {
+                            uni.showToast({
+                                title: '邮箱格式不正确',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }	
+                    } else if (this.type == 'pwd') {
+                        this.update(this.data, this.type)
+                    } else {
+                        this.update(this.data, this.type)
+                    }
+                }
+                this.modify()
+            },
         },
         onPageScroll() {
             this.getTop()
@@ -166,6 +259,7 @@
 <style lang="scss">
     @import "../../commons/css/mycss.scss"; // 引入公共样式
     .clear {
+        opacity: 0;
         clear: both;
     }
     .bgbar {
@@ -370,6 +464,73 @@
             font-size: $uni-font-size-lg;
             color: $uni-color-warning;
             line-height: 88rpx;
+        }
+    }
+    .modify {
+        position:fixed; 
+        z-index: 1001;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #fff;
+        .modify-header {
+            width: 100%;
+            height: 160rpx; // 调整高度以适配不同屏幕
+            padding-top: var(--status-bar-height);
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            border-bottom: 1px solid $uni-border-color;
+            .close {
+                padding-left: $uni-spacing-col-base;
+                padding-right: 20rpx;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 88rpx;
+            }
+            .title {
+                flex: auto;
+                text-align: center;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 88rpx;
+            }
+            .define {
+                padding-right: $uni-spacing-col-base;
+                font-size: $uni-font-size-lg;
+                color: $uni-color-success;
+                line-height: 88rpx;
+            }
+        }
+        .modify-main {
+            display: flex;
+            padding: $uni-spacing-col-base;
+            flex-direction: column;
+            .modify-pwd {
+                margin-bottom: $uni-spacing-col-base;
+                padding: 12rpx 20rpx;
+                box-sizing: border-box;
+                flex: auto;
+                width: 100%;
+                height: 88rpx;
+                background-color: $uni-bg-color-grey;
+                border-radius: $uni-border-radius-base;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 88rpx;
+            }
+            .modify-content {
+                padding: 16rpx 20rpx;
+                flex: auto;
+                width: 100%;
+                box-sizing: border-box;
+                height: 386rpx;
+                background: $uni-bg-color-grey;
+                border-radius: $uni-border-radius-base;
+                font-size: $uni-font-size-lg;
+                color: $uni-text-color;
+                line-height: 44rpx;
+            }
         }
     }
 </style>
