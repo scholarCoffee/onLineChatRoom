@@ -88,6 +88,7 @@
             this.join(this.uid)
             this.receiveSocketMsg()
             this.groupSocket()
+            this.leaveChatRoom()
         },
 		methods: {
             onPullDownRefresh() {
@@ -215,6 +216,17 @@
                             e.tip++
                             this.friendsList.splice(i, 1)
                             this.friendsList.unshift(e)
+                        }
+                    }
+                })
+            },
+            leaveChatRoom() {
+                this.socket.on('leavechatroom', (uid, fid) => {
+                    for(let i = 0 ; i < this.friendsList.length ; i++) {
+                        if (this.friendsList[i].id === fid) {
+                            let e = this.friendsList[i]
+                            e.tip = 0
+                            this.friendsList.splice(i, 1, e)
                         }
                     }
                 })

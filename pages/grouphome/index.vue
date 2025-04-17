@@ -2,12 +2,12 @@
     <view>
         <view class="top-bar">
             <view class="top-bar-left" @tap="navigateBack">
-                <image src="../../static/user/back1.png" class="back-img"></image>
+                <image src="../../static/user/backWhite.png" class="back-img"></image>
             </view>
             <view class="top-bar-center"></view>
             <view class="top-bar-right">
                 <view class="more-img">
-                    <image src="../../static/user/more1.png" class="more-img"></image>
+                    <image src="../../static/user/moreWhite.png" class="more-img"></image>
                 </view>
             </view>
         </view>

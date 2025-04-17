@@ -141,6 +141,7 @@ export default {
             } 
         },
         backOne() {
+            this.socket.emit('leaveChatRoom', this.uid, this.fid)
             uni.navigateBack({
                 delta: 1
             });
