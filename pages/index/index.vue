@@ -154,7 +154,7 @@
                 this.socket.emit('login', uid)
             },
             receiveFriendSocketMsg() {
-                this.socket.on('msg', (msg, fromid) => {
+                this.socket.on('msgFront', (msg, fromid) => {
                     let nmsg = ''
                     if (msg.types === 0) {
                         nmsg = msg.message
@@ -178,7 +178,7 @@
                 })
             },
             receiveGroupSocketMsg() {
-                this.socket.on('groupmsg', (msg, fromid, gid, name) => {
+                this.socket.on('groupMsgFront', (msg, fromid, gid, name) => {
                     let nmsg = ''
                     if (msg.types === 0) {
                         nmsg = msg.message
@@ -207,7 +207,7 @@
                 })
             },
             receiveLeaveChatRoomSocketMsg() {
-                this.socket.on('leavechatroom', (uid, fid) => {
+                this.socket.on('leaveChatRoomFront', (uid, fid) => {
                     for(let i = 0 ; i < this.friendsList.length ; i++) {
                         if (this.friendsList[i].id === fid) {
                             let e = this.friendsList[i]
@@ -242,6 +242,7 @@
                     });
                 }).finally(() => {
                     this.isRefresh = false
+                    uni.stopPullDownRefresh()
                 })   
             },
             // 好友列表
@@ -314,7 +315,7 @@
                                             data[i].message = data[i].name + ': ' + data[i].msg
                                         } 
                                         this.groupsList.push(data[i])
-                                        this.socket.emit('group', res[i].id)
+                                        this.socket.emit('groupServer', res[i].id)
                                     }
                                 }
                                 resolve()
@@ -354,9 +355,9 @@
                 });
             },
             toChatRoom(data) {
-                const { id, name, imgurl, type } = data || {}
+                const { id, name, imgurl, chatType } = data || {}
                 uni.navigateTo({
-                    url: '/pages/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&type=' + type
+                    url: '/pages/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&type=' + chatType
                 });
             },
 		}

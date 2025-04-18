@@ -9,7 +9,7 @@
             </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
-                <view class="group-img" v-if="type === 0" @tap="goGroupHome">
+                <view class="group-img" v-if="chatType === 1" @tap="goGroupHome">
                     <image :src="fimgurl"></image>
                 </view>
             </view>
@@ -91,7 +91,7 @@ export default {
             fid: '',
             fname: '',
             fimgurl: '',
-            type: '', // 0-好友，1-群
+            chatType: 0, // 0-好友，1-群
             uimgurl: '',
             token: '',
             uname: '',
@@ -113,17 +113,24 @@ export default {
         Submit
     },
     onLoad(e) {
-        const { id, name, type, imgurl } = e || {}
+        const { id, name, chatType, imgurl } = e || {}
         this.fid = id
         this.fname = name
-        this.type = type
+        this.chatType = chatType || 0
         this.fimgurl = this.serverUrl + imgurl
-        this.receiveSocketMsg()
-        this.groupSocketMsg()
+        if (this.chatType == 0) {
+            this.receiveSelfSocketMsg()
+        } else {
+            this.receivceGroupSocketMsg()
+        }
     },
     onShow() {
         this.getStorages()
-        this.getMsg()
+        if (this.chatType == 0) {
+            this.getSelfMsg()
+        } else {
+            this.getGroupMsg()
+        }
     },
     methods: {
         dateTime,
@@ -143,7 +150,7 @@ export default {
             } 
         },
         backOne() {
-            this.socket.emit('leaveChatRoom', this.uid, this.fid)
+            this.socket.emit('leaveChatRoomServer', this.uid, this.fid)
             uni.navigateBack({
                 delta: 1
             });
@@ -175,17 +182,20 @@ export default {
                     this.animationData = animation.export()
                     i++
                     if(i > 20) {
-                        this.getMsg()
+                        if (this.chatType == 0) {
+                            this.getSelfMsg()
+                        } else {
+                            this.getGroupMsg()
+                        }
                     }
-                    
                 }.bind(this), 100)
             }
 
         },
-        getMsg() {
+        getSelfMsg() {
             // 获取消息列表
             uni.request({
-                url: this.serverUrl + '/chat/getMsg', // 替换为你的登录接口地址,
+                url: this.serverUrl + '/chat/getSelfMsg', // 替换为你的登录接口地址,
                 method: 'POST',
                 data: {
                     uid: this.uid,
@@ -419,8 +429,8 @@ export default {
             
         },
         // socekt聊天接受数据
-        receiveSocketMsg() {
-            this.socket.on('msg', (msg, fromid, tip) => {
+        receiveSelfSocketMsg() {
+            this.socket.on('msgServer', (msg, fromid, tip) => {
                 if (fromid == this.fid && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
@@ -453,8 +463,8 @@ export default {
                 } 
             })
         },
-        groupSocketMsg() {
-            this.socket.on('groupmsg', (msg, fromid, gid, name, img, tip) => {
+        receivceGroupSocketMsg() {
+            this.socket.on('groupMsgFront', (msg, fromid, gid, name, img, tip) => {
                 if (gid == this.fid && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
@@ -489,10 +499,10 @@ export default {
         },
         // 聊天数据发送给后端
         sendSocket(e) {
-            if(this.type == 0) {
-                this.socket.emit('msg', e, this.uid, this.fid)
+            if(this.chatType == 0) {
+                this.socket.emit('msgServer', e, this.uid, this.fid)
             } else {
-                this.socket.emit('groupMsg', e, this.uid, this.fid, this.uname, this.uimgurl)
+                this.socket.emit('groupMsgServer', e, this.uid, this.fid, this.uname, this.uimgurl)
             }
         },
         currentHeight(value) {
