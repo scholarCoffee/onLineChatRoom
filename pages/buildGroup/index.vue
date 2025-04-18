@@ -25,7 +25,7 @@
             </view>
             <!-- 选择用户 -->
             <view class="friends">
-                <view class="user" v-for="(item, index) in friends" :key="index" @tap="selectFriend(index)">
+                <view class="user" v-for="(item, index) in friendsList" :key="index" @tap="selectFriend(index)">
                     <view class="selected" :class="{
                         'isselected':item.selected
                     }">
@@ -47,7 +47,7 @@
     export default {
         data() {
             return {
-                friends: [],
+                friendsList: [],
                 uid: '',
                 token: '',
                 gimgurl: '/group/group.png',
@@ -55,9 +55,6 @@
                 selectedNo: 0,
                 name: '',
             }
-        },
-        onReady() {
-
         },
         onLoad() {
             this.onSelectNumber()

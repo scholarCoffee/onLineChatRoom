@@ -10,17 +10,17 @@
 			</view>
 		</view>
 		<view class="main">
-            <view class="refresh" v-if="!isRefresh">
+            <view class="refresh" v-if="isRefresh">
                 <image src="/static/user/refresh.png" class="refresh-icon"></image>
                 <text class="ref-title">下拉刷新</text>
             </view>
-            <view class="noone" v-if="isNoone">
-                <image src="/static/user/noone.png" mode="aspectFill"></image>
-                <view class="no-title">你还没有好友~</view>
+            <view class="noone" v-if="isNoFriendList">
+                <image src="/static/home/emptyNo.png" mode="aspectFill"></image>
+                <view class="no-friends">你还没有好友~</view>
                 <view class="search-bt" @tap="toSearch">搜索好友</view>
             </view>
             <!-- 好友申请数量 -->
-            <view class="friends" v-if="requestData > 0" @tap="goFriendRequest">
+            <view class="friends" v-if="requestData > 0" @tap="toFriendRequest">
 				<view class="friends-list">
                     <view class="friends-list-l">
                         <text class="tip">{{ requestData }}</text>
@@ -61,7 +61,7 @@
 		data() {
 			return {
                 friendsList: [], // 好友列表
-                groups:[], // 群组列表
+                groupsList:[], // 群组列表
                 uid: '', // 用户ID
                 userName: '', // 用户名
                 imgUrl: '', // 头像URL
@@ -69,37 +69,31 @@
                 requestData: 0, // 好友申请数
                 requestTime: '', // 最后申请时间
                 isRefresh: false,
-                isNoone: false,
-                imageMap: {
-                    '1.png': '/static/1.png',
-                    '2.png': '/static/2.png',
-                    'fire.png': '/static/fire.png',
-                    'fire-kt.png': '/static/fire-kt.png',
-                    'fire-lb.png': '/static/fire-lb.png',
-                    '5.png': '/static/5.png',
-                }
+                isNoFriendList: false
 			}
 		},
-        onShow() {
+        onLoad() {
+            // 获取登录信息
             this.getStorages()
-            // 页面加载时获取好友请求
-            this.getFriendsRequest()
-            this.getInfo()
             this.join(this.uid)
-            this.receiveSocketMsg()
-            this.groupSocket()
-            this.leaveChatRoom()
+            this.initSocketInfo()
+        },
+        onShow() {
+            // 页面加载时获取好友请求
+            this.getHomeInfo()
         },
 		methods: {
+            initSocketInfo() {
+                // 连接好友socket
+                this.receiveFriendSocketMsg()
+                // 接收群组消息
+                this.receiveGroupSocketMsg()
+                // 离开聊天室
+                this.receiveLeaveChatRoomSocketMsg()
+            },
             onPullDownRefresh() {
-                this.friendsList = []
                 this.getStorages()
-                // 下拉刷新
-                this.getFriendsRequest()
-                this.getInfo()
-                setTimeout(() => {  
-                    uni.stopPullDownRefresh(); // 停止下拉刷新动画
-                }, 500)
+                this.getHomeInfo()
             },
             changeTime(time) {
                 return dateTime(time)
@@ -121,53 +115,45 @@
             },
             // 好友申请
             getFriendsRequest() {
-                this.requestData = 0
-                this.requestTime = ''
-                uni.request({
-					url: this.serverUrl + '/index/getFriend', // 替换为你的登录接口地址,
-					method: 'POST',
-					data: {
-						uid: this.uid,
-                        state: 1, // 2表示好友申请
-						token: this.token
-					},
-					success: (res) => {
-						const { data, code } = res.data
-						if (code === 200) {
-                            this.isNoone = false
-                            this.requestData = data.length; // 更新好友申请数量
-                            if (data.length > 0) {
-                                this.requestTime = data[0].lastTime
-                                for(let i = 0 ; i < data.length; i++) {
-                                    if (this.requestTime < data[i].lastTime) {
-                                        this.requestTime = data[i].lastTime; // 更新最后申请时间
+                return new Promise((resolve, reject) => {
+                    this.requestData = 0
+                    this.requestTime = ''
+                    uni.request({
+                        url: this.serverUrl + '/index/getFriend', // 替换为你的登录接口地址,
+                        method: 'POST',
+                        data: {
+                            uid: this.uid,
+                            state: 1, // 2表示好友申请
+                            token: this.token
+                        },
+                        success: (res) => {
+                            const { data, code } = res.data
+                            if (code === 200) {
+                                this.requestData = data.length; // 更新好友申请数量
+                                if (data.length > 0) {
+                                    this.requestTime = data[0].lastTime
+                                    for(let i = 0 ; i < data.length; i++) {
+                                        if (this.requestTime < data[i].lastTime) {
+                                            this.requestTime = data[i].lastTime; // 更新最后申请时间
+                                        }
                                     }
                                 }
+                                resolve()
                             } else {
-                                this.isNoone = true
+                                reject('好友申请存在问题')
                             }
-						} else {
-							uni.showToast({
-                                title: '获取好友请求失败',
-                                icon: 'none',
-                                duration: 2000
-                            });
-						}
-					},
-					fail: (err) => {
-						uni.showToast({
-							title: '获取好友请求失败',
-							icon: 'none',
-							duration: 2000
-						});
-					}
-				})
+                        },
+                        fail: (err) => {
+                            reject('好友申请失败：' + err)
+                        }
+                    })
+                })
             },
             // socket模块
             join(uid) {
                 this.socket.emit('login', uid)
             },
-            receiveSocketMsg() {
+            receiveFriendSocketMsg() {
                 this.socket.on('msg', (msg, fromid) => {
                     let nmsg = ''
                     if (msg.types === 0) {
@@ -191,7 +177,7 @@
                     }
                 })
             },
-            groupSocket() {
+            receiveGroupSocketMsg() {
                 this.socket.on('groupmsg', (msg, fromid, gid, name) => {
                     let nmsg = ''
                     if (msg.types === 0) {
@@ -220,7 +206,7 @@
                     }
                 })
             },
-            leaveChatRoom() {
+            receiveLeaveChatRoomSocketMsg() {
                 this.socket.on('leavechatroom', (uid, fid) => {
                     for(let i = 0 ; i < this.friendsList.length ; i++) {
                         if (this.friendsList[i].id === fid) {
@@ -231,33 +217,31 @@
                     }
                 })
             },
-            toSearch() {
-                uni.navigateTo({
-                    url: '../search/index'
-                });
-            },
-            toBuildGroup() {
-                uni.navigateTo({
-                    url: '../buildGroup/index'
-                });
-            },
-            goFriendRequest() {
-                uni.navigateTo({
-                    url: '../friendRequest/index'
-                });
-            },
-            getInfo() {
+            getHomeInfo() {
+                this.friendsList = []
+                this.isRefresh = true
                 // 页面加载获取好友
                 Promise.all([
+                    this.getFriendsRequest(),
                     this.getFriendsList(),
                     this.getGroup()
                 ]).then(() => {
-                    this.friendsList = this.friendsList.concat(this.groups)
-                    this.friendsList = sortByTip(this.friendsList, 'lastTime', 0)
+                    this.friendsList = this.friendsList.concat(this.groupsList)
+                    if (this.friendsList?.length > 0 || this.requestData > 0) {
+                        this.friendsList = sortByTip(this.friendsList, 'lastTime', 0)
+                        this.isNoFriendList = false
+                    } else {
+                        this.isNoFriendList = true
+                    }
                 }).catch((error) => {
-                    console.error('Error fetching data:', error);
+                    console.error('获取好友列表失败:', error);
+                    uni.showToast({
+                        title: '获取好友列表失败' + error,
+                        icon: 'none',
+                        duration: 2000
+                    });
                 }).finally(() => {
-                    this.isRefresh = true
+                    this.isRefresh = false
                 })   
             },
             // 好友列表
@@ -275,16 +259,16 @@
                             const { data, code } = res.data
                             if (code === 200) {
                                 if (data.length > 0) {
-                                    this.isNoone = false
                                     for(let i = 0; i < data.length ; i++) {
-                                        data[i].imgUrl = this.serverUrl + data[i].imgUrl
+                                        data[i].imgUrl = this.serverUrl + data[i].imgurl
                                         if (data[i].markname) {
                                             data[i].name = data[i].markname
                                         }
+                                        if (data[i].id != this.uid) {
+                                            data[i].message = data[i].msg
+                                        } 
                                         this.friendsList.push(data[i])
                                     }
-                                } else {
-                                    this.isNoone = true
                                 }
                                 resolve()
                             } else {
@@ -311,7 +295,7 @@
             getGroup() {
                 return new Promise((resolve, reject) => {
                     uni.request({
-                        url: this.serverUrl + '/index/getgroup', // 替换为你的登录接口地址,
+                        url: this.serverUrl + '/index/getGroup', // 替换为你的登录接口地址,
                         method: 'POST',
                         data: {
                             uid: this.uid,
@@ -322,18 +306,18 @@
                             if (code === 200) {
                                 if (data.length > 0) {
                                     for(let i = 0; i < data.length ; i++) {
-                                        data[i].imgUrl = this.serverUrl + data[i].imgUrl
+                                        data[i].imgUrl = this.serverUrl + data[i].imgurl
                                         if (data[i].markname) {
                                             data[i].name = data[i].markname
                                         }
-                                        this.groups.push(data[i])
+                                        if (data[i].id != this.uid) {
+                                            data[i].message = data[i].name + ': ' + data[i].msg
+                                        } 
+                                        this.groupsList.push(data[i])
                                         this.socket.emit('group', res[i].id)
                                     }
-                                    resolve()
-                                } else {
-                                    this.isNoone = true
-                                    resolve()
                                 }
+                                resolve()
                             } else {
                                 uni.showToast({
                                     title: '获取好友请求失败',
@@ -354,12 +338,27 @@
                     })
                 })
             },
+            toSearch() {
+                uni.navigateTo({
+                    url: '../search/index'
+                });
+            },
+            toBuildGroup() {
+                uni.navigateTo({
+                    url: '../buildGroup/index'
+                });
+            },
+            toFriendRequest() {
+                uni.navigateTo({
+                    url: '../friendRequest/index'
+                });
+            },
             toChatRoom(data) {
                 const { id, name, imgurl, type } = data || {}
                 uni.navigateTo({
                     url: '/pages/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&type=' + type
                 });
-            }
+            },
 		}
 	}
 </script>
@@ -367,22 +366,21 @@
 <style lang="scss">
     @import "../../commons/css/mycss.scss"; // 引入公共样式
     .content {
+        height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
-        justify-content: center;
         background-color: #f5f5f5; // 添加背景色
-        padding: 0 20rpx; // 增加左右内边距以适配小屏幕
+        padding: 200rpx 20rpx; // 增加左右内边距以适配小屏幕
     }
 
     .main {
-        margin: 240rpx 20rpx 0; // 调整顶部和左右间距
+        margin: 0rpx 20rpx 0; // 调整顶部和左右间距
         width: 100%;
     }
 
     .refresh {
         text-align: center;
-        padding-top: 480rpx;
         image {
             width: 32rpx;
             height: 32rpx;
@@ -397,13 +395,12 @@
     }
     .noone {
         text-align: center;
-        padding-top: 480rpx;
         image {
             height:250rpx;
             width: 150rpx;
         }
-        .no-title {
-            padding-top: 32rpx 0;
+        .no-friends {
+            padding: 32rpx 0;
             font-size: $uni-font-size-base;
             color: rgba(39, 40, 50, 0.4);
             line-height: 40rpx;
@@ -411,6 +408,7 @@
         .search-bt {
             display: inline-block;
             width: 240rpx;
+            line-height: 96rpx;
             height: 96rpx;
             background: $uni-color-primary;
             box-shadow: 0px 52rpx 36rpx -32rpx rgba(255,255,49, 0.4);

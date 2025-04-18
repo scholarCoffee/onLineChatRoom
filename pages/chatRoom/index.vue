@@ -103,7 +103,7 @@ export default {
             animationData: '',
             nowpage: 1,
             pagesize: 10,
-            loading: '',
+            loadingTimers: '',
             isLoading: true,
             scrollAnimation: true,
             beginLoading: true
@@ -118,10 +118,12 @@ export default {
         this.fname = name
         this.type = type
         this.fimgurl = this.serverUrl + imgurl
-        this.getStorages()
-        this.getMsg()
         this.receiveSocketMsg()
         this.groupSocketMsg()
+    },
+    onShow() {
+        this.getStorages()
+        this.getMsg()
     },
     methods: {
         dateTime,
@@ -168,7 +170,7 @@ export default {
                 animation.scale(2,2).rotate(45).step()
                 this.animationData = animation.export()
                 let i = 1;
-                this.loading = setInterval(function(){
+                this.loadingTimers = setInterval(function(){
                     animation.translate(i*30).step()
                     this.animationData = animation.export()
                     i++
@@ -245,7 +247,7 @@ export default {
                                 }
                             });     
                         }, 100);
-                        clearInterval(this.loading)
+                        clearInterval(this.loadingTimers)
                         this.isLoading = true
                         this.beginLoading = true
                     } else {
