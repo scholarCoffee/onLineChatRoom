@@ -52,6 +52,7 @@
                 tempFilePaths: '../../static/1.png',
                 selectedNo: 0,
                 name: '',
+                groupUserInfo: []
             }
         },
         onLoad() {
@@ -80,63 +81,63 @@
             },
             chooseImage() {
                 uni.chooseImage({
-                count: 1,
-                sizeType: ['original', 'compressed'],
-                sourceType: ['album', 'camera'],
-                success: (res) => {
-                    this.tempFilePaths = res.tempFilePaths.shift();
-                    // 显示加载提示
-                    uni.showLoading({
-                        title: '正在上传图片...'
-                    });
-                    uni.uploadFile({
-                        url: this.serverUrl + 'files/upload', // 替换为你的上传接口地址
-                        filePath: this.tempFilePaths,
-                        name: 'file',
-                        fileType: 'image',
-                        formData: {
-                            url: 'user',
-                            name: this.uid + new Date().getTime(),
-                            token: this.token
-                        },
-                        success: (res) => {
-                            try {
-                                const backImg = JSON.parse(res.data);
-                                this.gimgurl = backImg;
+                    count: 1,
+                    sizeType: ['original', 'compressed'],
+                    sourceType: ['album', 'camera'],
+                    success: (res) => {
+                        this.tempFilePaths = res.tempFilePaths.shift();
+                        // 显示加载提示
+                        uni.showLoading({
+                            title: '正在上传图片...'
+                        });
+                        uni.uploadFile({
+                            url: this.serverUrl + '/files/upload', // 替换为你的上传接口地址
+                            filePath: this.tempFilePaths,
+                            name: 'file',
+                            fileType: 'image',
+                            formData: {
+                                url: 'user',
+                                name: this.uid + new Date().getTime(),
+                                token: this.token
+                            },
+                            success: (res) => {
+                                try {
+                                    const backImg = JSON.parse(res.data);
+                                    this.gimgurl = backImg.data
+                                    uni.showToast({
+                                        title: '头像修改成功',
+                                        icon: 'success',
+                                        duration: 2000
+                                    });
+                                } catch (error) {
+                                    uni.showToast({
+                                        title: '解析返回数据失败',
+                                        icon: 'none',
+                                        duration: 2000
+                                    });
+                                }
+                            },
+                            fail: (err) => {
                                 uni.showToast({
-                                    title: '头像修改成功',
-                                    icon: 'success',
-                                    duration: 2000
-                                });
-                            } catch (error) {
-                                uni.showToast({
-                                    title: '解析返回数据失败',
+                                    title: '头像修改失败',
                                     icon: 'none',
                                     duration: 2000
                                 });
+                            },
+                            complete: () => {
+                                // 隐藏加载提示
+                                uni.hideLoading();
                             }
-                        },
-                        fail: (err) => {
-                            uni.showToast({
-                                title: '头像修改失败',
-                                icon: 'none',
-                                duration: 2000
-                            });
-                        },
-                        complete: () => {
-                            // 隐藏加载提示
-                            uni.hideLoading();
-                        }
-                    });
-                },
-                fail: (err) => {
-                    uni.showToast({
-                        title: '选择图片失败',
-                        icon: 'none',
-                        duration: 2000
-                    });
-                }
-});
+                        });
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '选择图片失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                });
             },
             // 获取已选择个数
             onSelectNumber() {
@@ -203,7 +204,7 @@
                 if (this.selectedNo > 0 && this.name.length > 0) {
                     for(let i = 0 ;i < this.friendsList.length; i++) {
                         if (this.friendsList[i].selected) {
-                            this.user.push(this.friendsList[i].id)
+                            this.groupUserInfo.push(this.friendsList[i].id)
                         }
                     }
                     uni.request({
@@ -214,7 +215,7 @@
                             token: this.token,
                             name: this.name,
                             imgurl: this.gimgurl,
-                            user: this.user
+                            groupUserInfo: this.groupUserInfo
                         },
                         success: (res) => {
                             const { data, code } = res.data

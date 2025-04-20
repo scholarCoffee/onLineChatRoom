@@ -5,12 +5,12 @@
                 <image src="/static/user/back.png" class="back-img"></image>
             </view>
             <view class="top-bar-center">
-                <view class="top-bar-name">{{ fname }}</view>
+                <view class="top-bar-name">{{ name }}</view>
             </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
                 <view class="group-img" v-if="chatType === 1" @tap="goGroupHome">
-                    <image :src="fimgurl"></image>
+                    <image :src="imgurl"></image>
                 </view>
             </view>
         </view>
@@ -87,10 +87,10 @@ const innerAudioContext = uni.createInnerAudioContext()
 export default {
     data() {
         return {
-            uid: '',
-            fid: '',
-            fname: '',
-            fimgurl: '',
+            uid: '', // 当前用户id
+            id: '', // 当前id[一对一好友id或者群id]
+            name: '', // 名称[好友名称或者群名称]
+            imgurl: '',
             chatType: 0, // 0-好友，1-群
             uimgurl: '',
             token: '',
@@ -114,10 +114,10 @@ export default {
     },
     onLoad(e) {
         const { id, name, chatType, imgurl } = e || {}
-        this.fid = id
-        this.fname = name
-        this.chatType = chatType || 0
-        this.fimgurl = this.serverUrl + imgurl
+        this.id = id
+        this.name = name
+        this.chatType = Number(chatType)
+        this.imgurl = this.serverUrl + imgurl
         if (this.chatType == 0) {
             this.receiveSelfSocketMsg()
         } else {
@@ -150,7 +150,7 @@ export default {
             } 
         },
         backOne() {
-            this.socket.emit('leaveChatRoomServer', this.uid, this.fid)
+            this.socket.emit('leaveChatRoomServer', this.uid, this.id)
             uni.navigateBack({
                 delta: 1
             });
@@ -162,7 +162,7 @@ export default {
         },
         goGroupHome() {
             uni.navigateTo({
-                url: '../grouphome/index?gid=' + this.fid + '&gimg=' + this.fimgurl
+                url: '../grouphome/index?gid=' + this.id + '&gimg=' + this.imgurl
             })
         },
         nextPage() {
@@ -192,6 +192,93 @@ export default {
             }
 
         },
+        getGroupMsg() {
+            // 获取消息列表
+            uni.request({
+                url: this.serverUrl + '/chat/getGroupMsg', // 替换为你的登录接口地址,
+                method: 'POST',
+                data: {
+                    uid: this.uid,
+                    gid: this.id,
+                    nowPage: this.nowpage,
+                    pageSize: this.pagesize,
+                    state: 1,
+                    token: this.token
+                },
+                success: (res) => {
+                    const { data, code } = res.data
+                    if (code === 200) {
+                        // 反转消息列表
+                        data.reverse();
+                        if (data.length > 0) {
+                            let oldTime = data[0].time
+                            let msgArr = []
+                            for (var i = 0; i < data.length; i++) {
+                                data[i].imgurl = this.serverUrl + data[i].imgurl;
+                                if (i < data.length) {
+                                    let t = spaceTime(oldTime, data[i].time);
+                                    if (t) {
+                                        oldTime = t
+                                    }
+                                    data[i].time = t;
+                                    if (this.nowPage === 1) {
+                                        if (data[i].time > this.oldTime) {
+                                            this.oldTime = data[i].time
+                                        }
+                                    }
+                                    if(data[i].types === 1) {
+                                        data[i].message =  this.serverUrl + msg[i].message;
+                                        msgArr.push(data[i].message)
+                                    }
+                                    if(data[i].types === 3) {
+                                        data[i].message =  JSON.parse(data[i].message)
+                                        msgArr.push(data[i].message)
+                                    }
+                                } else {
+                                    data[i].time = '';
+                                }
+                            }
+                            this.msg = data.concat(this.msg);
+                            this.imgMsg = this.imgMsg.concat(msgArr)
+                        }
+                        if (data.length == 10) {
+                            this.nowpage++ 
+                        } else {
+                            this.nowpage = 1
+                        }
+                        // 滚动到最底部
+                        setTimeout(() => {
+                            this.scrollToView = ''
+                            this.scrollAnimation = false
+                            this.$nextTick(() => {
+                                if (this.msg?.length > 0) {
+                                    const lastItem = this.msg[data.length -1].id;
+                                    if (lastItem) {
+                                        this.scrollToView = 'msg' + lastItem.id;
+                                    }   
+                                }
+                            });     
+                        }, 100);
+                        clearInterval(this.loadingTimers)
+                        this.isLoading = true
+                        this.beginLoading = true
+                    } else {
+                        uni.showToast({
+                            title: '获取聊天信息失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                },
+                fail: (err) => {
+                    uni.showToast({
+                        title: '获取聊天信息失败',
+                        icon: 'none',
+                        duration: 2000
+                    });
+                }
+            })   
+        },
         getSelfMsg() {
             // 获取消息列表
             uni.request({
@@ -199,7 +286,7 @@ export default {
                 method: 'POST',
                 data: {
                     uid: this.uid,
-                    fid: this.fid,
+                    fid: this.id,
                     nowPage: this.nowpage,
                     pageSize: this.pagesize,
                     state: 1, // 2表示好友申请
@@ -244,7 +331,7 @@ export default {
                         if (data.length == 10) {
                             this.nowpage++ 
                         } else {
-                            this.nowpage = -1
+                            this.nowpage = 1
                         }
                         // 滚动到最底部
                         setTimeout(() => {
@@ -431,7 +518,7 @@ export default {
         // socekt聊天接受数据
         receiveSelfSocketMsg() {
             this.socket.on('msgServer', (msg, fromid, tip) => {
-                if (fromid == this.fid && tip == 0) {
+                if (fromid == this.id && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
                     let len = this.msg.length
@@ -449,7 +536,7 @@ export default {
                         message: msg.message,
                         types: msg.types, // 假设 0 表示文本消息
                         time: nowTime,
-                        imgurl: this.fimgurl, // 假设当前用户头像
+                        imgurl: this.imgurl, // 假设当前用户头像
                         id: len
                     }
                     // 添加新消息到消息列表
@@ -465,7 +552,7 @@ export default {
         },
         receivceGroupSocketMsg() {
             this.socket.on('groupMsgFront', (msg, fromid, gid, name, img, tip) => {
-                if (gid == this.fid && tip == 0) {
+                if (gid == this.id && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
                     let len = this.msg.length
@@ -500,9 +587,9 @@ export default {
         // 聊天数据发送给后端
         sendSocket(e) {
             if(this.chatType == 0) {
-                this.socket.emit('msgServer', e, this.uid, this.fid)
+                this.socket.emit('msgServer', e, this.uid, this.id)
             } else {
-                this.socket.emit('groupMsgServer', e, this.uid, this.fid, this.uname, this.uimgurl)
+                this.socket.emit('groupMsgServer', e, this.uid, this.id, this.uname, this.uimgurl)
             }
         },
         currentHeight(value) {

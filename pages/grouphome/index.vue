@@ -1,16 +1,5 @@
 <template>
     <view>
-        <view class="top-bar">
-            <view class="top-bar-left" @tap="navigateBack">
-                <image src="../../static/user/backWhite.png" class="back-img"></image>
-            </view>
-            <view class="top-bar-center"></view>
-            <view class="top-bar-right">
-                <view class="more-img">
-                    <image src="../../static/user/moreWhite.png" class="more-img"></image>
-                </view>
-            </view>
-        </view>
         <view class="top-bar bgbar" :animation="animationData1">
             <view class="top-bar-left" @tap="navigateBack">
                 <image src="../../static/user/back.png" class="back-img"></image>
@@ -23,83 +12,80 @@
             </view>
         </view>
         <view class="bg">
-            <image :src="gimg" class="bg-img" mode="aspectFill"></image>
+            <image :src="groupInfo.imgurl" class="bg-img" mode="aspectFill"></image>
         </view>
         <view class="main">
             <view class="main-inner">
                 <view class="inf">
-                    <view class="name">今天很好</view>
-                    <view class="time">2022/11/1</view>
-                    <view class="notice">特别的爱给特别的你</view>
+                    <view class="name">{{ groupInfo.name }}</view>
+                    <view class="time">{{ formatDate(groupInfo.time) }}</view>
+                    <view class="notice">{{ groupInfo.notice }}</view>
                 </view>
                 <view class="member">
                     <view class="top">
                         <view class="title">群成员</view>
-                        <view class="more">管理群成员</view>
-                        <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
+                        <view class="more" v-if="isGroupMaster">管理群成员</view>
                     </view>
                     <view class="member-ls">
-                        <view class="member-li" v-for="(item, index) in groupmember" :key="index">
-                            <view class="imgs">
-                                <image src="../../static/delete.png" mode="aspectFill" class="delete-img"></image>
+                        <view class="member-li" v-for="(item, index) in groupMemberList" :key="index">
+                            <view class="imgs" @tap="deleteGroupMember(item)">
+                                <image src="../../static/delete.png" mode="aspectFill" class="delete-img" v-if="isGroupMaster && item.uid != groupInfo.uid "></image>
                                 <image :src="item.imgurl" mode="aspectFill" class="user-img"></image>
                             </view>
                             <view class="name">{{ item.name }}</view>
                         </view>
                         <view class="member-li">
-                            <view class="imgs">
+                            <view class="imgs" v-if="isGroupMaster" @tap="addGroupMember">
                                 <image src="../../static/add.png" mode="aspectFill" class="user-add"></image>
                             </view>
-                            <view class="name">邀请</view>
                         </view>
                     </view>
                     <view class="clear"></view>
                 </view>
                 <view class="mitem">
-                    <view class="row" @tap="modify('gname', '群名称', '今天天气真好')">
+                    <view class="row" @tap="modify('name', '群名称', groupInfo.name)">
                         <view class="title">群名称</view>
-                        <view class="cont">今天天气真好</view>
-                        <view class="more">
-                            <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
+                        <view class="cont">{{ groupInfo.name }}</view>
+                        <view class="more" v-if="isGroupMaster">
+                            <image src="../../static/user/arrow-right.png" mode="aspectFill" class="more-img"></image>
                         </view>
                     </view>
                     <view class="row">
                         <view class="title">群头像</view>
                         <view class="cont" @tap="chooseImage">
-                            <image :src="gimg" class="bg-img" mode="aspectFill"></image>
-                        </view>
-                        <view class="more">
-                            <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
+                            <image :src="groupInfo.imgurl" class="bg-inner-img" mode="aspectFill"></image>
                         </view>
                     </view>
-                    <view class="row" @tap="modify('gnotice ', '群公告', '今天天气真好')">
+                    <view class="row" @tap="modify('notice', '群公告', groupInfo.notice)">
                         <view class="title">群公告</view>
-                        <view class="cont">今天天气真好</view>
-                        <view class="more">
-                            <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
+                        <view class="cont">{{ groupInfo.notice }}</view>
+                        <view class="more" v-if="isGroupMaster">
+                            <image src="../../static/user/arrow-right.png" mode="aspectFill" class="more-img"></image>
                         </view>
                     </view>
-                    <view class="row" @tap="modify('giname', '群内名', '今天天气真好')">
+                    <!-- <view class="row" @tap="modify('markname', '群内名', '今天天气真好')">
                         <view class="title">群内名</view>
-                        <view class="cont">1111</view>
+                        <view class="cont">{{ groupInfo.markname }}</view>
                         <view class="more">
-                            <image src="../../static/user/more.png" mode="aspectFill" class="more-img"></image>
+                            <image src="../../static/user/arrow-right.png" mode="aspectFill" class="more-img"></image>
                         </view>
-                    </view>
-                    <view class="row">
+                    </view> -->
+                    <!-- <view class="row">
                         <view class="title">消息免打扰</view>
                         <view class="cont"></view>
                         <view class="more">
                             <switch :checked="swit" @change="switchChange" color="rgba(255, 288, 49, 1)" class="switch"/>
+                            <image src="../../static/user/arrow-right.png" mode="aspectFill" class="more-img"></image>
                         </view>
-                    </view>
+                    </view> -->
                 </view>
-                <view class="bt2">解散群</view>
+                <view class="bt2" @tap="onDealGroup">{{ isGroupMaster ? '解散群' : '退出群'  }}</view>
             </view>
         </view>
         <view class="modify" :style="{ bottom:-widHeight + 'px', 'display': isModify ? 'block' : 'none'  }" :animation="animation">
             <view class="modify-header">
                 <view class="close" @tap="modify">取消</view>
+                <view class="title">{{ modifyTitle }}</view>
                 <view class="define" @tap="modifySubmit">确定</view>
             </view>
             <view class="modify-main">
@@ -109,17 +95,26 @@
     </view>
 </template>
 <script>
-    import { getFriendsList } from '../../commons/js/datas'
+    import { formatDate } from '../../commons/js/utils.js'
     export default {
         data() {
             return {
-                gid: '',
-                gimg: '',
-                swit: false,
-                groupmember: [],
+                formatDate,
+                uid: '',
+                token: '',
+                groupMemberList: [],
+                groupInfo: {
+                    id: '', // 群ID
+                    uid: '', // 群主ID
+                    name: '', // 群名称
+                    imgurl: '', // 群头像
+                    notice: '', // 群公告
+                    markname: '', // 群内名
+                },
                 top: 0,
                 animationData1: {},
                 modifyTitle: '',
+                oldData: '', // 原数据
                 data: '修改的内容', // 签名内容
                 type: '', // 修改类型
                 animation: {}, // 动画对象
@@ -127,39 +122,59 @@
                 widHeight: 1000, // 组件高度
             }
         },
+        computed: {
+            isGroupMaster() {
+                return this.groupInfo.uid === this.uid
+            },
+        },
         onLoad(e) {
             const { gid, gimg } = e || {}
-            this.gid = gid || ''
-            this.gimg = gimg || ''
-            this.getMemberList()
-            
+            this.groupInfo.id = gid || ''
+            this.groupInfo.imgurl = gimg || ''
+            // 监听群成员变更
+            this.listenGroupMemberChange()
+        },
+        onShow() {
+            // 获取登录信息
+            this.getStorages()
+            this.getGroupMemberList()
         },
         onReady() {
             this.getTop()
         },
-        method: {
+        onPageScroll(e) {
+            this.getTop()
+            this.addAnimat()
+        },
+        methods: {
+            getStorages() {
+                // 获取本地存储的用户信息
+                const userInfo = uni.getStorageSync('userInfo');
+                if (userInfo) {
+                    const { userId, token } = userInfo;
+                    this.uid = userId; // 用户ID
+                    this.token = token; // 用户token
+                } else {
+                    uni.navigateTo({
+                        url: '/pages/signIn/index'
+                    });
+                } 
+            },
             navigateBack() {
                 uni.navigateTo({
                     url: '../index/index'
                 })
             },
-            switchChange(e) {
-                this.swit = e.detail.value
-                uni.showToast({
-                    title: this.swit ? '已开启免打扰' : '已关闭免打扰',
-                    icon: 'none',
-                    duration: 2000
-                })
-            },
             chooseImage() {
+                if (!this.isGroupMaster) return
                 uni.chooseImage({
                     count: 1,
                     sizeType: ['original', 'compressed'],
                     sourceType: ['album', 'camera'],
                     success: (res) => {
-                         this.gimg = res.tempFilePaths[0]
+                         this.groupInfo.imgurl = res.tempFilePaths[0]
                          uni.uploadFile({
-                            url: this.serverUrl + 'files/upload', // 替换为你的上传接口地址
+                            url: this.serverUrl + '/files/upload', // 替换为你的上传接口地址
                             filePath: this.tempFilePaths,
                             name: 'file',
                             fileType: 'image',
@@ -182,17 +197,57 @@
                     }
                 })
             },
-            getMemberList() {
-                let members = getFriendsList(this.gid)
-                for (let i = 0; i < members.length; i++) {
-                    members[i].imgurl = '../../static/' + members[i].imgurl
-                    this.groupmember.push(member)
-                }
+            getGroupMemberList() {
+                this.groupMemberList = []
+                // 获取群成员列表
+                uni.request({
+                    url: this.serverUrl + '/group/getGroupDetail',
+                    method: 'POST',
+                    data: {
+                        gid: this.groupInfo.id,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { code, data } = res.data
+                        if (code == 200) {
+                            const { groupInfo, groupMemberList } = data
+                            this.groupInfo.name = groupInfo.name
+                            this.groupInfo.imgurl = this.serverUrl + groupInfo.imgurl
+                            this.groupInfo.notice = groupInfo.notice
+                            this.groupInfo.markname = groupInfo.markname
+                            this.groupInfo.time = groupInfo.time
+                            this.groupInfo.uid = groupInfo.userID
+                            this.groupMemberList = groupMemberList.map(item => {
+                                return {
+                                    ...item,
+                                    imgurl: this.serverUrl + item.imgurl
+                                }
+                            })
+                            // 群主放在第一个
+                            this.groupMemberList.sort((a, b) => {
+                                return a.uid === this.groupInfo.uid ? -1 : 1
+                            })
+                        } else {
+                            uni.showToast({
+                                title: '获取群成员失败',
+                                icon: 'none',
+                                duration: 2000
+                            });
+                        }
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '获取群成员失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
             },
             getTop() {
                 const query = uni.createSelectorQuery().in(this)
                 query.select('.main-inner').boundingClientRect((rect) => {
-                    this.top = data.top
+                    this.top = rect.top
                 }).exec()
             },
             // 顶部切换动画
@@ -201,7 +256,7 @@
                     duration: 300,
                     timingFunction: 'ease'
                 })
-                if (this.top < 60) {
+                if (this.top > 180) {
                     animation.opacity(1).step()
                 } else {
                     animation.opacity(0).step()
@@ -209,6 +264,7 @@
                 this.animationData1 = animation.export()
             },
             modify(type, title, data) {
+                if (!this.isGroupMaster) return 
                 this.type = type
                 this.modifyTitle = title
                 this.oldData = data
@@ -227,32 +283,110 @@
             },
             modifySubmit() {
                 if (this.data.length > 0 && this.data != this.oldData) {
-                    if (this.type == 'markname') {
-                        this.updateFriendName()
-                        this.user.markname = this.data
-                    } else if (this.type == 'email') {
-                        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 邮箱正则表达式
-                        if (this.user.email.length > 0 && emailPattern.test(this.user.email)) {
-                            this.update(this.data, this.type)
-                        } else {
-                            uni.showToast({
-                                title: '邮箱格式不正确',
-                                icon: 'none',
-                                duration: 2000
-                            });
-                        }	
-                    } else if (this.type == 'pwd') {
-                        this.update(this.data, this.type)
-                    } else {
-                        this.update(this.data, this.type)
-                    }
+                    this.update(this.data, this.type)
                 }
                 this.modify()
             },
-        },
-        onPageScroll() {
-            this.getTop()
-            this.addAnimat()
+            update(value, type) {
+                uni.request({
+                    url: this.serverUrl + '/group/updateGroup', // 替换为你的登录接口地址,
+                    method: 'POST',
+                    data: {
+                        gid: this.groupInfo.id,
+                        value: value,
+                        type: type,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { code, data } = res.data
+                        if (code === 200) { 
+                            this.groupInfo[type] = data[type]
+                        }
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '获取群详情失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
+            },
+            listenGroupMemberChange() {
+                
+            },
+            deleteGroupMember(item) {
+                uni.showModal({
+                    title: '删除群成员',
+                    content: '确定要删除该成员吗？',
+                    success: (res) => {
+                        if (res.confirm) {
+                            this.dealGroup('remove', item)
+                        }
+                    }
+                })
+            },
+            addGroupMember() {
+                uni.navigateTo({
+                    url: '../search/index?gid=' + this.groupInfo.id
+                })
+            },
+            onDealGroup() {
+                if (this.isGroupMaster) {
+                    uni.showModal({
+                        title: '解散群',
+                        content: '确定要解散该群吗？',
+                        success: (res) => {
+                            if (res.confirm) {
+                                this.dealGroup('delete')
+                            }
+                        }
+                    })
+                } else {
+                    uni.showModal({
+                        title: '退出群',
+                        content: '确定要退出该群吗？',
+                        success: (res) => {
+                            if (res.confirm) {
+                                const item = this.groupMemberList.find(item => item.uid === this.uid)
+                                this.dealGroup('exit', item)
+                            }
+                        }
+                    })
+                }
+            },
+            dealGroup(type, item) {
+                uni.request({
+                    url: this.serverUrl + '/group/deleteGroup', // 替换为你的登录接口地址,
+                    method: 'POST',
+                    data: {
+                        gid: this.groupInfo.id,
+                        type: type,
+                        uid: item ? item.uid : this.uid,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { code } = res.data
+                        if (code === 200) {
+                            if (type === 'remove') {
+                                this.getGroupMemberList()
+                            } else {
+                                // 退回到首页
+                                uni.navigateTo({
+                                    url: '../index/index'
+                                })
+                            }
+                        }
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '操作失败',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
+            },
         }
     }
 </script>
@@ -261,9 +395,6 @@
     .clear {
         opacity: 0;
         clear: both;
-    }
-    .bgbar {
-        background-color: #fff;
     }
     .bg {
         width: 100%;
@@ -279,10 +410,10 @@
         }
     }
     .main {
-        padding-top: 360rpx;
+        padding-top: 400rpx;
         .main-inner {
             width: 100%;
-            min-height: 600rpx;
+            min-height: 700rpx;
             background-color: #fff;
             border-radius: 40rpx 40rpx 0 0;
         }
@@ -341,7 +472,7 @@
                 }
                 .more-img {
                     width: 16rpx;
-                    height: 28rpx;
+                    height: 16rpx;
                 }
 
             }
@@ -427,6 +558,11 @@
                 height: 46rpx;
                 border-radius: $uni-border-radius-base;
             }
+            .bg-inner-img {
+                width: 98rpx;
+                height: 98rpx;
+                border-radius: $uni-border-radius-base;
+            }
             .cont {
                 flex: auto;
                 align-items: center;
@@ -450,8 +586,8 @@
                 display: flex;
                 align-items: center;
                 image {
-                    width: 80rpx;
-                    height: 28rpx
+                    width: 40rpx;
+                    height: 40rpx
                 }
             }
             .switch {
@@ -459,7 +595,6 @@
             }
         }
         .bt2 {
-            margin: 36rpx 0;
             text-align: center;
             font-size: $uni-font-size-lg;
             color: $uni-color-warning;
@@ -532,5 +667,12 @@
                 line-height: 44rpx;
             }
         }
+    }
+    .top-bar {
+        transition: transform 0.3s ease-in-out; // 添加平滑过渡效果
+        transform: translateY(0); // 默认显示
+    }
+    .top-bar.hidden {
+        transform: translateY(-100%); // 隐藏时向上移动
     }
 </style>

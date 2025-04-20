@@ -360,14 +360,13 @@
                 uni.chooseImage({
                     count: 1,
                     sizeType: ['original', 'compressed'],
-                    sourceType: ['album', 'camera'],
+                    sourceType: ['album'],
                     success: (res) => {
-                         this.tempFilePaths = res.tempFilePaths.shift()
+                         this.tempFilePaths = res.tempFilePaths.shift() 
                          uni.uploadFile({
-                            url: this.serverUrl + 'files/upload', // 替换为你的上传接口地址
+                            url: this.serverUrl + '/files/upload', // 替换为你的上传接口地址
                             filePath: this.tempFilePaths,
                             name: 'file',
-                            fileType: 'image',
                             formData: {
                                 url: 'user',
                                 name: this.uid,
@@ -385,7 +384,7 @@
                             },
                             fail: (err) => {
                                 uni.showToast({
-                                    title: '头像修改失败',
+                                    title: '头像修改失败:' + err.errMsg,
                                     icon: 'none',
                                     duration: 2000
                                 });

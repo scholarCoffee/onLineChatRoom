@@ -40,7 +40,7 @@
                     <view class="friends-list-l">
                         <text class="tip" v-if="friend.tip > 0">{{ friend.tip }}</text>
                         <image :src="friend.imgUrl" class="avatar"></image>
-                        <view class="groupm" v-if="friend.type == 1"></view>
+                        <view class="groupm" v-if="friend.chatType == 1"></view>
                     </view>
                     <view class="friends-list-r">
                         <view class="top">
@@ -73,12 +73,12 @@
 			}
 		},
         onLoad() {
-            // 获取登录信息
-            this.getStorages()
             this.join(this.uid)
             this.initSocketInfo()
         },
         onShow() {
+            // 获取登录信息
+            this.getStorages()
             // 页面加载时获取好友请求
             this.getHomeInfo()
         },
@@ -219,6 +219,7 @@
             },
             getHomeInfo() {
                 this.friendsList = []
+                this.groupsList = []
                 this.isRefresh = true
                 // 页面加载获取好友
                 Promise.all([
@@ -226,7 +227,7 @@
                     this.getFriendsList(),
                     this.getGroup()
                 ]).then(() => {
-                    this.friendsList = this.friendsList.concat(this.groupsList)
+                    this.friendsList = this.groupsList.concat(this.friendsList)
                     if (this.friendsList?.length > 0 || this.requestData > 0) {
                         this.friendsList = sortByTip(this.friendsList, 'lastTime', 0)
                         this.isNoFriendList = false
@@ -234,9 +235,8 @@
                         this.isNoFriendList = true
                     }
                 }).catch((error) => {
-                    console.error('获取好友列表失败:', error);
                     uni.showToast({
-                        title: '获取好友列表失败' + error,
+                        title: error,
                         icon: 'none',
                         duration: 2000
                     });
@@ -253,7 +253,7 @@
                         method: 'POST',
                         data: {
                             uid: this.uid,
-                            state: 0, // 2表示好友申请
+                            state: 0, 
                             token: this.token
                         },
                         success: (res) => {
@@ -300,6 +300,7 @@
                         method: 'POST',
                         data: {
                             uid: this.uid,
+                            state: 0, 
                             token: this.token
                         },
                         success: (res) => {
@@ -311,30 +312,20 @@
                                         if (data[i].markname) {
                                             data[i].name = data[i].markname
                                         }
-                                        if (data[i].id != this.uid) {
+                                        if (data[i].id != this.uid && data[i].msg) {
                                             data[i].message = data[i].name + ': ' + data[i].msg
                                         } 
                                         this.groupsList.push(data[i])
-                                        this.socket.emit('groupServer', res[i].id)
+                                        this.socket.emit('groupServer', data[i].id)
                                     }
                                 }
                                 resolve()
                             } else {
-                                uni.showToast({
-                                    title: '获取好友请求失败',
-                                    icon: 'none',
-                                    duration: 2000
-                                });
-                                reject(new Error('获取好友请求失败'));
+                                reject('获取创建群消息失败');
                             }
                         },
                         fail: (err) => {
-                            uni.showToast({
-                                title: '获取好友请求失败',
-                                icon: 'none',
-                                duration: 2000
-                            });
-                            reject(err);
+                            reject('获取创建群消息失败' + err);
                         }
                     })
                 })
@@ -357,7 +348,7 @@
             toChatRoom(data) {
                 const { id, name, imgurl, chatType } = data || {}
                 uni.navigateTo({
-                    url: '/pages/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&type=' + chatType
+                    url: '/pages/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&chatType=' + chatType
                 });
             },
 		}

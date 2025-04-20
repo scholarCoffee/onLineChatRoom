@@ -3,7 +3,7 @@
         <view class="top-bar">
             <view class="search-div">
                 <image src="../../static/user/back.png" class="search-img" @tap="back"></image>
-                <input type="text" placeholder="搜索用户/群" class="search" placeholder-style="color:#999;font-weight:400;" @input="onInputUser">
+                <input type="text" placeholder="搜索用户" class="search" placeholder-style="color:#999;font-weight:400;" @input="onInputUser">
             </view>            
 		</view>
         <view class="main">
@@ -17,6 +17,7 @@
                         <view class="name" v-html="item.names"></view>
                         <view class="email" v-html="item.emails"></view>
                     </view>
+                    <view class="right-bt add" v-if="item.tip === 2" @tap="onAddGroup(item._id)">邀请群</view> 
                     <view class="right-bt send" v-if="item.tip === 1" @tap="toChatRoom(item)">发消息</view>
                     <view class="right-bt add" v-if="item.tip === 0" @tap="onAddFriend(item._id)">加好友</view>
                 </view>
@@ -41,6 +42,7 @@
 		data() {
 			return {
                 qryUserInfo: [], // 搜索用户
+                gid: '', // 群ID
                 uid: '', // 用户ID
                 fid: '', // 好友ID
                 userName: '', // 用户名
@@ -51,8 +53,9 @@
                 widHeight: 0, // 组件高度
 			}
 		},
-        onLoad() {
+        onLoad(e) {
             // 页面加载时获取好友列表
+            this.gid = e.gid || ''
             this.getStorages()
         },
         onReady() {
@@ -101,7 +104,11 @@
                         const result = res.data.data || []
                         if (code === 200 ) { 
                             for(let i = 0; i < result.length ; i++) {
-                                this.isFriend(result[i], inputVal)
+                                if (this.gid !== '') {
+                                    this.isGroup(result[i], inputVal)
+                                } else {
+                                    this.isFriend(result[i], inputVal)
+                                }
                             }
                         } else if (code === 300) {
                             uni.navigateTo({
@@ -124,13 +131,58 @@
                     }
                 })
             },
+            // 判断是否是群成员
+            isGroup(item, inputVal) {
+                let tip = 3
+                const exp = new RegExp(inputVal, 'g');
+                if(item._id === this.uid) {
+                    tip = 3
+                    item.tip = tip
+                    item.imgurl = this.serverUrl + item.imgurl
+                    item.names = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                    item.emails = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                    this.qryUserInfo.push(item)
+                    return
+                }
+                // 搜索用户
+                uni.request({
+                    url: this.serverUrl + '/search/isInGroupByFriend', // 替换为你的登录接口地址,
+                    method: 'POST',
+                    data: {
+                        uid: this.uid,
+                        fid: item._id,
+                        gid: this.gid,
+                        token: this.token
+                    },
+                    success: (res) => {
+                        const { code } = res.data
+                        if (code === 200) {
+                           tip = 2
+                           item.tip = tip
+                           item.id = item._id
+                           item.type = 1
+                           item.imgurl = this.serverUrl + item.imgurl
+                           item.names = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                           item.emails = item.email.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
+                           this.qryUserInfo.push(item)
+                        }
+                    },
+                    fail: (err) => {
+                        uni.showToast({
+                            title: '没有搜索到相关用户',
+                            icon: 'none',
+                            duration: 2000
+                        });
+                    }
+                })
+            },
             // 判断是否是好友
             isFriend(item, inputVal) {
                 console.log(item)
                 let tip = 0
                 const exp = new RegExp(inputVal, 'g');
                 if(item._id === this.uid) {
-                    tip = 2
+                    tip = 3
                     item.tip = tip
                     item.imgurl = this.serverUrl + item.imgurl
                     item.names = item.name.replace(exp, "<span style='color: #4A4AFF;'>" + inputVal + "</span>")
@@ -166,6 +218,48 @@
                             icon: 'none',
                             duration: 2000
                         });
+                    }
+                })
+            },
+            onAddGroup(id) {
+                // 提示确定
+                uni.showModal({
+                    title: '提示',
+                    content: '确定邀请好友加入群聊吗？',
+                    success: (res) => {
+                        if (res.confirm) {
+                            // 确定邀请好友
+                            uni.request({
+                                url: this.serverUrl + '/group/addGroupUser', // 替换为你的登录接口地址,
+                                method: 'POST',
+                                data: {
+                                    userID: id,
+                                    groupID: this.gid,
+                                    token: this.token
+                                },
+                                success: (res) => {
+                                    const { code } = res.data
+                                    if (code === 200) {
+                                        uni.showToast({
+                                            title: '邀请成功',
+                                            icon: 'success',
+                                            duration: 2000
+                                        });
+                                        // 邀请成功返回
+                                        uni.navigateBack({
+                                            delta: 1
+                                        });
+                                    }
+                                },
+                                fail: (err) => {
+                                    uni.showToast({
+                                        title: '没有搜索到相关用户',
+                                        icon: 'none',
+                                        duration: 2000
+                                    });
+                                }
+                            })
+                        }
                     }
                 })
             },
