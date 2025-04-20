@@ -9,7 +9,7 @@
             </view>
             <view class="top-bar-right">
                 <view class="pice"></view>
-                <view class="group-img" v-if="chatType === 1" @tap="goGroupHome">
+                <view class="group-img" v-if="isGroup" @tap="goGroupHome">
                     <image :src="imgurl"></image>
                 </view>
             </view>
@@ -19,32 +19,36 @@
                 <view class="loading" :class="{ 'displayNone': isLoading }">
                     <image src="../../static/loading.png" class="loading-img" :animation="animationData"></image>
                 </view>
-                <view class="chat-ls" v-for="(item, index) in msg" :key="index" :id="'msg' + item.id">     
+                <view class="chat-ls" v-for="(item, index) in chatMessage" :key="index" :id="'chatMessage' + item.id">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
                     <view class="msg-m msg-left" v-if="item.fromId !== uid"  @tap="goUserHome(item.fromId)">
                         <image :src="item.imgurl" class="user-img"></image>
                         <view class="message" v-if="item.types === 0">
+                            <view class="name-text" v-if="isGroup">{{ item.name }}</view>
                             <view class="msg-text">{{ item.message }}</view>
                         </view>
                         <view class="message" v-if="item.types === 1">
+                            <view class="name-text" v-if="isGroup">{{ item.name }}</view>
                             <image :src="item.message" class="msg-img" @tap="previewImg(item.message)" mode="widthFix"></image>
                         </view>
-                        <view class="message" v-if="item.types === 2">
+                        <!-- <view class="message" v-if="item.types === 2">
+                            <view class="name-text" v-if="isGroup">{{ item.name }}</view>
                             <view class="msg-text voice" :style="{
                                 'width': item.message.time*4 + 'px'
                             }" @tap="playVoice(item.message.voice)"> 
                                 <image src="../../static/yy.png" class="voice-img"></image>
                                 {{ item.message.time }}"
                             </view>    
-                        </view>
-                        <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
+                        </view> -->
+                        <!-- <view class="message" v-if="item.types === 3" @tap="openLocation(item.message)">
+                            <view class="name-text" v-if="isGroup">{{ item.name }}</view>
                             <view class="msg-map">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>   
                                 <image src="../../static/6.png" class="msg-img" mode="aspectFit"></image>                 -->
-                                <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>    
+                                <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>    
                             </view>
-                        </view>
+                        </view> -->
                     </view>
                     <view class="msg-m msg-right" v-else>
                         <image :src="item.imgurl" class="user-img"  @tap="goUserHome(item.fromId)"></image>
@@ -54,22 +58,22 @@
                         <view class="message" v-if="item.types === 1">
                             <image :src="item.message" class="msg-img" @tap="previewImg(item.message)" mode="widthFix"></image>
                         </view>
-                        <view class="message" v-if="item.types === 2">
+                        <!-- <view class="message" v-if="item.types === 2">
                             <view class="msg-text voice" :style="{
                                 'width': item.message.time*4 + 'px'
                             }" @tap="playVoice(item.message.voice)">
                                 {{ item.message.time }}"
                                 <image src="../../static/yy.png" class="voice-img"></image>
                             </view>    
-                        </view> 
-                        <view class="message" v-if="item.types === 3">
+                        </view>  -->
+                        <!-- <view class="message" v-if="item.types === 3">
                             <view class="msg-map" @tap="openLocation(item.message)">
                                 <view class="map-name">{{ item.message.name }}</view>
                                 <view class="map-address">{{ item.message.address }}</view>                    
                                 <image src="../../static/6.png" class="msg-img" mode="aspectFit"></image> -->
-                                <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>    
+                                <!-- <map class="map" :longitude="item.message.longitude" :latitude="item.message.latitude" :markers="cover(item.message)"></map>    
                             </view>
-                        </view>
+                        </view> -->
                     </view>
                 </view>
             </view>
@@ -83,7 +87,7 @@
 <script>
 import { dateTime, spaceTime, fileNameTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 import Submit from './../../componets/submit'
-const innerAudioContext = uni.createInnerAudioContext()
+// const innerAudioContext = uni.createInnerAudioContext()
 export default {
     data() {
         return {
@@ -95,7 +99,7 @@ export default {
             uimgurl: '',
             token: '',
             uname: '',
-            msg: [],
+            chatMessage: [],
             imgMsg: [],
             scrollToView: '',
             oldTime: 0,
@@ -109,28 +113,28 @@ export default {
             beginLoading: true
         }
     },
-    components: {
-        Submit
-    },
+    components: { Submit },
     onLoad(e) {
         const { id, name, chatType, imgurl } = e || {}
         this.id = id
         this.name = name
         this.chatType = Number(chatType)
         this.imgurl = this.serverUrl + imgurl
-        if (this.chatType == 0) {
+        if (!this.isGroup) {
             this.receiveSelfSocketMsg()
         } else {
             this.receivceGroupSocketMsg()
         }
     },
+    computed: {
+        // 是否群聊
+        isGroup() {
+            return this.chatType == 1
+        }
+    },
     onShow() {
         this.getStorages()
-        if (this.chatType == 0) {
-            this.getSelfMsg()
-        } else {
-            this.getGroupMsg()
-        }
+        this.getChatMessage()
     },
     methods: {
         dateTime,
@@ -168,38 +172,37 @@ export default {
         nextPage() {
             if (this.nowpage > 0  && this.beginLoading) {
                 this.isLoading = false
-                var animation = uni.createAniamtion({
+                this.beginLoading = false
+                const animation = uni.createAnimation({
                     duration: 1000,
                     timingFunction: 'step-start'
                 })
-                this.beginLoading = false
-                this.animation = animation
-                animation.scale(2,2).rotate(45).step()
+                // 动画转动
+                animation.scale(1,1).rotate(360).step()
                 this.animationData = animation.export()
                 let i = 1;
                 this.loadingTimers = setInterval(function(){
-                    animation.translate(i*30).step()
+                    // 动画转圈后消失
+                    animation.scale(1,1).rotate(360 * i).step()
                     this.animationData = animation.export()
                     i++
                     if(i > 20) {
-                        if (this.chatType == 0) {
-                            this.getSelfMsg()
-                        } else {
-                            this.getGroupMsg()
-                        }
+                       this.getChatMessage()
                     }
                 }.bind(this), 100)
             }
 
         },
-        getGroupMsg() {
+        getChatMessage() {
             // 获取消息列表
+            this.chatMessage = []
+            const url = this.isGroup ? this.serverUrl + '/chat/getGroupMsg' : this.serverUrl + '/chat/getSelfMsg'
             uni.request({
-                url: this.serverUrl + '/chat/getGroupMsg', // 替换为你的登录接口地址,
+                url, // 替换为你的登录接口地址,
                 method: 'POST',
                 data: {
                     uid: this.uid,
-                    gid: this.id,
+                    fid: this.id,
                     nowPage: this.nowpage,
                     pageSize: this.pagesize,
                     state: 1,
@@ -227,7 +230,7 @@ export default {
                                         }
                                     }
                                     if(data[i].types === 1) {
-                                        data[i].message =  this.serverUrl + msg[i].message;
+                                        data[i].message =  this.serverUrl + data[i].message;
                                         msgArr.push(data[i].message)
                                     }
                                     if(data[i].types === 3) {
@@ -238,7 +241,7 @@ export default {
                                     data[i].time = '';
                                 }
                             }
-                            this.msg = data.concat(this.msg);
+                            this.chatMessage = data.concat(this.chatMessage);
                             this.imgMsg = this.imgMsg.concat(msgArr)
                         }
                         if (data.length == 10) {
@@ -246,107 +249,7 @@ export default {
                         } else {
                             this.nowpage = 1
                         }
-                        // 滚动到最底部
-                        setTimeout(() => {
-                            this.scrollToView = ''
-                            this.scrollAnimation = false
-                            this.$nextTick(() => {
-                                if (this.msg?.length > 0) {
-                                    const lastItem = this.msg[data.length -1].id;
-                                    if (lastItem) {
-                                        this.scrollToView = 'msg' + lastItem.id;
-                                    }   
-                                }
-                            });     
-                        }, 100);
-                        clearInterval(this.loadingTimers)
-                        this.isLoading = true
-                        this.beginLoading = true
-                    } else {
-                        uni.showToast({
-                            title: '获取聊天信息失败',
-                            icon: 'none',
-                            duration: 2000
-                        });
-                    }
-                },
-                fail: (err) => {
-                    uni.showToast({
-                        title: '获取聊天信息失败',
-                        icon: 'none',
-                        duration: 2000
-                    });
-                }
-            })   
-        },
-        getSelfMsg() {
-            // 获取消息列表
-            uni.request({
-                url: this.serverUrl + '/chat/getSelfMsg', // 替换为你的登录接口地址,
-                method: 'POST',
-                data: {
-                    uid: this.uid,
-                    fid: this.id,
-                    nowPage: this.nowpage,
-                    pageSize: this.pagesize,
-                    state: 1, // 2表示好友申请
-                    token: this.token
-                },
-                success: (res) => {
-                    const { data, code } = res.data
-                    if (code === 200) {
-                        // 反转消息列表
-                        data.reverse();
-                        if (data.length > 0) {
-                            let oldTime = data[0].time
-                            let msgArr = []
-                            for (var i = 0; i < data.length; i++) {
-                                data[i].imgurl = this.serverUrl + data[i].imgurl;
-                                if (i < data.length) {
-                                    let t = spaceTime(oldTime, data[i].time);
-                                    if (t) {
-                                        oldTime = t
-                                    }
-                                    data[i].time = t;
-                                    if (this.nowPage === 1) {
-                                        if (data[i].time > this.oldTime) {
-                                            this.oldTime = data[i].time
-                                        }
-                                    }
-                                    if(data[i].types === 1) {
-                                        data[i].message =  this.serverUrl + msg[i].message;
-                                        msgArr.push(data[i].message)
-                                    }
-                                    if(data[i].types === 3) {
-                                        data[i].message =  JSON.parse(data[i].message)
-                                        msgArr.push(data[i].message)
-                                    }
-                                } else {
-                                    data[i].time = '';
-                                }
-                            }
-                            this.msg = data.concat(this.msg);
-                            this.imgMsg = this.imgMsg.concat(msgArr)
-                        }
-                        if (data.length == 10) {
-                            this.nowpage++ 
-                        } else {
-                            this.nowpage = 1
-                        }
-                        // 滚动到最底部
-                        setTimeout(() => {
-                            this.scrollToView = ''
-                            this.scrollAnimation = false
-                            this.$nextTick(() => {
-                                const lastItem = this.msg[data.length -1].id;
-                                if (lastItem) {
-                                    this.scrollToView = 'msg' + lastItem.id;
-                                }
-                            });     
-                        }, 100);
-                        clearInterval(this.loadingTimers)
-                        this.isLoading = true
-                        this.beginLoading = true
+                        this.scrollToBottom()
                     } else {
                         uni.showToast({
                             title: '获取聊天信息失败',
@@ -386,34 +289,34 @@ export default {
                 }
             });
         },
-        playVoice(e) {
-            innerAudioContext.src = e
-            innerAudioContext.play();
-        },
-        cover(e) {
-            const { longitude, latitude, name, address } = e || {}
-            let map = [{
-                latitude: latitude,
-                longitude: longitude,
-                iconPath: '/static/6.png',
-            }] 
-            return map
-        },
-        openLocation(e) {
-            const { longitude, latitude, name, address } = e || {}
-            uni.openLocation({
-                latitude: latitude,
-                longitude: longitude,
-                name: name,
-                address: address,
-                success: function (res) {
-                    console.log(res)
-                },
-                fail: function (res) {
-                    console.log(res.errMsg)
-                }
-            });
-        },
+        // playVoice(e) {
+        //     innerAudioContext.src = e
+        //     innerAudioContext.play();
+        // },
+        // cover(e) {
+        //     const { longitude, latitude, name, address } = e || {}
+        //     let map = [{
+        //         latitude: latitude,
+        //         longitude: longitude,
+        //         iconPath: '/static/6.png',
+        //     }] 
+        //     return map
+        // },
+        // openLocation(e) {
+        //     const { longitude, latitude, name, address } = e || {}
+        //     uni.openLocation({
+        //         latitude: latitude,
+        //         longitude: longitude,
+        //         name: name,
+        //         address: address,
+        //         success: function (res) {
+        //             console.log(res)
+        //         },
+        //         fail: function (res) {
+        //             console.log(res.errMsg)
+        //         }
+        //     });
+        // },
         sendMessage(e) {
            this.receiveMsg(e, this.uid, this.uimgurl, 0)
         },
@@ -455,42 +358,42 @@ export default {
                 uploadTask.onProgressUpdate((res) => {
                     console.log('上传进度', res.progress)
                 })
-            } else if (e.types === 2) {
-                let url = fileNameTime(new Date())
-                const uploadTask = uni.uploadFile({
-                    url: this.serverUrl + '/files/upload', // 仅为示例，非真实的接口地址
-                    filePath: e.message.voice,
-                    name: 'file',
-                    formData: {
-                        url: url,
-                        name: new Date().getTime() + this.uid + Math.ceil(Math.random()*10),
-                    },
-                    success: (res) => {
-                        // 处理返回的数据
-                        res = JSON.parse(res.data)
-                        console.log('上传成功', res)
-                        let data = {
-                            message: res.data,
-                            types: e.types
-                        }
-                        this.sendSocket(data)
-                    },
-                    fail: (err) => {
-                        uni.showToast({
-                            title: '语音上传失败',
-                            icon: 'none',
-                            duration: 2000
-                        });
-                    }
-                })
+            // } else if (e.types === 2) {
+            //     let url = fileNameTime(new Date())
+            //     const uploadTask = uni.uploadFile({
+            //         url: this.serverUrl + '/files/upload', // 仅为示例，非真实的接口地址
+            //         filePath: e.message.voice,
+            //         name: 'file',
+            //         formData: {
+            //             url: url,
+            //             name: new Date().getTime() + this.uid + Math.ceil(Math.random()*10),
+            //         },
+            //         success: (res) => {
+            //             // 处理返回的数据
+            //             res = JSON.parse(res.data)
+            //             console.log('上传成功', res)
+            //             let data = {
+            //                 message: res.data,
+            //                 types: e.types
+            //             }
+            //             this.sendSocket(data)
+            //         },
+            //         fail: (err) => {
+            //             uni.showToast({
+            //                 title: '语音上传失败',
+            //                 icon: 'none',
+            //                 duration: 2000
+            //             });
+            //         }
+            //     })
 
-                uploadTask.onProgressUpdate((res) => {
-                    console.log('上传进度', res.progress)
-                })
+            //     uploadTask.onProgressUpdate((res) => {
+            //         console.log('上传进度', res.progress)
+            //     })
             }
             const { message, types } = e || {}
             this.scrollAnimation = true
-            let len = this.msg.length
+            let len = this.chatMessage.length
             let nowTime = new Date();
             let t = spaceTime(this.oldTime, nowTime);
             if (t) {
@@ -509,9 +412,9 @@ export default {
                 id: len
             }
             // 添加新消息到消息列表
-            this.msg.push(data);
+            this.chatMessage.push(data);
             this.$nextTick(() => {
-                this.scrollToView = 'msg' + len;
+                this.scrollToView = 'chatMessage' + len;
             }); 
             
         },
@@ -540,7 +443,7 @@ export default {
                         id: len
                     }
                     // 添加新消息到消息列表
-                    this.msg.push(data);
+                    this.chatMessage.push(data);
                     if (msg.types === 1) {
                         this.imgMsg.push(msg.message)
                     }
@@ -574,7 +477,7 @@ export default {
                         id: len
                     }
                     // 添加新消息到消息列表
-                    this.msg.push(data);
+                    this.chatMessage.push(data);
                     if (msg.types === 1) {
                         this.imgMsg.push(msg.message)
                     }
@@ -586,7 +489,7 @@ export default {
         },
         // 聊天数据发送给后端
         sendSocket(e) {
-            if(this.chatType == 0) {
+            if(!this.isGroup) {
                 this.socket.emit('msgServer', e, this.uid, this.id)
             } else {
                 this.socket.emit('groupMsgServer', e, this.uid, this.id, this.uname, this.uimgurl)
@@ -600,13 +503,17 @@ export default {
             this.scrollAnimation = true
             setTimeout(() => {
                 this.scrollToView = ''
+                this.scrollAnimation = false
                 this.$nextTick(() => {
-                    const lastItem = this.msg[this.msg.length - 1];
+                    const lastItem = this.chatMessage[this.chatMessage.length - 1];
                     if (lastItem) {
-                        this.scrollToView = 'msg' + lastItem.id;
+                        this.scrollToView = 'chatMessage' + lastItem.id;
                     }
                 });     
             }, 100);
+            clearInterval(this.loadingTimers)
+            this.isLoading = true
+            this.beginLoading = true
         }
     }
 }
