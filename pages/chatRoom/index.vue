@@ -4,14 +4,9 @@
             <view class="top-bar-left" @tap="backOne">
                 <image src="/static/user/back.png" class="back-img"></image>
             </view>
-            <view class="top-bar-center">
-                <view class="top-bar-name">{{ name }}</view>
-            </view>
+            <view class="top-bar-center"><view class="top-bar-name">{{ name }}</view></view>
             <view class="top-bar-right">
-                <view class="pice"></view>
-                <view class="group-img" v-if="isGroup" @tap="goGroupHome">
-                    <image :src="imgurl"></image>
-                </view>
+                <view class="group-img" v-if="isGroup" @tap="goGroupHome"><image :src="imgurl"></image></view>
             </view>
         </view>
         <scroll-view class="chat" scroll-y="true" :scroll-with-animation="scrollAnimation" :scroll-into-view="scrollToView" @scrolltoupper="nextPage">
@@ -94,7 +89,7 @@ export default {
             uid: '', // 当前用户id
             id: '', // 当前id[一对一好友id或者群id]
             name: '', // 名称[好友名称或者群名称]
-            imgurl: '',
+            imgurl: '', // 头像[好友头像或者群头像]
             chatType: 0, // 0-好友，1-群
             uimgurl: '',
             token: '',
@@ -233,10 +228,10 @@ export default {
                                         data[i].message =  this.serverUrl + data[i].message;
                                         msgArr.push(data[i].message)
                                     }
-                                    if(data[i].types === 3) {
-                                        data[i].message =  JSON.parse(data[i].message)
-                                        msgArr.push(data[i].message)
-                                    }
+                                    // if(data[i].types === 3) {
+                                    //     data[i].message =  JSON.parse(data[i].message)
+                                    //     msgArr.push(data[i].message)
+                                    // }
                                 } else {
                                     data[i].time = '';
                                 }
@@ -420,7 +415,7 @@ export default {
         },
         // socekt聊天接受数据
         receiveSelfSocketMsg() {
-            this.socket.on('msgServer', (msg, fromid, tip) => {
+            this.socket.on('msgFront', (msg, fromid, tip) => {
                 if (fromid == this.id && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
@@ -492,7 +487,13 @@ export default {
             if(!this.isGroup) {
                 this.socket.emit('msgServer', e, this.uid, this.id)
             } else {
-                this.socket.emit('groupMsgServer', e, this.uid, this.id, this.uname, this.uimgurl)
+                this.socket.emit('groupMsgServer', {
+                    msg: e,
+                    fromid: this.uid, // 信息来源：当前用户
+                    gid: this.id, // 当前群id
+                    name: this.uname, // 当前用户名称
+                    img: this.uimgurl, // 当前用户头像
+                })
             }
         },
         currentHeight(value) {
