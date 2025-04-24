@@ -11,9 +11,6 @@
         </view>
         <scroll-view class="chat" scroll-y="true" :scroll-with-animation="scrollAnimation" :scroll-into-view="scrollToView" @scrolltoupper="nextPage">
             <view class="chat-main" :style="{ 'padding-bottom': inputh + 'px'}">
-                <view class="loading" :class="{ 'displayNone': isLoading }">
-                    <image src="../../static/loading.png" class="loading-img" :animation="animationData"></image>
-                </view>
                 <view class="chat-ls" v-for="(item, index) in chatMessage" :key="index" :id="'chatMessage' + item.id">     
                     <view class="chat-time" v-if="item.time != ''">{{ dateTime(item.time) }}</view>
                     <view class="msg-m msg-left" v-if="item.fromId !== uid"  @tap="goUserHome(item.fromId)">
@@ -99,13 +96,11 @@ export default {
             scrollToView: '',
             oldTime: 0,
             inputh: '96',
-            animationData: '',
-            nowpage: 1,
-            pagesize: 10,
+            nowPage: 1,
+            pageSize: 20,
             loadingTimers: '',
-            isLoading: true,
-            scrollAnimation: true,
-            beginLoading: true
+            isLoading: false,
+            scrollAnimation: true
         }
     },
     components: { Submit },
@@ -165,31 +160,22 @@ export default {
             })
         },
         nextPage() {
-            if (this.nowpage > 0  && this.beginLoading) {
+            if (this.isLoading) {
                 this.isLoading = false
-                this.beginLoading = false
-                const animation = uni.createAnimation({
-                    duration: 1000,
-                    timingFunction: 'step-start'
-                })
-                // 动画转动
-                animation.scale(1,1).rotate(360).step()
-                this.animationData = animation.export()
-                let i = 1;
-                this.loadingTimers = setInterval(function(){
-                    // 动画转圈后消失
-                    animation.scale(1,1).rotate(360 * i).step()
-                    this.animationData = animation.export()
-                    i++
-                    if(i > 20) {
-                       this.getChatMessage()
-                    }
-                }.bind(this), 100)
+                this.pageSize += 20
+                setTimeout(() => {
+                    this.getChatMessage('scrollTop')
+                }, 1000)
             }
 
         },
-        getChatMessage() {
+        getChatMessage(action) {
             // 获取消息列表
+            uni.showToast({
+                title: '加载中...',
+                icon: 'loading',
+                duration: 5000
+            });
             this.chatMessage = []
             const url = this.isGroup ? this.serverUrl + '/chat/getGroupMsg' : this.serverUrl + '/chat/getSelfMsg'
             uni.request({
@@ -198,8 +184,8 @@ export default {
                 data: {
                     uid: this.uid,
                     fid: this.id,
-                    nowPage: this.nowpage,
-                    pageSize: this.pagesize,
+                    nowPage: this.nowPage,
+                    pageSize: this.pageSize,
                     state: 1,
                     token: this.token
                 },
@@ -239,17 +225,12 @@ export default {
                             this.chatMessage = data.concat(this.chatMessage);
                             this.imgMsg = this.imgMsg.concat(msgArr)
                         }
-                        if (data.length == 10) {
-                            this.nowpage++ 
-                        } else {
-                            this.nowpage = 1
-                        }
-                        this.scrollToBottom()
+                        this.scrollToBottom(action)
                     } else {
                         uni.showToast({
                             title: '获取聊天信息失败',
                             icon: 'none',
-                            duration: 2000
+                            duration: 5000
                         });
                     }
                 },
@@ -257,8 +238,11 @@ export default {
                     uni.showToast({
                         title: '获取聊天信息失败',
                         icon: 'none',
-                        duration: 2000
+                        duration: 5000
                     });
+                },
+                complete: () => {
+                    uni.hideToast()
                 }
             })
         },
@@ -419,7 +403,7 @@ export default {
                 if (fromid == this.id && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
-                    let len = this.msg.length
+                    let len = this.chatMessage.length
                     let nowTime = new Date();
                     let t = spaceTime(this.oldTime, nowTime);
                     if (t) {
@@ -453,7 +437,7 @@ export default {
                 if (gid == this.id && tip == 0) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
-                    let len = this.msg.length
+                    let len = this.chatMessage.length
                     let nowTime = new Date();
                     let t = spaceTime(this.oldTime, nowTime);
                     if (t) {
@@ -500,21 +484,24 @@ export default {
             this.inputh = value
             this.scrollToBottom()
         },
-        scrollToBottom() {
+        scrollToBottom(action) {
             this.scrollAnimation = true
-            setTimeout(() => {
-                this.scrollToView = ''
-                this.scrollAnimation = false
-                this.$nextTick(() => {
-                    const lastItem = this.chatMessage[this.chatMessage.length - 1];
-                    if (lastItem) {
-                        this.scrollToView = 'chatMessage' + lastItem.id;
-                    }
-                });     
-            }, 100);
+            if (action === 'scrollTop') {
+                this.scrollToView = 'chatMessage' + this.chatMessage[0].id;
+            } else {
+                setTimeout(() => {
+                    this.scrollToView = ''
+                    this.scrollAnimation = false
+                    this.$nextTick(() => {
+                        const lastItem = this.chatMessage[this.chatMessage.length - 1];
+                        if (lastItem) {
+                            this.scrollToView = 'chatMessage' + lastItem.id;
+                        }
+                    });     
+                }, 0);
+            }
             clearInterval(this.loadingTimers)
             this.isLoading = true
-            this.beginLoading = true
         }
     }
 }

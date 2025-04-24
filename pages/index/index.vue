@@ -68,12 +68,13 @@
                 token: '', // 用户token
                 requestData: 0, // 好友申请数
                 requestTime: '', // 最后申请时间
+                isInit: false, // 是否初始化
                 isRefresh: false,
                 isNoFriendList: false
 			}
 		},
         onLoad() {
-            this.join(this.uid)
+            this.isInit = true
             this.initSocketInfo()
         },
         onShow() {
@@ -107,6 +108,10 @@
                     this.userName = userName; // 用户名
                     this.imgUrl = this.serverUrl + imgUrl; // 头像URL
                     this.token = token; // 用户token
+                    if (this.isInit) {
+                        this.socket.emit('login', this.uid)
+                        this.isInit = false
+                    }
                 } else {
                     uni.navigateTo({
                         url: '/pages/signIn/index'
@@ -148,10 +153,6 @@
                         }
                     })
                 })
-            },
-            // socket模块
-            join(uid) {
-                this.socket.emit('login', uid)
             },
             receiveFriendSocketMsg() {
                 this.socket.on('msgFront', (msg, fromid) => {
@@ -208,6 +209,7 @@
             },
             receiveLeaveChatRoomSocketMsg() {
                 this.socket.on('leaveChatRoomFront', (uid, fid) => {
+                    // 离开聊天室更新聊天tip
                     for(let i = 0 ; i < this.friendsList.length ; i++) {
                         if (this.friendsList[i].id === fid) {
                             let e = this.friendsList[i]
@@ -316,6 +318,7 @@
                                             data[i].message = data[i].name + ': ' + data[i].msg
                                         } 
                                         this.groupsList.push(data[i])
+                                        // 加入群组监听
                                         this.socket.emit('groupServer', data[i].id)
                                     }
                                 }
