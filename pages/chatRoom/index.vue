@@ -162,8 +162,9 @@ export default {
         nextPage() {
             if (this.isLoading) {
                 this.isLoading = false
-                this.pageSize += 20
-                setTimeout(() => {
+                // 节流
+                this.loadingTimers = setTimeout(() => {
+                    this.pageSize += 20
                     this.getChatMessage('scrollTop')
                 }, 1000)
             }
@@ -399,8 +400,8 @@ export default {
         },
         // socekt聊天接受数据
         receiveSelfSocketMsg() {
-            this.socket.on('msgFront', (msg, fromid, tip) => {
-                if (fromid == this.id && tip == 0) {
+            this.socket.on('msgChatRoomFront', (msg, fromid) => {
+                if (fromid == this.id) {
                     console.log(msg + '---' + fromid)
                     this.scrollAnimation = true
                     let len = this.chatMessage.length
@@ -433,11 +434,11 @@ export default {
             })
         },
         receivceGroupSocketMsg() {
-            this.socket.on('groupMsgFront', (msg, fromid, gid, name, img, tip) => {
-                if (gid == this.id && tip == 0) {
-                    console.log(msg + '---' + fromid)
+            this.socket.on('groupMsgChatRoomFront', data => {
+                const { msg, userID, groupID, name, imgurl } = data
+                if (groupID == this.id) {
+                    console.log('')
                     this.scrollAnimation = true
-                    let len = this.chatMessage.length
                     let nowTime = new Date();
                     let t = spaceTime(this.oldTime, nowTime);
                     if (t) {
@@ -448,12 +449,13 @@ export default {
                     }
                     nowTime = t;
                     const data = {
-                        fromId: fromid, // 假设 1 表示当前用户
+                        fromId: userID, // 假设 1 表示当前用户
+                        name: name, 
                         message: msg.message,
                         types: msg.types, // 假设 0 表示文本消息
                         time: nowTime,
-                        imgurl: img, // 假设当前用户头像
-                        id: len
+                        imgurl: imgurl, // 假设当前用户头像
+                        id: this.chatMessage.length
                     }
                     // 添加新消息到消息列表
                     this.chatMessage.push(data);
@@ -473,10 +475,10 @@ export default {
             } else {
                 this.socket.emit('groupMsgServer', {
                     msg: e,
-                    fromid: this.uid, // 信息来源：当前用户
-                    gid: this.id, // 当前群id
+                    userID: this.uid, // 信息来源：当前用户
+                    groupID: this.id, // 当前群id
                     name: this.uname, // 当前用户名称
-                    img: this.uimgurl, // 当前用户头像
+                    imgurl: this.uimgurl, // 当前用户头像
                 })
             }
         },

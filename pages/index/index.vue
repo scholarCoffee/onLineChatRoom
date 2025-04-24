@@ -179,7 +179,8 @@
                 })
             },
             receiveGroupSocketMsg() {
-                this.socket.on('groupMsgFront', (msg, fromid, gid, name) => {
+                this.socket.on('groupMsgFront', data => {
+                    const { msg, userID, groupID, name, imgurl } = data || {}
                     let nmsg = ''
                     if (msg.types === 0) {
                         nmsg = msg.message
@@ -191,10 +192,10 @@
                         nmsg = '[位置]'
                     }
                     for(let i = 0 ; i < this.friendsList.length ; i++) {
-                        if (this.friendsList[i].id === gid) {
+                        if (this.friendsList[i].id === groupID) {
                             let e = this.friendsList[i]
                             e.lastTime = new Date()
-                            if (fromid == this.uid) {
+                            if (userID == this.uid) {
                                 e.msg = nmsg
                             } else {
                                 e.msg = name + ': ' + nmsg
