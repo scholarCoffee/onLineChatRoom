@@ -47,7 +47,6 @@
 </template>
 
 <script>
-import { getFriendsList } from '../../commons/js/datas.js'
     import { dateTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 	export default {
 		data() {
@@ -89,7 +88,7 @@ import { getFriendsList } from '../../commons/js/datas.js'
                 return dateTime(time)
             },
             getRequesters() {
-                this.requesters = getFriendsList()
+                this.requesters = []
                 for(let i = 0; i < this.requesters.length; i++) {
                     this.requesters[i].imgUrl = '../../static/' + this.requesters[i].imgUrl
                 }

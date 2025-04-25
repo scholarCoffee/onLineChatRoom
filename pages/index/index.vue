@@ -77,6 +77,9 @@
             this.isInit = true
             this.initSocketInfo()
         },
+        created() {
+
+        },
         onShow() {
             // 获取登录信息
             this.getStorages()
@@ -155,70 +158,73 @@
                 })
             },
             receiveFriendSocketMsg() {
-                this.socket.on('msgFront', (msg, fromid) => {
-                    let nmsg = ''
-                    if (msg.types === 0) {
-                        nmsg = msg.message
-                    } else if (msg.types === 1) {
-                        nmsg = '[图片]'
-                    } else if (msg.types === 2) {
-                        nmsg = '[音频]'
-                    } else if (msg.types === 3) {
-                        nmsg = '[位置]'
+                this.socket.on('msgFront', this.friendMsgListener)
+            },
+            friendMsgListener(msg, fromid) {
+                let nmsg = ''
+                if (msg.types === 0) {
+                    nmsg = msg.message
+                } else if (msg.types === 1) {
+                    nmsg = '[图片]'
+                } else if (msg.types === 2) {
+                    nmsg = '[音频]'
+                } else if (msg.types === 3) {
+                    nmsg = '[位置]'
+                }
+                for(let i = 0 ; i < this.friendsList.length ; i++) {
+                    if (this.friendsList[i].id === fromid) {
+                        let e = this.friendsList[i]
+                        e.lastTime = new Date()
+                        e.message = nmsg 
+                        e.tip++
+                        this.friendsList.splice(i, 1)
+                        this.friendsList.unshift(e)
                     }
-                    for(let i = 0 ; i < this.friendsList.length ; i++) {
-                        if (this.friendsList[i].id === fromid) {
-                            let e = this.friendsList[i]
-                            e.lastTime = new Date()
-                            e.message = nmsg 
-                            e.tip++
-                            this.friendsList.splice(i, 1)
-                            this.friendsList.unshift(e)
-                        }
-                    }
-                })
+                }
             },
             receiveGroupSocketMsg() {
-                this.socket.on('groupMsgFront', data => {
-                    const { msg, userID, groupID, name, imgurl } = data || {}
-                    let nmsg = ''
-                    if (msg.types === 0) {
-                        nmsg = msg.message
-                    } else if (msg.types === 1) {
-                        nmsg = '[图片]'
-                    } else if (msg.types === 2) {
-                        nmsg = '[音频]'
-                    } else if (msg.types === 3) {
-                        nmsg = '[位置]'
-                    }
-                    for(let i = 0 ; i < this.friendsList.length ; i++) {
-                        if (this.friendsList[i].id === groupID) {
-                            let e = this.friendsList[i]
-                            e.lastTime = new Date()
-                            if (userID == this.uid) {
-                                e.msg = nmsg
-                            } else {
-                                e.msg = name + ': ' + nmsg
-                            }
-                            e.message = nmsg 
-                            e.tip++
-                            this.friendsList.splice(i, 1)
-                            this.friendsList.unshift(e)
+                this.socket.on('groupMsgFront', this.groupMsgListener)
+            },
+            // 接受群组
+            groupMsgListener(data) {
+                const { msg, userID, groupID, name, imgurl } = data || {}
+                let nmsg = ''
+                if (msg.types === 0) {
+                    nmsg = msg.message
+                } else if (msg.types === 1) {
+                    nmsg = '[图片]'
+                } else if (msg.types === 2) {
+                    nmsg = '[音频]'
+                } else if (msg.types === 3) {
+                    nmsg = '[位置]'
+                }
+                for(let i = 0 ; i < this.friendsList.length ; i++) {
+                    if (this.friendsList[i].id === groupID) {
+                        let e = this.friendsList[i]
+                        e.lastTime = new Date()
+                        if (userID == this.uid) {
+                            e.message = nmsg
+                        } else {
+                            e.message = name + ': ' + nmsg
                         }
+                        e.tip++
+                        this.friendsList.splice(i, 1)
+                        this.friendsList.unshift(e)
                     }
-                })
+                }
             },
             receiveLeaveChatRoomSocketMsg() {
-                this.socket.on('leaveChatRoomFront', (uid, fid) => {
-                    // 离开聊天室更新聊天tip
-                    for(let i = 0 ; i < this.friendsList.length ; i++) {
-                        if (this.friendsList[i].id === fid) {
-                            let e = this.friendsList[i]
-                            e.tip = 0
-                            this.friendsList.splice(i, 1, e)
-                        }
+                this.socket.on('leaveChatRoomFront', this.leaveChatRoomMsgListener)
+            },
+            leaveChatRoomMsgListener(uid, fid) {
+                // 离开聊天室更新聊天tip
+                for(let i = 0 ; i < this.friendsList.length ; i++) {
+                    if (this.friendsList[i].id === fid) {
+                        let e = this.friendsList[i]
+                        e.tip = 0
+                        this.friendsList.splice(i, 1, e)
                     }
-                })
+                }
             },
             getHomeInfo() {
                 this.friendsList = []

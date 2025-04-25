@@ -80,6 +80,7 @@
 import { dateTime, spaceTime, fileNameTime } from './../../commons/js/utils.js'; // 导入 dateTime 函数
 import Submit from './../../componets/submit'
 // const innerAudioContext = uni.createInnerAudioContext()
+
 export default {
     data() {
         return {
@@ -405,73 +406,75 @@ export default {
         },
         // socekt聊天接受数据
         receiveSelfSocketMsg() {
-            this.socket.on('msgChatRoomFront', (msg, fromid) => {
-                if (fromid == this.id) {
-                    console.log(msg + '---' + fromid)
-                    this.scrollAnimation = true
-                    let len = this.chatMessage.length
-                    let nowTime = new Date();
-                    let t = spaceTime(this.oldTime, nowTime);
-                    if (t) {
-                        this.oldTime = t
-                    }
-                    if (msg.types == 1 || msg.types == 2) {
-                        msg.message = this.serverUrl + msg.message
-                    }
-                    nowTime = t;
-                    const data = {
-                        fromId: fromid, // 假设 1 表示当前用户
-                        message: msg.message,
-                        types: msg.types, // 假设 0 表示文本消息
-                        time: nowTime,
-                        imgurl: this.imgurl, // 假设当前用户头像
-                        id: len
-                    }
-                    // 添加新消息到消息列表
-                    this.chatMessage.push(data);
-                    if (msg.types === 1) {
-                        this.imgMsg.push(msg.message)
-                    }
-                    this.$nextTick(() => {
-                        this.scrollToView = 'msg' + len;
-                    });
-                } 
-            })
+            this.socket.on('msgFront', this.friendIndexServerListener)
+        },
+        friendIndexServerListener(data, fromid) {
+            const { msg, userID } = data
+            if (userID == this.id && userID !== this.uid) {
+                console.log('')
+                this.scrollAnimation = true
+                let nowTime = new Date();
+                let t = spaceTime(this.oldTime, nowTime);
+                if (t) {
+                    this.oldTime = t
+                }
+                if (msg.types == 1 || msg.types == 2) {
+                    msg.message = this.serverUrl + msg.message
+                }
+                nowTime = t;
+                const data = {
+                    fromId: userID, // 假设 1 表示当前用户
+                    message: msg.message,
+                    types: msg.types, // 假设 0 表示文本消息
+                    time: nowTime,
+                    imgurl: this.imgurl, // 假设当前用户头像
+                    id: this.chatMessage.length
+                }
+                // 添加新消息到消息列表
+                this.chatMessage.push(data);
+                if (msg.types === 1) {
+                    this.imgMsg.push(msg.message)
+                }
+                this.$nextTick(() => {
+                    this.scrollToView = 'msg' + this.chatMessage.length;
+                });
+            } 
         },
         receivceGroupSocketMsg() {
-            this.socket.on('groupMsgChatRoomFront', data => {
-                const { msg, userID, groupID, name, imgurl } = data
-                if (groupID == this.id) {
-                    console.log('')
-                    this.scrollAnimation = true
-                    let nowTime = new Date();
-                    let t = spaceTime(this.oldTime, nowTime);
-                    if (t) {
-                        this.oldTime = t
-                    }
-                    if (msg.types == 1 || msg.types == 2) {
-                        msg.message = this.serverUrl + msg.message
-                    }
-                    nowTime = t;
-                    const data = {
-                        fromId: userID, // 假设 1 表示当前用户
-                        name: name, 
-                        message: msg.message,
-                        types: msg.types, // 假设 0 表示文本消息
-                        time: nowTime,
-                        imgurl: imgurl, // 假设当前用户头像
-                        id: this.chatMessage.length
-                    }
-                    // 添加新消息到消息列表
-                    this.chatMessage.push(data);
-                    if (msg.types === 1) {
-                        this.imgMsg.push(msg.message)
-                    }
-                    this.$nextTick(() => {
-                        this.scrollToView = 'msg' + len;
-                    });
-                } 
-            })
+            this.socket.on('groupMsgFront', this.groupIndexServerListener)
+        },
+        groupIndexServerListener(data) {
+            const { msg, userID, groupID, name, imgurl } = data
+            console.log('-------------')
+            if (groupID == this.id && userID !== this.uid) {
+                this.scrollAnimation = true
+                let nowTime = new Date();
+                let t = spaceTime(this.oldTime, nowTime);
+                if (t) {
+                    this.oldTime = t
+                }
+                if (msg.types == 1 || msg.types == 2) {
+                    msg.message = this.serverUrl + msg.message
+                }
+                nowTime = t;
+                const data = {
+                    fromId: userID, // 假设 1 表示当前用户
+                    name: name, 
+                    message: msg.message,
+                    types: msg.types, // 假设 0 表示文本消息
+                    time: nowTime,
+                    imgurl: imgurl, // 假设当前用户头像
+                    id: this.chatMessage.length
+                }
+                // 添加新消息到消息列表
+                this.chatMessage.push(data);
+                if (msg.types === 1) {
+                    this.imgMsg.push(msg.message)
+                }
+                this.$nextTick(() => {
+                    this.scrollToView = 'msg' + this.chatMessage.length;
+                });
+            } 
         },
         // 聊天数据发送给后端
         sendSocket(e) {
