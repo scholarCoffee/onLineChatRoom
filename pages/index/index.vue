@@ -316,7 +316,7 @@
                                             data[i].name = data[i].markname
                                         }
                                         if (data[i].id != this.uid && data[i].msg) {
-                                            data[i].message = data[i].name + ': ' + data[i].msg
+                                            data[i].message = data[i].username + ': ' + data[i].msg
                                         } 
                                         this.groupsList.push(data[i])
                                         // 加入群组监听

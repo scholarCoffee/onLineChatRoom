@@ -179,17 +179,22 @@ export default {
             });
             this.chatMessage = []
             const url = this.isGroup ? this.serverUrl + '/chat/getGroupMsg' : this.serverUrl + '/chat/getSelfMsg'
+            const data = {
+                uid: this.uid,
+                nowPage: this.nowPage,
+                pageSize: this.pageSize,
+                state: 1,
+                token: this.token
+            }
+            if (this.isGroup) {
+                data.gid = this.id
+            } else {
+                data.fid = this.id
+            }
             uni.request({
                 url, // 替换为你的登录接口地址,
                 method: 'POST',
-                data: {
-                    uid: this.uid,
-                    fid: this.id,
-                    nowPage: this.nowPage,
-                    pageSize: this.pageSize,
-                    state: 1,
-                    token: this.token
-                },
+                data,
                 success: (res) => {
                     const { data, code } = res.data
                     if (code === 200) {
