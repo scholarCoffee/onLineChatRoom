@@ -20,6 +20,12 @@
 			}
 		},
 		{
+			"path": "pages/resetPassword/index",
+			"style": {
+				"navigationStyle": "custom"
+			}
+		},
+		{
 			"path": "pages/chatRoom/index",
 			"style": {
 				"navigationStyle": "custom"
