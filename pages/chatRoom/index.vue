@@ -127,6 +127,11 @@ export default {
         this.getStorages()
         this.getChatMessage()
     },
+    beforeDestroy() {
+        this.socket.off('msgFront', this.friendIndexServerListener)
+        this.socket.off('groupMsgFront', this.groupIndexServerListener)
+        clearInterval(this.loadingTimers)
+    },
     methods: {
         dateTime,
         getStorages() {
@@ -436,7 +441,7 @@ export default {
                     this.imgMsg.push(msg.message)
                 }
                 this.$nextTick(() => {
-                    this.scrollToView = 'msg' + this.chatMessage.length;
+                    this.scrollToView = 'chatMessage' + this.chatMessage[this.chatMessage.length - 1].id
                 });
             } 
         },
@@ -472,7 +477,7 @@ export default {
                     this.imgMsg.push(msg.message)
                 }
                 this.$nextTick(() => {
-                    this.scrollToView = 'msg' + this.chatMessage.length;
+                    this.scrollToView = 'chatMessage' + this.chatMessage[this.chatMessage.length - 1].id
                 });
             } 
         },

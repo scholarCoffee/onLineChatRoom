@@ -77,14 +77,17 @@
             this.isInit = true
             this.initSocketInfo()
         },
-        created() {
-
-        },
         onShow() {
             // 获取登录信息
             this.getStorages()
             // 页面加载时获取好友请求
             this.getHomeInfo()
+        },
+        onUnload() {
+            // 断开socket连接
+            this.socket.off('msgFront', this.friendMsgListener)
+            this.socket.off('groupMsgFront', this.groupMsgListener)
+            this.socket.off('leaveChatRoomFront', this.leaveChatRoomMsgListener)
         },
 		methods: {
             initSocketInfo() {
@@ -301,7 +304,7 @@
                     })
                 })
             },
-            // 好友列表
+            // 获取群列表
             getGroup() {
                 return new Promise((resolve, reject) => {
                     uni.request({

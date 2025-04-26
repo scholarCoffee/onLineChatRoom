@@ -57,8 +57,6 @@
                 token: ''
 			};
 		},
-		computed: {
-		},
         onLoad() {
             this.getStorages()
             this.friendRequest()
@@ -86,12 +84,6 @@
 			},
             changeTime(time) {
                 return dateTime(time)
-            },
-            getRequesters() {
-                this.requesters = []
-                for(let i = 0; i < this.requesters.length; i++) {
-                    this.requesters[i].imgUrl = '../../static/' + this.requesters[i].imgUrl
-                }
             },
             friendRequest() {
                 uni.request({
