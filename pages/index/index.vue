@@ -9,7 +9,7 @@
 				<view class="add" @tap="toBuildGroup"><image src="/static/user/add.png"></image></view>
 			</view>
 		</view>
-		<view class="main">
+		<view class="main main-content-adjust">
             <view class="refresh" v-if="isRefresh">
                 <image src="/static/user/refresh.png" class="refresh-icon"></image>
                 <text class="ref-title">下拉刷新</text>
@@ -21,7 +21,7 @@
             </view>
             <!-- 好友申请数量 -->
             <view class="friends" v-if="requestData > 0" @tap="toFriendRequest">
-				<view class="friends-list">
+				<view class="friends-list friends-request">
                     <view class="friends-list-l">
                         <text class="tip">{{ requestData }}</text>
                         <image src="../../static/user/applyFriend.png" class="avatar"></image>
@@ -35,22 +35,69 @@
                     </view>
                 </view>
 			</view>
-			<view class="friends">
-				<view class="friends-list" v-for="(friend, index) in friendsList" :key="index" @tap="toChatRoom(friend)">
-                    <view class="friends-list-l">
-                        <text class="tip" v-if="friend.tip > 0">{{ friend.tip }}</text>
-                        <image :src="friend.imgUrl" class="avatar"></image>
-                        <view class="groupm" v-if="friend.chatType == 1"></view>
-                    </view>
-                    <view class="friends-list-r">
-                        <view class="top">
-                            <view class="name">{{ friend.name }}</view>
-                            <view class="time">{{ changeTime(friend.lastTime) }}</view>
+            
+            <!-- 消息分组 - 今天 -->
+            <view class="message-group" v-if="todayMessages.length > 0">
+                <view class="group-title">今天</view>
+                <view class="friends">
+                    <view class="friends-list" v-for="(friend, index) in todayMessages" :key="friend.id" @tap="toChatRoom(friend)">
+                        <view class="friends-list-l">
+                            <text class="tip" v-if="friend.tip > 0">{{ friend.tip }}</text>
+                            <image :src="friend.imgUrl" class="avatar"></image>
+                            <view class="groupm" v-if="friend.chatType == 1"></view>
                         </view>
-                        <view class="news">{{ friend.message }}</view>
+                        <view class="friends-list-r">
+                            <view class="top">
+                                <view class="name">{{ friend.name }}</view>
+                                <view class="time">{{ changeTime(friend.lastTime) }}</view>
+                            </view>
+                            <view class="news">{{ friend.message }}</view>
+                        </view>
                     </view>
                 </view>
-			</view>
+            </view>
+            
+            <!-- 消息分组 - 最近七天 -->
+            <view class="message-group" v-if="weekMessages.length > 0">
+                <view class="group-title">最近七天</view>
+                <view class="friends">
+                    <view class="friends-list" v-for="(friend, index) in weekMessages" :key="friend.id" @tap="toChatRoom(friend)">
+                        <view class="friends-list-l">
+                            <text class="tip" v-if="friend.tip > 0">{{ friend.tip }}</text>
+                            <image :src="friend.imgUrl" class="avatar"></image>
+                            <view class="groupm" v-if="friend.chatType == 1"></view>
+                        </view>
+                        <view class="friends-list-r">
+                            <view class="top">
+                                <view class="name">{{ friend.name }}</view>
+                                <view class="time">{{ changeTime(friend.lastTime) }}</view>
+                            </view>
+                            <view class="news">{{ friend.message }}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
+            
+            <!-- 更早的消息 -->
+            <view class="message-group" v-if="earlierMessages.length > 0">
+                <view class="group-title">更早</view>
+                <view class="friends">
+                    <view class="friends-list" v-for="(friend, index) in earlierMessages" :key="friend.id" @tap="toChatRoom(friend)">
+                        <view class="friends-list-l">
+                            <text class="tip" v-if="friend.tip > 0">{{ friend.tip }}</text>
+                            <image :src="friend.imgUrl" class="avatar"></image>
+                            <view class="groupm" v-if="friend.chatType == 1"></view>
+                        </view>
+                        <view class="friends-list-r">
+                            <view class="top">
+                                <view class="name">{{ friend.name }}</view>
+                                <view class="time">{{ changeTime(friend.lastTime) }}</view>
+                            </view>
+                            <view class="news">{{ friend.message }}</view>
+                        </view>
+                    </view>
+                </view>
+            </view>
 		</view>
 	</view>
 </template>
@@ -70,7 +117,10 @@
                 requestTime: '', // 最后申请时间
                 isInit: false, // 是否初始化
                 isRefresh: false,
-                isNoFriendList: false
+                isNoFriendList: false,
+                todayMessages: [], // 今天的消息
+                weekMessages: [], // 最近七天的消息
+                earlierMessages: [] // 更早的消息
 			}
 		},
         onLoad() {
@@ -81,6 +131,10 @@
             // 获取登录信息
             this.getStorages()
             // 页面加载时获取好友请求
+            this.getHomeInfo()
+        },
+        onPullDownRefresh() {
+            this.getStorages()
             this.getHomeInfo()
         },
         onUnload() {
@@ -97,10 +151,6 @@
                 this.receiveGroupSocketMsg()
                 // 离开聊天室
                 this.receiveLeaveChatRoomSocketMsg()
-            },
-            onPullDownRefresh() {
-                this.getStorages()
-                this.getHomeInfo()
             },
             changeTime(time) {
                 return dateTime(time)
@@ -182,6 +232,10 @@
                         e.tip++
                         this.friendsList.splice(i, 1)
                         this.friendsList.unshift(e)
+                        
+                        // 更新消息分组
+                        this.updateGroupsAfterNewMessage(e)
+                        break
                     }
                 }
             },
@@ -213,6 +267,10 @@
                         e.tip++
                         this.friendsList.splice(i, 1)
                         this.friendsList.unshift(e)
+                        
+                        // 更新消息分组
+                        this.updateGroupsAfterNewMessage(e)
+                        break
                     }
                 }
             },
@@ -243,6 +301,7 @@
                     if (this.friendsList?.length > 0 || this.requestData > 0) {
                         this.friendsList = sortByTip(this.friendsList, 'lastTime', 0)
                         this.isNoFriendList = false
+                        this.groupMessagesByDate()
                     } else {
                         this.isNoFriendList = true
                     }
@@ -257,7 +316,7 @@
                     uni.stopPullDownRefresh()
                 })   
             },
-            // 好友列表
+
             getFriendsList() {
                 return new Promise((resolve, reject) => {
                     uni.request({
@@ -304,7 +363,7 @@
                     })
                 })
             },
-            // 获取群列表
+            // 好友列表
             getGroup() {
                 return new Promise((resolve, reject) => {
                     uni.request({
@@ -343,6 +402,62 @@
                     })
                 })
             },
+            
+            // 按日期对消息进行分组
+            groupMessagesByDate() {
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                
+                const oneWeekAgo = new Date(today)
+                oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+                
+                this.todayMessages = []
+                this.weekMessages = []
+                this.earlierMessages = []
+                
+                this.friendsList.forEach(friend => {
+                    if (!friend.lastTime) return
+                    
+                    const messageDate = new Date(friend.lastTime)
+                    messageDate.setHours(0, 0, 0, 0)
+                    
+                    if (messageDate.getTime() === today.getTime()) {
+                        this.todayMessages.push(friend)
+                    } else if (messageDate >= oneWeekAgo) {
+                        this.weekMessages.push(friend)
+                    } else {
+                        this.earlierMessages.push(friend)
+                    }
+                })
+            },
+            
+            // 当接收新消息时更新分组
+            updateGroupsAfterNewMessage(updatedFriend) {
+                const today = new Date()
+                today.setHours(0, 0, 0, 0)
+                
+                const messageDate = new Date(updatedFriend.lastTime)
+                messageDate.setHours(0, 0, 0, 0)
+                
+                // 从所有分组中移除该好友
+                this.todayMessages = this.todayMessages.filter(f => f.id !== updatedFriend.id)
+                this.weekMessages = this.weekMessages.filter(f => f.id !== updatedFriend.id)
+                this.earlierMessages = this.earlierMessages.filter(f => f.id !== updatedFriend.id)
+                
+                // 添加到合适的分组
+                if (messageDate.getTime() === today.getTime()) {
+                    this.todayMessages.unshift(updatedFriend)
+                } else {
+                    const oneWeekAgo = new Date(today)
+                    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
+                    
+                    if (messageDate >= oneWeekAgo) {
+                        this.weekMessages.unshift(updatedFriend)
+                    } else {
+                        this.earlierMessages.unshift(updatedFriend)
+                    }
+                }
+            },
             toSearch() {
                 uni.navigateTo({
                     url: '../search/index'
@@ -367,134 +482,243 @@
 		}
 	}
 </script>
-
 <style lang="scss">
     @import "../../commons/css/mycss.scss"; // 引入公共样式
+    @import "../../commons/css/top-bar.scss"; // 引入统一顶部栏样式
+    
+    /* 全局容器 */
     .content {
-        height: 100%;
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        background-color: #f7f8fc; // 更柔和的背景色
+        position: relative;
+        padding-bottom: env(safe-area-inset-bottom); // 适配iPhone底部安全区域
+    }
+
+    /* 主内容区域 */
+    .main {
+        flex: 1;
+        padding: 20rpx 24rpx;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    /* 下拉刷新提示 */
+    .refresh {
         display: flex;
         flex-direction: column;
         align-items: center;
-        background-color: #f5f5f5; // 添加背景色
-        padding: 200rpx 20rpx; // 增加左右内边距以适配小屏幕
-    }
-
-    .main {
-        margin: 0rpx 20rpx 0; // 调整顶部和左右间距
-        width: 100%;
-    }
-
-    .refresh {
-        text-align: center;
-        image {
-            width: 32rpx;
-            height: 32rpx;
+        padding: 20rpx 0;
+        color: #8a8a8a;
+        
+        .refresh-icon {
+            width: 36rpx;
+            height: 36rpx;
+            animation: spin 1.2s linear infinite; // 添加旋转动画
         }
 
         .ref-title {
-            padding-top: 10rpx;
-            font-size: $uni-font-size-base;
-            color: rgba(39, 40, 50, 0.4);
-            line-height: 40rpx;
+            margin-top: 10rpx;
+            font-size: 26rpx;
+            color: #8a8a8a;
+            line-height: 1.5;
         }
     }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* 空状态 */
     .noone {
-        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 120rpx 0;
+        
         image {
-            height:250rpx;
-            width: 150rpx;
+            height: 280rpx;
+            width: 180rpx;
+            opacity: 0.8;
+            margin-bottom: 20rpx;
         }
+        
         .no-friends {
-            padding: 32rpx 0;
-            font-size: $uni-font-size-base;
-            color: rgba(39, 40, 50, 0.4);
-            line-height: 40rpx;
+            font-size: 28rpx;
+            color: #8a8a8a;
+            margin-bottom: 40rpx;
         }
+        
         .search-bt {
-            display: inline-block;
-            width: 240rpx;
-            line-height: 96rpx;
-            height: 96rpx;
-            background: $uni-color-primary;
-            box-shadow: 0px 52rpx 36rpx -32rpx rgba(255,255,49, 0.4);
-            border-radius: 48rpx;
+            font-size: 28rpx;
+            color: #ffffff;
+            padding: 20rpx 40rpx;
+            background: linear-gradient(135deg, #6e8efb, #5d7df9); // 渐变按钮
+            border-radius: 40rpx;
+            box-shadow: 0 10rpx 20rpx rgba(93, 125, 249, 0.3);
+            transition: transform 0.2s;
+            
+            &:active {
+                transform: scale(0.95);
+                opacity: 0.9;
+            }
         }
     }
-    .friends-list {
-        background: #ffffff; // 白色背景
-        border-radius: 16rpx; // 圆角
-        box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1); // 添加阴影
-        margin-bottom: 20rpx; // 卡片间距
-        padding: 20rpx; // 增加内边距
-        display: flex;
-        align-items: center;
-        &:active, &:hover { // 添加点击和悬停效果
-            background: #f0f0f0; // 点击时背景色变化
+    
+    /* 消息分组 */
+    .message-group {
+        margin-bottom: 24rpx;
+        
+        .group-title {
+            font-size: 24rpx;
+            color: #8a8a8a;
+            padding: 16rpx 8rpx;
+            font-weight: 500;
         }
-        .friends-list-l {
-            position: relative; // 确保子元素相对于父元素定位
-            margin-right: 20rpx; // 增加左右间距
+    }
 
-            image {
-                width: 56rpx; // 调整头像大小
-                height: 56rpx;
-                border-radius: 50%; // 圆形头像
-                background-color: $uni-color-primary;
+    /* 好友和群组列表 */
+    .friends {
+        .friends-list {
+            background: #ffffff;
+            border-radius: 20rpx;
+            box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.05);
+            margin-bottom: 20rpx;
+            padding: 24rpx;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.15s ease, background-color 0.15s ease;
+            
+            &:active {
+                transform: scale(0.98);
+                background: #f9f9f9;
             }
-            .tip {
+            
+            /* 波纹效果 */
+            &::after {
+                content: '';
+                display: block;
                 position: absolute;
-                z-index: 10;
-                top: -8rpx; // 调整到图片右上方
-                right: -8rpx; // 靠右对齐
-                min-width: 36rpx;
-                line-height: 36rpx;
-                height: 36rpx;
-                font-size: $uni-font-size-sm;
-                background: $uni-color-warning;
-                border-radius: $uni-border-radius-circle;
-                color: $uni-text-color-inverse;
-                text-align: center;
+                width: 100%;
+                height: 100%;
+                top: 0;
+                left: 0;
+                pointer-events: none;
+                background-image: radial-gradient(circle, #5d7df9 10%, transparent 10.01%);
+                background-repeat: no-repeat;
+                background-position: 50%;
+                transform: scale(10, 10);
+                opacity: 0;
+                transition: transform .5s, opacity 0.8s;
             }
-            .groupm {
-                position: absolute;
-                z-index: 10;
-                bottom: 8rpx;
-                top: -8rpx; // 调整到图片右上方
-                right: 0rpx; // 靠右对齐
-                width: 16rpx;
-                height: 16rpx;
-                background: $uni-color-primary;
-                border-radius: 8rpx;
-                opacity: 0.8;
-                box-shadow: 0 2rpx 12rpx rgba(0, 0, 0, 0.1);
+            
+            &:active::after {
+                transform: scale(0, 0);
+                opacity: 0.2;
+                transition: 0s;
             }
-        }
-
-        .friends-list-r {
-            flex: 1; // 占满剩余空间
-            .top {
-                display: flex;
-                justify-content: space-between; // 左右对齐
-                align-items: center;
-                margin-bottom: 8rpx; // 增加间距
-                .name {
-                    font-size: 30rpx; // 调整字体大小
+            
+            .friends-list-l {
+                position: relative;
+                margin-right: 24rpx;
+                
+                /* 头像样式 */
+                image.avatar {
+                    width: 88rpx;
+                    height: 88rpx;
+                    border-radius: 44rpx; // 圆形头像
+                    box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+                    border: 3rpx solid #ffffff;
+                    object-fit: cover; // 确保图片正确裁剪
+                }
+                
+                /* 消息提示徽章 */
+                .tip {
+                    position: absolute;
+                    top: -8rpx;
+                    right: -8rpx;
+                    min-width: 36rpx;
+                    height: 36rpx;
+                    padding: 0 8rpx;
+                    line-height: 36rpx;
+                    font-size: 22rpx;
                     font-weight: 500;
-                    color: #333333;
+                    background: #ff5252; // 醒目的红色
+                    color: #ffffff;
+                    border-radius: 18rpx;
+                    text-align: center;
+                    box-shadow: 0 4rpx 8rpx rgba(255, 82, 82, 0.3);
+                    z-index: 10;
                 }
-                .time {
-                    font-size: 26rpx; // 调整字体大小
-                    color: #999999;
+                
+                /* 群组标识 */
+                .groupm {
+                    position: absolute;
+                    bottom: 6rpx;
+                    right: 6rpx;
+                    width: 24rpx;
+                    height: 24rpx;
+                    background: #5d7df9; // 与应用主色调一致
+                    border-radius: 12rpx;
+                    border: 3rpx solid #ffffff;
+                    box-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
+                    z-index: 5;
                 }
             }
-            .news {
-                font-size: 26rpx; // 调整字体大小
-                color: #666666;
-                line-height: 36rpx; // 调整行高
-                display: -webkit-box;
-                -webkit-box-orient: vertical;
-                -webkit-line-clamp: 1;
+            
+            .friends-list-r {
+                flex: 1;
                 overflow: hidden;
+                
+                .top {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 10rpx;
+                    
+                    .name {
+                        font-size: 32rpx;
+                        font-weight: 600;
+                        color: #333333;
+                        max-width: 70%;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    }
+                    
+                    .time {
+                        font-size: 24rpx;
+                        color: #999999;
+                    }
+                }
+                
+                .news {
+                    font-size: 26rpx;
+                    color: #666666;
+                    line-height: 1.5;
+                    display: -webkit-box;
+                    -webkit-box-orient: vertical;
+                    -webkit-line-clamp: 1;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    max-width: 100%;
+                }
+            }
+        }
+    }
+    
+    /* 特殊样式：好友申请项 */
+    .friends-list:first-child {
+        border-left: 4rpx solid #5d7df9; // 左侧边框强调
+        
+        .friends-list-r {
+            .name {
+                color: #5d7df9;
             }
         }
     }

@@ -522,7 +522,7 @@ export default {
 }
 </script>
 <style lang="scss">
-@import "../../commons/css/mycss.scss"; // 引入公共样式
+@import "../../commons/css/top-bar.scss"; // 引入公共样式
 .displayNone {
     display: none;
 }
@@ -540,14 +540,15 @@ page {
     justify-content: flex-start;
     align-items: center;
 
-    .group-img {
+    .group-img, uni-image {
         // position: absolute;
-        bottom: 10rpx;
-        right: $uni-spacing-col-base;
+        display: contents;
         width: 78rpx;
         height: 78rpx;
         image {
-            border-radius: 16rpx
+            border-radius: 16rpx;
+            width: 48rpx;
+            height: 48rpx;
         }
     }
 }

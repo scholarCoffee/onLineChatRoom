@@ -4,12 +4,6 @@
             <view class="top-bar-left" @tap="navigateBack">
                 <image src="../../static/user/back.png" class="back-img"></image>
             </view>
-            <view class="top-bar-center"></view>
-            <view class="top-bar-right">
-                <view class="more-img">
-                    <image src="../../static/user/more.png" class="more-img"></image>
-                </view>
-            </view>
         </view>
         <view class="bg">
             <image :src="groupInfo.imgurl" class="bg-img" mode="aspectFill"></image>
@@ -161,9 +155,9 @@
                 } 
             },
             navigateBack() {
-                uni.navigateTo({
-                    url: '../index/index'
-                })
+                uni.navigateBack({
+                    delta: 1
+                });
             },
             chooseImage() {
                 if (!this.isGroupMaster) return
@@ -391,11 +385,13 @@
     }
 </script>
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
+    @import "../../commons/css/top-bar.scss"; // 引入公共样式
+    @import "../../commons/css/mycss.scss"; // 引入公共样式   
     .clear {
         opacity: 0;
         clear: both;
     }
+    
     .bg {
         width: 100%;
         height: 100%;
@@ -404,37 +400,52 @@
         top: 0;
         left: 0;
         z-index: -1;
+        
         .bg-img {
             width: 100%;
             height: 750rpx;
+            object-fit: cover; // 确保图片适当覆盖区域
         }
     }
+    
+    .top-bar {
+        &.bgbar {
+            background-color: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+        }
+    }
+    
     .main {
         padding-top: 400rpx;
+        padding-bottom: 20rpx;
         .main-inner {
             width: 100%;
             min-height: 700rpx;
             background-color: #fff;
             border-radius: 40rpx 40rpx 0 0;
+            box-shadow: 0 -5rpx 20rpx rgba(0, 0, 0, 0.05);
         }
+        
         .inf {
-            padding: $uni-spacing-row-base $uni-spacing-col-base 0;
-            padding-bottom: 40rpx;
+            padding: $uni-spacing-row-base $uni-spacing-col-base 40rpx;
             box-sizing: border-box;
             border-bottom: 1px solid #eee;
+            
             .name {
                 float: left;
-                font-size: 48rpx;
+                font-size: 40rpx;
                 font-weight: 600;
                 color: #272832;
                 line-height: 66rpx;
             }
+            
             .time {
                 float: right;
-                font-size: 28rpx;
+                font-size: 26rpx;
                 color: rgba(39, 40, 50, 0.5);
                 line-height: 66rpx;
             }
+            
             .notice {
                 padding-top: 20rpx;
                 font-size: 28rpx;
@@ -447,8 +458,10 @@
                 overflow: hidden;
             }
         }
+        
         .member {
             border-bottom: 1px solid #eee;
+            
             .top {
                 padding: $uni-spacing-row-base $uni-spacing-col-base 0;
                 box-sizing: border-box;
@@ -457,179 +470,185 @@
                 display: flex;
                 align-items: center;
                 justify-content: space-between;
+                
                 .title {
                     flex: 1;
-                    font-size: 36rpx;
+                    font-size: 32rpx;
                     font-weight: 600;
                     color: #272832;
                 }
+                
                 .more {
-                    float: right;
-                    padding-right: 20rpx;
-                    font-size: 32rpx;
+                    font-size: 28rpx;
                     font-weight: 400;
-                    color: rgba(39, 40, 50, 0.6)
+                    color: rgba(39, 40, 50, 0.6);
+                    padding-right: 10rpx;
                 }
-                .more-img {
-                    width: 16rpx;
-                    height: 16rpx;
-                }
-
             }
+            
             .member-ls {
                 width: 100%;
-                padding: 20rpx 16rpx;
+                padding: 20rpx;
                 box-sizing: border-box;
+                display: flex;
+                flex-wrap: wrap;
             }
+            
             .member-li {
-                padding-bottom: 32rpx;
                 width: 20%;
-                float: left;
+                padding: 10rpx;
+                box-sizing: border-box;
                 text-align: center;
+                margin-bottom: 20rpx;
+                
                 .imgs {
-                    display: inline-block;
                     position: relative;
-                    width: 104rpx;
-                    height: 104rpx;
+                    width: 100rpx;
+                    height: 100rpx;
+                    margin: 0 auto;
                     border-radius: 20rpx;
+                    overflow: hidden;
                     background-color: $uni-color-primary;
                 }
+                
                 .user-img {
-                    width: 104rpx;
-                    height: 104rpx;
+                    width: 100%;
+                    height: 100%;
                     border-radius: 20rpx;
+                    object-fit: cover;
                 }
+                
                 .delete-img {
                     position: absolute;
-                    top: -16rpx;
-                    right: -16rpx;
+                    top: -10rpx;
+                    right: -10rpx;
                     z-index: 10;
-                    width: 40rpx;
-                    height: 40rpx;
+                    width: 36rpx;
+                    height: 36rpx;
+                    background-color: #fff;
+                    border-radius: 50%;
                 }
+                
                 .name {
-                    padding:0 8rpx;
-                    font-size: 28rpx;
+                    margin-top: 10rpx;
+                    font-size: 24rpx;
                     color: #272832;
-                    line-height: 40rpx;
-                    display: --webkit-box;
+                    line-height: 34rpx;
+                    display: -webkit-box;
                     -webkit-box-orient: vertical;
                     -webkit-line-clamp: 1;
                     overflow: hidden; 
                 }
+                
                 .user-add {
-                    width: 104rpx;
-                    height: 104rpx;
-                    padding: 32rpx;
+                    width: 100rpx;
+                    height: 100rpx;
+                    padding: 28rpx;
                     box-sizing: border-box;
+                    border-radius: 20rpx;
+                    border: 1rpx dashed #ccc;
                 }
             }
         }
+        
         .mitem {
             display: flex;
             flex-direction: column;
             padding-top: 22rpx;
             width: 100%;
             border-bottom: 1px solid #eee;
+            
             .row {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                justify-content: flex-start;
+                padding: 0 30rpx;
+                min-height: 100rpx;
                 border-bottom: 1px solid $uni-border-color; 
+                
+                &:last-child {
+                    border-bottom: none;
+                }
             }
+            
             .title {
-                flex: none;
-                padding: 0 $uni-spacing-col-base;
+                width: 150rpx;
                 font-size: $uni-font-size-lg;
                 color: $uni-text-color;
-                line-height: 112rpx;
+                padding: 20rpx 0;
             }
-            .user-header {
-                flex: auto;
-            }
-            .head {
-                height: 108rpx;
-                display: flex;
-                align-items: center;
-            }
-            .user-img {
-                width: 46rpx;
-                height: 46rpx;
-                border-radius: $uni-border-radius-base;
-            }
-            .bg-inner-img {
-                width: 98rpx;
-                height: 98rpx;
-                border-radius: $uni-border-radius-base;
-            }
+            
             .cont {
-                flex: auto;
-                align-items: center;
+                flex: 1;
                 font-size: $uni-font-size-lg;
                 color: $uni-text-color-grey;
-                line-height: 112rpx;
-                height: 112rpx;
+                padding: 20rpx 0;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
             }
-            .group-img {
-                width: 80rpx;
-                height: 80rpx;
-                border-radius: 20rpx;
-                margin-top: 16rpx;
+            
+            .bg-inner-img {
+                width: 90rpx;
+                height: 90rpx;
+                border-radius: 10rpx;
+                margin: 10rpx 0;
+                object-fit: cover;
             }
+            
             .more {
-                flex: none;
-                height: 112rpx;
-                display: flex;
-                align-items: center;
+                padding-left: 20rpx;
+                
                 image {
-                    width: 40rpx;
-                    height: 40rpx
+                    width: 32rpx;
+                    height: 32rpx;
                 }
             }
-            .switch {
-                margin-right: 22rpx;
-            }
         }
+        
         .bt2 {
+            margin: 40rpx auto;
             text-align: center;
-            font-size: $uni-font-size-lg;
+            font-size: 32rpx;
             color: $uni-color-warning;
             line-height: 88rpx;
+            border-radius: 44rpx;
+            background-color: #f8f8f8;
         }
     }
+    
     .modify {
-        position:fixed; 
+        position: fixed; 
         z-index: 1001;
         left: 0;
         width: 100%;
         height: 100%;
         background: #fff;
+        
         .modify-header {
             width: 100%;
-            height: 160rpx; // 调整高度以适配不同屏幕
+            height: 88rpx;
             padding-top: var(--status-bar-height);
             display: flex;
             flex-direction: row;
             align-items: center;
             border-bottom: 1px solid $uni-border-color;
+            
             .close {
                 padding-left: $uni-spacing-col-base;
-                padding-right: 20rpx;
                 font-size: $uni-font-size-lg;
                 color: $uni-text-color;
                 line-height: 88rpx;
             }
+            
             .title {
-                flex: auto;
+                flex: 1;
                 text-align: center;
                 font-size: $uni-font-size-lg;
                 color: $uni-text-color;
                 line-height: 88rpx;
             }
+            
             .define {
                 padding-right: $uni-spacing-col-base;
                 font-size: $uni-font-size-lg;
@@ -637,29 +656,17 @@
                 line-height: 88rpx;
             }
         }
+        
         .modify-main {
             display: flex;
             padding: $uni-spacing-col-base;
             flex-direction: column;
-            .modify-pwd {
-                margin-bottom: $uni-spacing-col-base;
-                padding: 12rpx 20rpx;
-                box-sizing: border-box;
-                flex: auto;
-                width: 100%;
-                height: 88rpx;
-                background-color: $uni-bg-color-grey;
-                border-radius: $uni-border-radius-base;
-                font-size: $uni-font-size-lg;
-                color: $uni-text-color;
-                line-height: 88rpx;
-            }
+            
             .modify-content {
-                padding: 16rpx 20rpx;
-                flex: auto;
+                padding: 20rpx;
                 width: 100%;
                 box-sizing: border-box;
-                height: 386rpx;
+                height: 300rpx;
                 background: $uni-bg-color-grey;
                 border-radius: $uni-border-radius-base;
                 font-size: $uni-font-size-lg;
@@ -668,11 +675,24 @@
             }
         }
     }
-    .top-bar {
-        transition: transform 0.3s ease-in-out; // 添加平滑过渡效果
-        transform: translateY(0); // 默认显示
+    
+    /* #ifdef MP */
+    .top-bar, .modify-header {
+        padding-top: 40rpx; // 小程序状态栏适配
     }
-    .top-bar.hidden {
-        transform: translateY(-100%); // 隐藏时向上移动
+    
+    // 优化小程序中的按钮点击区域
+    .member-li .imgs, .bt2 {
+        position: relative;
+        
+        &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
     }
+    /* #endif */
 </style>

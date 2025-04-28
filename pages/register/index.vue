@@ -194,9 +194,6 @@
                 })
             },
             onInputUser(e) {
-
-				
-
                 // 用户名验证逻辑
                 if (this.userName.length > 0) {
                     uni.showLoading({ title: '验证中...' });
@@ -214,6 +211,11 @@
                             // 表示用户名已存在
                             if (code === 200) {
                                 if (data > 0) {
+                                    uni.showToast({
+                                        title: '用户名已被占用',
+                                        icon: 'none',
+                                        duration: 2000
+                                    });
                                     this.isUser = false; // 用户名无效
                                     this.isUserEmploy = true; // 显示用户名已占用提示
                                 } else {

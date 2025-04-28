@@ -59,7 +59,7 @@
                 </view>
                 <view class="row">
                     <view class="title">生日：</view>
-                    <view class="more">
+                    <view class="birth">
                         <picker mode="date" :value="user.birth" :start="startDate" :end="endDate" @change="bindPickerChange" v-if="id == uid">
                             <view class="uni-input">{{ user.birth }}</view>
                         </picker>
@@ -526,141 +526,214 @@
     }
 </script>
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
-    .top-bar {
-        background: rgba(255,255,255,0.96);
-        border-bottom: 1px solid $uni-border-color;
+    @import "../../commons/css/top-bar.scss"; // 引入公共顶部样式
+
+    .content {
+        background-color: #f8f8f8;
+        min-height: 100vh;
     }
+        
     .main {
-        padding-top: 240rpx;
-        display: flex;
-        flex-direction: column;
+        padding-top: 140rpx;
+        padding-bottom: 100rpx;
+        
         .column {
-            display: flex;
-            flex-direction: column;
-            padding-top: 12rpx;
-            width: 100%;
+            margin: 20rpx 30rpx;
+            background-color: #fff;
+            border-radius: 16rpx;
+            box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            
+            &.heads {
+                .row {
+                    padding: 20rpx 30rpx;
+                }
+            }
+            
             .row {
                 display: flex;
                 flex-direction: row;
                 align-items: center;
-                justify-content: flex-start;
-                border-bottom: 1px solid $uni-border-color; 
+                padding: 0 30rpx;
+                min-height: 100rpx;
+                border-bottom: 1px solid rgba(230, 230, 230, 0.5);
+                
+                &:last-child {
+                    border-bottom: none;
+                }
             }
+            
             .title {
-                flex: none;
-                padding: 0 $uni-spacing-col-base;
-                font-size: $uni-font-size-lg;
+                width: 160rpx;
+                font-size: 30rpx;
                 color: $uni-text-color;
-                line-height: 112rpx;
             }
+            
             .user-header {
-                flex: auto;
-            }
-            .head {
-                height: 108rpx;
                 display: flex;
                 align-items: center;
             }
+            
             .user-img {
-                width: 46rpx;
-                height: 46rpx;
-                border-radius: $uni-border-radius-base;
+                width: 80rpx;
+                height: 80rpx;
+                border-radius: 10rpx;
+                object-fit: cover;
             }
+            
             .cont {
-                flex: auto;
-                align-items: center;
-                font-size: $uni-font-size-lg;
+                flex: 1;
+                font-size: 30rpx;
                 color: $uni-text-color-grey;
-                line-height: 112rpx;
                 overflow: hidden;
                 text-overflow: ellipsis;
                 white-space: nowrap;
+                padding-right: 20rpx;
             }
+            
             .more {
-                flex: none;
-                height: 112rpx;
+                width: 40rpx;
+                height: 100rpx;
                 display: flex;
                 align-items: center;
+                justify-content: center;
+                
                 image {
-                    width: 80rpx;
-                    height: 28rpx
+                    width: 30rpx;
+                    height: 30rpx;
                 }
             }
+            
+            // 日期选择器样式优化
+            .uni-input {
+                font-size: 30rpx;
+                color: $uni-text-color-grey;
+            }
+            
+            // 选择器样式优化
+            .picker {
+                font-size: 30rpx;
+                color: $uni-text-color-grey;
+            }
         }
+        
         .bt2 {
-            margin: 36rpx 0;
+            margin: 40rpx auto;
+            width: 80%;
+            height: 90rpx;
+            line-height: 90rpx;
             text-align: center;
-            font-size: $uni-font-size-lg;
+            font-size: 32rpx;
             color: $uni-color-warning;
-            line-height: 88rpx;
+            background-color: #fff;
+            border-radius: 45rpx;
+            box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05);
         }
     }
+    
     .modify {
-        position:fixed; 
+        position: fixed; 
         z-index: 1001;
         left: 0;
         width: 100%;
         height: 100%;
         background: #fff;
+        
         .modify-header {
             width: 100%;
-            height: 160rpx; // 调整高度以适配不同屏幕
+            height: 88rpx;
             padding-top: var(--status-bar-height);
             display: flex;
             flex-direction: row;
             align-items: center;
             border-bottom: 1px solid $uni-border-color;
+            
             .close {
-                padding-left: $uni-spacing-col-base;
-                padding-right: 20rpx;
-                font-size: $uni-font-size-lg;
-                color: $uni-text-color;
-                line-height: 88rpx;
-            }
-            .title {
-                flex: auto;
+                width: 120rpx;
                 text-align: center;
-                font-size: $uni-font-size-lg;
+                font-size: 30rpx;
                 color: $uni-text-color;
                 line-height: 88rpx;
             }
+            
             .define {
-                padding-right: $uni-spacing-col-base;
-                font-size: $uni-font-size-lg;
+                width: 120rpx;
+                text-align: center;
+                font-size: 30rpx;
                 color: $uni-color-success;
                 line-height: 88rpx;
             }
         }
+        
         .modify-main {
             display: flex;
-            padding: $uni-spacing-col-base;
+            padding: 30rpx;
             flex-direction: column;
+            
             .modify-pwd {
-                margin-bottom: $uni-spacing-col-base;
-                padding: 12rpx 20rpx;
+                margin-bottom: 30rpx;
+                padding: 20rpx;
                 box-sizing: border-box;
-                flex: auto;
                 width: 100%;
                 height: 88rpx;
                 background-color: $uni-bg-color-grey;
-                border-radius: $uni-border-radius-base;
-                font-size: $uni-font-size-lg;
+                border-radius: 16rpx;
+                font-size: 30rpx;
                 color: $uni-text-color;
-                line-height: 88rpx;
             }
+            
             .modify-content {
-                padding: 16rpx 20rpx;
-                flex: auto;
+                padding: 20rpx;
                 width: 100%;
                 box-sizing: border-box;
-                height: 386rpx;
+                height: 300rpx;
                 background: $uni-bg-color-grey;
-                border-radius: $uni-border-radius-base;
-                font-size: $uni-font-size-lg;
+                border-radius: 16rpx;
+                font-size: 30rpx;
                 color: $uni-text-color;
-                line-height: 44rpx;
+                line-height: 42rpx;
             }
         }
     }
+    
+    /* #ifdef MP */
+    .top-bar {
+        padding-top: 40rpx; // 小程序状态栏适配
+    }
+    
+    .modify-header {
+        padding-top: 40rpx;
+    }
+    
+    // 修复小程序中的表单元素行高问题
+    .picker, .uni-input {
+        height: 60rpx;
+        line-height: 60rpx;
+    }
+    
+    // 优化小程序按钮
+    .bt2 {
+        position: relative;
+        
+        &:after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+    }
+    /* #endif */
+    
+    /* #ifdef H5 */
+    // 优化H5的点击反馈效果
+    .row, .bt2 {
+        transition: background-color 0.2s;
+        
+        &:active {
+            background-color: #f8f8f8;
+        }
+    }
+    /* #endif */
 </style>

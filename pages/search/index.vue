@@ -347,7 +347,7 @@
 </script>
 
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
+    @import "../../commons/css/top-bar.scss"; // 引入公共样式
 	.top-bar {     
         .search-div {
             flex: 1;
@@ -355,100 +355,130 @@
             align-items: center;
             justify-content: flex-start;
             flex-direction: row;
+            padding: 0 30rpx;
+            height: 88rpx;
+            
             .search {
-                padding: 0 60rpx 0 12rpx;
+                flex: 1;
+                padding: 0 60rpx 0 20rpx;
                 height: 60rpx;
-                border-radius: 10rpx;
+                border-radius: 30rpx; // 更圆润的圆角
                 background: $uni-bg-color-grey;
+                font-size: 28rpx;
             }
             .search-img {
                 width: 40rpx;
                 height: 40rpx;
-                margin-left: 20rpx;
-                margin-right: 40rpx;
+                margin-right: 20rpx;
             }
         }
+        
 	}
     .main {
-        padding: 240rpx $uni-spacing-col-base;
+        padding: 180rpx $uni-spacing-col-base 120rpx; // 调整顶部间距适配固定的搜索栏
+        
         .result {
             padding-top: $uni-spacing-col-base;
+            
             .title {
-                font-size: 44rpx;
+                font-size: 36rpx;
                 font-weight: 600;
                 color: $uni-text-color;
                 line-height: 60rpx;
+                margin-bottom: 20rpx;
             }
         }
-        .list{
+        
+        .list {
             width: 100%;
-            height: 100rpx;
+            height: auto; // 自适应高度
             padding: 20rpx 0;
+            display: flex;
+            align-items: center;
+            border-bottom: 1px solid rgba(230, 230, 230, 0.5);
+            
             image {
-                float: left;
                 width: 80rpx;
                 height: 80rpx;
                 border-radius: $uni-border-radius-base;
-                background-color: rgba(255, 228, 49, 1)
+                background-color: #f8f8f8;
             }
         }
+        
         .names {
-            float: left;
+            flex: 1;
             padding-left: $uni-spacing-col-base;
+            overflow: hidden; // 防止文本溢出
         }
+        
         .name {
-            font-size: 36rpx;
+            font-size: 32rpx;
             font-weight: 500;
             color: $uni-text-color;
-            line-height: 50rpx;
+            line-height: 44rpx;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+        
         .email {
             font-size: $uni-font-size-sm;
-            line-height: 28rpx;
-            color: $uni-text-color;
+            line-height: 36rpx;
+            color: $uni-text-color-grey;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+        
         .right-bt {
-            float: right;
-            width: 120rpx;
-            height: 48rpx;
-            border-radius: 24rpx;
+            min-width: 120rpx;
+            height: 56rpx;
+            border-radius: 28rpx;
             font-size: $uni-font-size-sm;
-            font-family: PingFangSC-Medium;
-            line-height: 48rpx;
-            margin-top: 16rpx; 
+            line-height: 56rpx;
             text-align: center;
+            margin-left: 16rpx;
+            box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.1);
         }
+        
         .send {
-            color: $uni-text-color;
+            color: #fff;
             background: $uni-color-primary;
         }
+        
         .add {
             color: $uni-color-success;
             background: rgba(74, 170, 255, 0.1);
         }
     }
+    
     .modify {
-        position:fixed; 
+        position: fixed; 
         z-index: 1002;
         left: 0;
         width: 100%;
         height: 100%;
         background: #fff;
+        
         .modify-header {
             width: 100%;
-            height: 160rpx; // 调整高度以适配不同屏幕
+            height: 88rpx;
             padding-top: var(--status-bar-height);
             display: flex;
             flex-direction: row;
             align-items: center;
+            justify-content: space-between;
             border-bottom: 1px solid $uni-border-color;
+            
             .close {
                 padding-left: $uni-spacing-col-base;
-                padding-right: 20rpx;
                 font-size: $uni-font-size-lg;
                 color: $uni-text-color;
                 line-height: 88rpx;
             }
+            
             .title {
                 flex: auto;
                 text-align: center;
@@ -456,6 +486,7 @@
                 color: $uni-text-color;
                 line-height: 88rpx;
             }
+            
             .define {
                 padding-right: $uni-spacing-col-base;
                 font-size: $uni-font-size-lg;
@@ -463,29 +494,17 @@
                 line-height: 88rpx;
             }
         }
+        
         .modify-main {
             display: flex;
             padding: $uni-spacing-col-base;
             flex-direction: column;
-            .modify-pwd {
-                margin-bottom: $uni-spacing-col-base;
-                padding: 12rpx 20rpx;
-                box-sizing: border-box;
-                flex: auto;
-                width: 100%;
-                height: 88rpx;
-                background-color: $uni-bg-color-grey;
-                border-radius: $uni-border-radius-base;
-                font-size: $uni-font-size-lg;
-                color: $uni-text-color;
-                line-height: 88rpx;
-            }
+            
             .modify-content {
-                padding: 16rpx 20rpx;
-                flex: auto;
+                padding: 20rpx;
                 width: 100%;
                 box-sizing: border-box;
-                height: 386rpx;
+                height: 300rpx;
                 background: $uni-bg-color-grey;
                 border-radius: $uni-border-radius-base;
                 font-size: $uni-font-size-lg;
@@ -494,4 +513,14 @@
             }
         }
     }
+    
+    /* #ifdef MP */
+    .top-bar {
+        padding-top: 40rpx; // 小程序状态栏高度适配
+    }
+    
+    .modify-header {
+        padding-top: 40rpx;
+    }
+    /* #endif */
 </style>

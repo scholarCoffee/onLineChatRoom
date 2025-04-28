@@ -309,7 +309,45 @@
 </script>
 
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
+    @import "../../commons/css/top-bar.scss"; // 引入公共样式
+    
+    .top-bar {
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 88rpx;
+        padding-top: var(--status-bar-height);
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(230, 230, 230, 0.5);
+    }
+    
+    .top-bar-title {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+        font-size: 32rpx;
+        font-weight: 500;
+        color: #333;
+        margin-top: calc(var(--status-bar-height) / 2);
+    }
+    
+    .top-bar-right {
+        position: absolute;
+        right: 30rpx;
+        height: 88rpx;
+        display: flex;
+        align-items: center;
+        
+        image {
+            width: 50rpx;
+            height: 50rpx;
+        }
+    }
+    
 	.bg {
         position: fixed;
         z-index: -2;
@@ -317,10 +355,12 @@
         left: 0;
         width: 100%;
         height: 100%;
+        
         .bg-bai {
             width: 100%;
             height: 100%;
         }
+        
         .bg-img {
             opacity: 0.4;
             position: absolute;
@@ -330,108 +370,178 @@
             width: 110%;
             height: 110%;
             filter: blur(16px);
+            object-fit: cover;
         }
     }
+    
     .main {
         text-align: center;
-        padding-top: 240rpx;
+        padding-top: 180rpx;
+        padding-bottom: 150rpx;
+        
         .user-header {
             position: relative;
-            width: 412rpx;
-            height: 412rpx;
+            width: 350rpx;
+            height: 350rpx;
             margin: 0 auto;
+            
             .sex {
                 position: absolute;
                 z-index: 11;
-                right: 22rpx;
-                bottom: 22rpx;
-                width: 64rpx;
-                height: 64rpx;
-                border-radius: $uni-border-radius-circle;
+                right: 20rpx;
+                bottom: 20rpx;
+                width: 60rpx;
+                height: 60rpx;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.1);
+                
                 image {
-                    padding: 16rpx;
                     width: 32rpx;
                     height: 32rpx;
                 }
             }
+            
             .user-img {
                 z-index: 10;
-                top: 0;
-                width: 400rpx;
-                height: 400rpx;
-                border-radius: 48rpx;
-                border: 6px solid rgba(255, 255, 255, 1);
-                box-shadow: 0 36rpx 40rpx 0rpx rgba(39, 40, 50, 0.1);
+                width: 100%;
+                height: 100%;
+                border-radius: 30rpx;
+                border: 6rpx solid #fff;
+                box-shadow: 0 10rpx 30rpx rgba(0, 0, 0, 0.1);
+                object-fit: cover;
             }
         }
-        .user-imf {
-            padding-top: 42rpx;
+        
+        .user-img {
+            padding: 40rpx 30rpx 0;
+            
             .name {
-                font-size: 52rpx;
-                font-weight: 500;
+                font-size: 44rpx;
+                font-weight: 600;
                 color: $uni-text-color;
-                line-height: 74rpx;
+                line-height: 60rpx;
+                margin-bottom: 10rpx;
             }
+            
             .nick {
-                font-size: $uni-font-size-base;
-                color:  $uni-text-color;
+                font-size: 30rpx;
+                color: $uni-text-color-grey;
                 line-height: 40rpx;
+                margin-bottom: 20rpx;
             }
+            
             .intr {
-                padding-top: 20rpx 100rpx;
-                font-size: $uni-font-size-base;
-                font-weight: 300;
-                color:  $uni-text-color;
-                line-height: 48rpx;
+                font-size: 28rpx;
+                line-height: 40rpx;
+                color: $uni-text-color-grey;
+                padding: 0 60rpx;
+                display: -webkit-box;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 3;
+                overflow: hidden;
             }
         }
     }
+    
     .bottom-bar {
-        bottom-btn {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        height: 120rpx;
+        padding: 20rpx 30rpx;
+        box-sizing: border-box;
+        background-color: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        box-shadow: 0 -2rpx 10rpx rgba(0, 0, 0, 0.05);
+        
+        .bottom-btn {
+            flex: 1;
+            height: 80rpx;
+            line-height: 80rpx;
+            text-align: center;
+            font-size: 30rpx;
+            border-radius: 40rpx;
+            margin: 0 15rpx;
+        }
+        
+        .btn1 {
             background-color: $uni-color-primary;
-            margin: 0 $uni-spacing-col-base;
+            color: #fff;
         }
     }
+    
     .add-misg {
         position: fixed;
         bottom: 0;
         width: 100%;
         box-sizing: border-box;
-        padding: 0 56rpx;
-        background: rgba(255,255,255, 1);
-        border-radius: 40rpx 40rpx 0rpx 0rpx;
+        padding: 30rpx;
+        background: rgba(255, 255, 255, 1);
+        border-radius: 30rpx 30rpx 0 0;
+        box-shadow: 0 -2rpx 20rpx rgba(0, 0, 0, 0.1);
+        
         .name {
-            padding-top: 168rpx 0 40rpx;
-            font-size: 52rpx;
+            font-size: 36rpx;
+            font-weight: 500;
             color: $uni-text-color;
-            line-height: 74rpx;
+            line-height: 60rpx;
+            margin-bottom: 30rpx;
         }
+        
         .add-main {
-            padding: 18rpx 22rpx;
+            padding: 20rpx;
             box-sizing: border-box;
             width: 100%;
-            height: 420rpx;
+            height: 300rpx;
             background: $uni-bg-color-grey;
-            border-radius: $uni-border-radius-base;
-            font-size: $uni-font-size-lg;
-            line-height: 44px;
+            border-radius: 16rpx;
+            font-size: 30rpx;
+            line-height: 42rpx;
             color: $uni-text-color;
         }   
     }
+    
     .add-bt {
-        bottom: -200rpx;
-        z-index: 100;
         display: flex;
-        align-items: center;
+        padding: 20rpx 30rpx;
+        box-sizing: border-box;
+        
         .close {
-            width: 172rpx;
-            background: $uni-bg-color-hover;
-            margin-left: $uni-spacing-col-base;
+            width: 200rpx;
+            background: #f2f2f2;
+            color: #666;
+            margin-right: 20rpx;
         }
+        
         .send {
-            flex: auto;
-            margin:0 $uni-spacing-col-base;
+            flex: 1;
             background: $uni-color-primary;
+            color: #fff;
         }
     }
+    
+    /* #ifdef MP */
+    .top-bar {
+        padding-top: 40rpx; // 小程序状态栏适配
+    }
+    
+    .bottom-btn {
+        line-height: 76rpx !important; // 修复小程序中的行高问题
+        overflow: hidden;
+        
+        &:after {
+            border: none !important; // 去除小程序按钮边框
+        }
+    }
+    
+    .add-main {
+        box-sizing: border-box !important;
+    }
+    /* #endif */
 </style>
