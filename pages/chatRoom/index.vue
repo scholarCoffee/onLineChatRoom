@@ -157,12 +157,12 @@ export default {
         },
         goUserHome(fromId) {
             uni.navigateTo({
-                url: '../userDetail/index?id=' + fromId
+                url: '/subPackages/pages/userDetail/index?id=' + fromId
             })
         },
         goGroupHome() {
             uni.navigateTo({
-                url: '../grouphome/index?gid=' + this.id + '&gimg=' + this.imgurl
+                url: '/subPackages/pages/grouphome/index?gid=' + this.id + '&gimg=' + this.imgurl
             })
         },
         nextPage() {

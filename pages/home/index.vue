@@ -301,7 +301,7 @@
             // 跳转到用户详情页
             userDetail() {
                 uni.navigateTo({
-                    url: '/pages/userDetail/index?id=' + this.id
+                    url: '/subPackages/pages/userDetail/index?id=' + this.id
                 });
             }
 		}

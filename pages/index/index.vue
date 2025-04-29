@@ -1,7 +1,7 @@
 <template>
 	<view class="content">
 		<view class="top-bar">
-			<navigator :url="'../userDetail/index?id=' + uid" hover-class="none" class="top-bar-left">
+			<navigator :url="'/subPackages/pages/userDetail/index?id=' + uid" hover-class="none" class="top-bar-left">
 				<image :src="imgUrl" class="my-img"></image>
 			</navigator>
 			<view class="top-bar-right">
@@ -460,17 +460,17 @@
             },
             toSearch() {
                 uni.navigateTo({
-                    url: '../search/index'
+                    url: '/subPackages/pages/search/index'
                 });
             },
             toBuildGroup() {
                 uni.navigateTo({
-                    url: '../buildGroup/index'
+                    url: '/subPackages/pages/buildGroup/index'
                 });
             },
             toFriendRequest() {
                 uni.navigateTo({
-                    url: '../friendRequest/index'
+                    url: '/subPackages/pages/friendRequest/index'
                 });
             },
             toChatRoom(data) {

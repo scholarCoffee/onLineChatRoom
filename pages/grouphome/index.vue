@@ -322,7 +322,7 @@
             },
             addGroupMember() {
                 uni.navigateTo({
-                    url: '../search/index?gid=' + this.groupInfo.id
+                    url: '/subPackages/pages/search/index?gid=' + this.groupInfo.id
                 })
             },
             onDealGroup() {

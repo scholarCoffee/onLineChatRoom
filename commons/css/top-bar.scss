@@ -1,0 +1,95 @@
+/* 顶部导航栏统一样式 */
+.top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-left: 32rpx;
+    padding-right: 32rpx;
+    padding-bottom: 24rpx;
+    padding-top: calc(24rpx + env(safe-area-inset-top)); /* 适配顶部安全区域 */
+    background: #ffffff;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    width: 100%; /* 确保宽度100% */
+    box-sizing: border-box; /* 确保padding计算在宽度内 */
+    z-index: 100;
+    box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05); /* 柔和阴影 */
+    
+    .top-bar-left {
+        height: 88rpx;
+        display: flex;
+        align-items: center;
+        .my-img {
+            width: 80rpx;
+            height: 80rpx;
+            border-radius: 40rpx;
+            box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
+            border: 3rpx solid #ffffff;
+            transition: transform 0.2s ease;
+            
+            &:active {
+                transform: scale(0.95);
+            }
+        }
+        .back-img {
+            width: 50rpx;
+            height: 50rpx;
+        }
+    }
+    
+    .top-bar-right {
+        display: flex;
+        align-items: center;
+        
+        .search, .add {
+            width: 80rpx;
+            height: 80rpx;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            margin-left: 10rpx;
+            
+            &:active {
+                opacity: 0.7;
+            }
+            
+            &::after {
+                content: "";
+                position: absolute;
+                left: 0;
+                top: 0;
+                right: 0;
+                bottom: 0;
+                background: transparent;
+                border-radius: 50%;
+            }
+            
+            image {
+                width: 44rpx;
+                height: 44rpx;
+            }
+
+            .more-img {
+                image {
+                    width: 48rpx;
+                    height: 48rpx;
+                }
+            }
+
+            .group-img {
+                image {
+                    width: 48rpx;
+                    height: 48rpx;
+                }
+            }
+        }
+    }
+}
+
+/* 主内容区域 - 适配顶部导航栏 */
+.main-content-adjust {
+    margin-top: calc(128rpx + env(safe-area-inset-top)); // 顶部导航高度 + 安全区域
+}

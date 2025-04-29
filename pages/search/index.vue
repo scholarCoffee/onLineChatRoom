@@ -10,7 +10,7 @@
             <view class="search-user result">
                 <view class="title" v-if="qryUserInfo.length > 0">用户</view>
                 <view class="list user" v-for="(item, index) in qryUserInfo" :key="index">
-                    <navigator :url="'../home/index?id=' + item._id" hover-class="none">
+                    <navigator :url="'/subPackages/pages/home/index?id=' + item._id" hover-class="none">
                         <image :src="item.imgurl"></image>
                     </navigator>
                     <view class="names">

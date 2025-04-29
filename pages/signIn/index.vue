@@ -147,12 +147,12 @@
             },
             navigateToRegister() {
                 uni.navigateTo({
-                    url: '/pages/register/index'
+                    url: '/subPackages/pages/register/index'
                 });
             },
 			navigateToResetPassword() {
 				uni.navigateTo({
-					url: '/pages/resetPassword/index'
+					url: '/subPackages/pages/resetPassword/index'
 				});
 			},
             navigateToLogin() {
