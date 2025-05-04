@@ -7,8 +7,8 @@ import io from './componets/socket/weapp.socket.io.js'
 
 
 Vue.config.productionTip = false
-Vue.prototype.serverUrl = 'http://192.168.3.87:3000' // Set your server URL here
-Vue.prototype.socket = io('http://192.168.3.87:8002')
+Vue.prototype.serverUrl = 'http://47.97.7.181:3000' // Set your server URL here
+Vue.prototype.socket = io('http://47.97.7.181:8002')
 
 App.mpType = 'app'
 const app = new Vue({
