@@ -8,7 +8,6 @@
             <view class="back-btn" @tap="navigateBack">
                 <text class="iconfont icon-back">←</text>
             </view>
-            <view class="page-title">注册账号</view>
         </view>
         
         <!-- Logo区域 -->

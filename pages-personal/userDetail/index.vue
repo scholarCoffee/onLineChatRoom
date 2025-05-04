@@ -187,7 +187,7 @@
                         success: (res) => {
                             const { data, code } = res.data
                             if (code === 200) {
-                                const { markname } = data
+                                const { markname } = data || {}
                                 if (!this.user.markname) {
                                     this.user.markname = markname
                                 }
@@ -367,17 +367,18 @@
                             url: this.serverUrl + '/files/upload', // 替换为你的上传接口地址
                             filePath: this.tempFilePaths,
                             name: 'file',
+                            fileType: 'image',
                             formData: {
                                 url: 'user',
                                 name: this.uid,
                                 token: this.token
                             },
                             success: (res) => {
-                                const backImg = JSON.parse(res.data)
+                                const backImg = JSON.parse(res.data).data
                                 uni.setStorageSync('userInfo', {
-                                    'id': this.uid,
-                                    'name': this.myname,
-                                    'imgurl': backImg,
+                                    'userId': this.uid,
+                                    'userName': this.myname,
+                                    'imgUrl': backImg,
                                     'token': this.token
                                 })
                                 this.update(backImg, 'imgurl', undefined)
@@ -476,7 +477,7 @@
                         this.user.markname = this.data
                     } else if (this.type == 'email') {
                         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/; // 邮箱正则表达式
-                        if (this.user.email.length > 0 && emailPattern.test(this.user.email)) {
+                        if (this.data.length > 0 && emailPattern.test(this.data)) {
                             this.update(this.data, this.type, this.pwd)
                         } else {
                             uni.showToast({
@@ -694,11 +695,6 @@
                 line-height: 42rpx;
             }
         }
-    }
-    
-    /* #ifdef MP */
-    .top-bar {
-        padding-top: 40rpx; // 小程序状态栏适配
     }
     
     .modify-header {

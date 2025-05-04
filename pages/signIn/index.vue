@@ -2,10 +2,6 @@
     <view class="container">
         <!-- 安全区域适配 -->
         <view class="safe-area-top"></view>
-        <!-- 顶部区域 -->
-        <view class="header">
-            <view class="register-btn" @tap="navigateToRegister">注册</view>
-        </view>
         <!-- Logo区域 -->
         <view class="logo-area">
             <image class="logo-image" src="/static/fire.png" mode="aspectFit"></image>
@@ -62,8 +58,9 @@
                     </view>
                     <text>记住密码</text>
                 </view>
-                <view class="forgot-password" @tap="navigateToResetPassword">
-                    <text>忘记密码?</text>
+                <view class="forgot-password" >
+                    <text @tap="navigateToRegister" class="forgot-register">注册</text>
+                    <text @tap="navigateToResetPassword">忘记密码?</text>
                 </view>
             </view>
             
@@ -147,12 +144,12 @@
             },
             navigateToRegister() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/register/index'
+                    url: '/pages-personal/register/index'
                 });
             },
 			navigateToResetPassword() {
 				uni.navigateTo({
-					url: '/subPackages/pages/resetPassword/index'
+					url: '/pages-personal/resetPassword/index'
 				});
 			},
             navigateToLogin() {
@@ -236,8 +233,6 @@
 </script>
 
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
-    
     /* 容器适配全面屏设备 */
     .container {
         display: flex;
@@ -451,6 +446,10 @@
                 }
             }
             
+            .forgot-register {
+                margin-right: 18rpx;
+            }
+
             .forgot-password {
                 font-size: 28rpx;
                 color: #5d7df9;

@@ -12,68 +12,73 @@
 				"navigationStyle": "custom",
 				"enablePullDownRefresh": true
 			}
-		},
-		{
-			"path": "pages/chatRoom/index",
-			"style": {
-				"navigationStyle": "custom"
-			}
 		}
 	],
 	"subPackages": [
         {
-            "root": "subPackages",
+            "root": "pages-personal",
             "pages": [
 				{
-					"path": "pages/register/index",
+					"path": "register/index",
 					"style": {
 						"navigationStyle": "custom"
 					}
 				},
 				{
-					"path": "pages/search/index",
+					"path": "search/index",
 					"style": {
 						"navigationStyle": "custom"
 					}
 				},
 				{
-					"path": "pages/friendRequest/index",
+					"path": "resetPassword/index",
 					"style": {
 						"navigationStyle": "custom"
 					}
 				},
 				{
-					"path": "pages/buildGroup/index",
+					"path": "home/index",
 					"style": {
 						"navigationStyle": "custom"
 					}
 				},
 				{
-					"path": "pages/grouphome/index",
-					"style": {
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "pages/resetPassword/index",
-					"style": {
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "pages/home/index",
-					"style": {
-						"navigationStyle": "custom"
-					}
-				},
-				{
-					"path": "pages/userDetail/index",
+					"path": "userDetail/index",
 					"style": {
 						"navigationStyle": "custom"
 					}
 				}
             ]
-        }
+        },
+		{
+			"root": "pages-chat",
+			"pages": [
+				{
+					"path": "friendRequest/index",
+					"style": {
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "buildGroup/index",
+					"style": {
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "grouphome/index",
+					"style": {
+						"navigationStyle": "custom"
+					}
+				},
+				{
+					"path": "chatRoom/index",
+					"style": {
+						"navigationStyle": "custom"
+					}
+				}
+			]
+		}
     ],
 	"globalStyle": {
 		"navigationBarTextStyle": "black",

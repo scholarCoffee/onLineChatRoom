@@ -1,12 +1,12 @@
 <template>
 	<view class="content">
 		<view class="top-bar">
-			<navigator :url="'/subPackages/pages/userDetail/index?id=' + uid" hover-class="none" class="top-bar-left">
+			<navigator :url="'/pages-personal/userDetail/index?id=' + uid" hover-class="none" class="top-bar-left">
 				<image :src="imgUrl" class="my-img"></image>
 			</navigator>
 			<view class="top-bar-right">
 				<view class="search" @tap="toSearch"><image src="/static/user/search.png"></image></view>
-				<view class="add" @tap="toBuildGroup"><image src="/static/user/add.png"></image></view>
+				<view class="add" @tap="toBuildGroup"><image src="/static/add.png"></image></view>
 			</view>
 		</view>
 		<view class="main main-content-adjust">
@@ -460,30 +460,29 @@
             },
             toSearch() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/search/index'
+                    url: '/pages-personal/search/index'
                 });
             },
             toBuildGroup() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/buildGroup/index'
+                    url: '/pages-chat/buildGroup/index'
                 });
             },
             toFriendRequest() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/friendRequest/index'
+                    url: '/pages-chat/friendRequest/index'
                 });
             },
             toChatRoom(data) {
                 const { id, name, imgurl, chatType } = data || {}
                 uni.navigateTo({
-                    url: '/pages/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&chatType=' + chatType
+                    url: '/pages-chat/chatRoom/index?id=' + id + '&name=' + name + '&imgurl=' + imgurl + '&chatType=' + chatType
                 });
             },
 		}
 	}
 </script>
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
     @import "../../commons/css/top-bar.scss"; // 引入统一顶部栏样式
     
     /* 全局容器 */

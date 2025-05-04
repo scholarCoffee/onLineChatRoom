@@ -1,8 +1,8 @@
 <template>
     <view class="content">
-        <view class="top-bar fixed-top">
+        <view class="top-bar">
             <view class="top-bar-left" @tap="backOne">
-                <image src="/static/user/back.png" class="back-img"></image>
+                <image src="../../static/user/back.png" class="back-img"></image>
             </view>
             <view class="top-bar-center"><view class="top-bar-name">{{ name }}</view></view>
             <view class="top-bar-right">
@@ -157,12 +157,12 @@ export default {
         },
         goUserHome(fromId) {
             uni.navigateTo({
-                url: '/subPackages/pages/userDetail/index?id=' + fromId
+                url: '/pages-personal/userDetail/index?id=' + fromId
             })
         },
         goGroupHome() {
             uni.navigateTo({
-                url: '/subPackages/pages/grouphome/index?gid=' + this.id + '&gimg=' + this.imgurl
+                url: '/pages-chat/grouphome/index?gid=' + this.id + '&gimg=' + this.imgurl
             })
         },
         nextPage() {
@@ -322,6 +322,7 @@ export default {
                 const uploadTask = uni.uploadFile({
                     url: this.serverUrl + '/files/upload', // 仅为示例，非真实的接口地址
                     filePath: e.message,
+                    fileType: 'image',
                     name: 'file',
                     formData: {
                         url: fileNameTime(new Date()),
@@ -533,25 +534,6 @@ page {
     height: 100%;
     background: rgba(244, 244, 244 ,1)
 }
-.top-bar {
-    background: rgba(244, 244, 244 ,1);
-    border-bottom: 1px solid $uni-border-color;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-
-    .group-img, uni-image {
-        // position: absolute;
-        display: contents;
-        width: 78rpx;
-        height: 78rpx;
-        image {
-            border-radius: 16rpx;
-            width: 48rpx;
-            height: 48rpx;
-        }
-    }
-}
 .chat {
     height: 100%; // 减去头部高度
     .padbt {
@@ -593,6 +575,9 @@ page {
             .message {
                flex: none;
                max-width: 480rpx;
+            }
+            .name-text {
+                padding: 0 20rpx;
             }
             .msg-text {
                 padding: 20rpx;

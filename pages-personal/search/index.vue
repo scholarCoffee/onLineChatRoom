@@ -1,5 +1,5 @@
 <template>
-	<view>
+	<view class="content">
         <view class="top-bar">
             <view class="search-div">
                 <image src="../../static/user/back.png" class="search-img" @tap="back"></image>
@@ -10,9 +10,9 @@
             <view class="search-user result">
                 <view class="title" v-if="qryUserInfo.length > 0">用户</view>
                 <view class="list user" v-for="(item, index) in qryUserInfo" :key="index">
-                    <navigator :url="'/subPackages/pages/home/index?id=' + item._id" hover-class="none">
+                    <view  @tap="gotoHome(item)" hover-class="none">
                         <image :src="item.imgurl"></image>
-                    </navigator>
+                    </view>
                     <view class="names">
                         <view class="name" v-html="item.names"></view>
                         <view class="email" v-html="item.emails"></view>
@@ -75,6 +75,11 @@
                         url: '/pages/signIn/index'
                     });
                 } 
+            },
+            gotoHome(item) {
+                uni.navigateTo({
+                    url: '/pages-personal/home/index?id=' + item._id
+                });
             },
             onInputUser(e) {
                 this.qryUserInfo = []
@@ -339,7 +344,7 @@
             toChatRoom(data) {
                 const { id, name, imgurl, type } = data || {}
                 uni.navigateTo({
-                    url: '/pages/chatRoom/index?id=' + id + '&names=' + name + '&imgurl=' + imgurl + '&type=' + type
+                    url: '/pages-chat/chatRoom/index?id=' + id + '&names=' + name + '&imgurl=' + imgurl + '&type=' + type
                 });
             }
 		}
@@ -348,32 +353,6 @@
 
 <style lang="scss">
     @import "../../commons/css/top-bar.scss"; // 引入公共样式
-	.top-bar {     
-        .search-div {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            flex-direction: row;
-            padding: 0 30rpx;
-            height: 88rpx;
-            
-            .search {
-                flex: 1;
-                padding: 0 60rpx 0 20rpx;
-                height: 60rpx;
-                border-radius: 30rpx; // 更圆润的圆角
-                background: $uni-bg-color-grey;
-                font-size: 28rpx;
-            }
-            .search-img {
-                width: 40rpx;
-                height: 40rpx;
-                margin-right: 20rpx;
-            }
-        }
-        
-	}
     .main {
         padding: 180rpx $uni-spacing-col-base 120rpx; // 调整顶部间距适配固定的搜索栏
         

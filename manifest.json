@@ -73,10 +73,14 @@
         "appid" : "wxedd2e225d0fbca96",
         "setting" : {
             "urlCheck" : false,
-            "es6" : true
+            "es6" : true,
+            "minified" : true
         },
         "usingComponents" : true,
-        "permission" : {}
+        "permission" : {},
+        "optimization" : {
+            "subPackages" : true
+        }
     },
     "mp-alipay" : {
         "usingComponents" : true

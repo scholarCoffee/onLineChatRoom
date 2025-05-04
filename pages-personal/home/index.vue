@@ -36,7 +36,7 @@
             <view class="name"> {{ user.name }}</view>
             <textarea v-model="msg" maxlength="120" class="add-main" :cursor-spacing="0" ></textarea>
         </view>
-        <view class="add-bt bottom-bar" :animation="animationData1">
+        <view class="add-bt bottom-bar" :animation="animationData1" v-if="relation !== 0 && isAdd">
             <view class="close btn1" @tap="addFrinedAnimat">取消</view>
             <view class="send btn1" @tap="addSubmit">发送</view>            
         </view>
@@ -53,7 +53,7 @@
                 user: {},
                 sexImg: '../../static/user/male.png', // 性别
                 sexColor: 'rgb(255, 93, 91 ,1)', // 性别颜色
-                relation: '', // 用户关系 0-自己，1-好友，2-陌生人
+                relation: 0, // 用户关系 0-自己，1-好友，2-陌生人
                 userName: '', // 用户名
                 markname: '',
                 msg: '', // 消息内容
@@ -64,7 +64,6 @@
                 animationData3: {}, // 动画
                 animationData4: {}, // 动画
                 isAdd: false,
-                
 			};
 		},
 		computed: {
@@ -192,7 +191,7 @@
                     success: (res) => {
                         const { data, code } = res.data
                         if (code === 200) {
-                           const { markname } = data
+                           const { markname } = data || {}
                            if (!this.markname) {
                              this.markname = markname
                            }
@@ -249,8 +248,8 @@
                     animation4.backgroundColor('rgba(255, 228, 49, 0.6)').step(); // 设置动画的初始状态
                 } else {
                     animation.bottom(-this.addHeight).step(); // 设置动画的初始状态
-                    animation1.bottom(-100).step(); // 设置动画的初始状态
-                    animation2.width(200).height(200).top(0).step(); // 设置动画的初始状态
+                    animation1.bottom(0).step(); // 设置动画的初始状态
+                    animation2.width(180).height(180).top(0).step(); // 设置动画的初始状态
                     animation3.opacity(1).step(); // 设置动画的初始状态
                     animation4.backgroundColor('rgba(255, 228, 49, 0)').step();
                 }
@@ -263,6 +262,12 @@
             onAddFriend() {
                 this.msg = this.userName + ' 请求添加好友~'
                 this.addFrinedAnimat() // 弹出添加好友框
+            },
+            sendMessage() {
+                const { _id, name, imgurl } = this.user || {}
+                uni.navigateTo({
+                    url: '/pages-chat/chatRoom/index?id=' + _id + '&name=' + name + '&imgurl=' + imgurl + '&chatType=0'
+                });
             },
             addSubmit() {
                 if (this.msg.length > 0) {
@@ -301,7 +306,7 @@
             // 跳转到用户详情页
             userDetail() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/userDetail/index?id=' + this.id
+                    url: '/pages-personal/userDetail/index?id=' + this.id
                 });
             }
 		}
@@ -310,47 +315,8 @@
 
 <style lang="scss">
     @import "../../commons/css/top-bar.scss"; // 引入公共样式
-    
-    .top-bar {
-        position: fixed;
-        z-index: 1000;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 88rpx;
-        padding-top: var(--status-bar-height);
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(230, 230, 230, 0.5);
-    }
-    
-    .top-bar-title {
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
-        font-size: 32rpx;
-        font-weight: 500;
-        color: #333;
-        margin-top: calc(var(--status-bar-height) / 2);
-    }
-    
-    .top-bar-right {
-        position: absolute;
-        right: 30rpx;
-        height: 88rpx;
-        display: flex;
-        align-items: center;
-        
-        image {
-            width: 50rpx;
-            height: 50rpx;
-        }
-    }
-    
 	.bg {
         position: fixed;
-        z-index: -2;
         top: 0;
         left: 0;
         width: 100%;
@@ -415,14 +381,13 @@
             }
         }
         
-        .user-img {
-            padding: 40rpx 30rpx 0;
-            
+        .user-img {            
             .name {
                 font-size: 44rpx;
                 font-weight: 600;
                 color: $uni-text-color;
                 line-height: 60rpx;
+                margin-top: 20rpx;
                 margin-bottom: 10rpx;
             }
             
@@ -509,18 +474,24 @@
     
     .add-bt {
         display: flex;
-        padding: 20rpx 30rpx;
+        padding: 20rpx 20rpx;
         box-sizing: border-box;
         
         .close {
             width: 200rpx;
+            padding: 20rpx;
+            text-align: center;
             background: #f2f2f2;
             color: #666;
+            border-radius: $uni-border-radius-base;
             margin-right: 20rpx;
         }
         
         .send {
             flex: 1;
+            padding: 20rpx;
+            text-align: center;
+            border-radius: $uni-border-radius-base;
             background: $uni-color-primary;
             color: #fff;
         }

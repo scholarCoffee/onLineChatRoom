@@ -98,13 +98,13 @@
             // 查看用户资料
             viewProfile(userId) {
                 uni.navigateTo({
-                    url: '/subPackages/pages/userDetail/index?id=' + userId
+                    url: '/pages-personal/userDetail/index?id=' + userId
                 });
             },
             // 查找好友
             findFriends() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/search/index'
+                    url: '/pages-personal/search/index'
                 });
             },
             // 获取留言增加空值处理

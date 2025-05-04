@@ -322,7 +322,7 @@
             },
             addGroupMember() {
                 uni.navigateTo({
-                    url: '/subPackages/pages/search/index?gid=' + this.groupInfo.id
+                    url: '/pages-personal/search/index?gid=' + this.groupInfo.id
                 })
             },
             onDealGroup() {
@@ -386,7 +386,6 @@
 </script>
 <style lang="scss">
     @import "../../commons/css/top-bar.scss"; // 引入公共样式
-    @import "../../commons/css/mycss.scss"; // 引入公共样式   
     .clear {
         opacity: 0;
         clear: both;

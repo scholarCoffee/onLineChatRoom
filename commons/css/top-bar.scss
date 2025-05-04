@@ -16,14 +16,47 @@
     box-sizing: border-box; /* 确保padding计算在宽度内 */
     z-index: 100;
     box-shadow: 0 2rpx 10rpx rgba(0, 0, 0, 0.05); /* 柔和阴影 */
-    
+    .group-img {
+        // position: absolute;
+        display: contents;
+        width: 40rpx;
+        height: 40rpx;
+        image {
+            border-radius: 16rpx;
+            width: 40rpx;
+            height: 40rpx;
+        }
+    }
+
+    .search-div {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        flex-direction: row;
+        height: 40rpx;
+        
+        .search {
+            flex: 1;
+            padding: 0 60rpx 0 20rpx;
+            height: 60rpx;
+            border-radius: 30rpx; // 更圆润的圆角
+            background: $uni-bg-color-grey;
+            font-size: 28rpx;
+        }
+        .search-img {
+            width: 40rpx;
+            height: 40rpx;
+            margin-right: 20rpx;
+        }
+    }
+
     .top-bar-left {
-        height: 88rpx;
         display: flex;
         align-items: center;
         .my-img {
-            width: 80rpx;
-            height: 80rpx;
+            width: 40rpx;
+            height: 40rpx;
             border-radius: 40rpx;
             box-shadow: 0 4rpx 8rpx rgba(0, 0, 0, 0.1);
             border: 3rpx solid #ffffff;
@@ -34,23 +67,27 @@
             }
         }
         .back-img {
-            width: 50rpx;
-            height: 50rpx;
+            width: 40rpx;
+            height: 40rpx;
         }
+    }
+
+    .top-bar-center {
+        margin: auto 0;
     }
     
     .top-bar-right {
         display: flex;
         align-items: center;
-        
+        margin-right: 120rpx;
         .search, .add {
-            width: 80rpx;
-            height: 80rpx;
+            width: 40rpx;
+            height: 40rpx;
             display: flex;
             justify-content: center;
             align-items: center;
             position: relative;
-            margin-left: 10rpx;
+            margin-left: 20rpx;
             
             &:active {
                 opacity: 0.7;
@@ -68,22 +105,22 @@
             }
             
             image {
-                width: 44rpx;
-                height: 44rpx;
+                width: 40rpx;
+                height: 40rpx;
             }
-
-            .more-img {
-                image {
-                    width: 48rpx;
-                    height: 48rpx;
-                }
+        }
+        .more-img {
+            display: flex;
+            image {
+                width: 40rpx;
+                height: 40rpx;
             }
+        }
 
-            .group-img {
-                image {
-                    width: 48rpx;
-                    height: 48rpx;
-                }
+        .group-img {
+            image {
+                width: 40rpx;
+                height: 40rpx;
             }
         }
     }

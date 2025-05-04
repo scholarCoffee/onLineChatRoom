@@ -1,12 +1,8 @@
 <template>
-    <view>
+    <view class="content"> 
         <view class="top-bar">
             <view class="top-bar-left" @tap="navigateBack">
                 <image src="../../static/user/back.png" class="back-img"></image>
-            </view>
-            <view class="top-bar-center">创建群聊</view>
-            <view class="top-bar-right">
-                <view class="pice"></view>
             </view>
         </view>
         <view class="main">
@@ -81,7 +77,7 @@
         methods: {
             navigateBack() {
                 uni.navigateTo({
-                    url: '../index/index'
+                    url: '/pages/index/index'
                 })
             },
             getStorages() {
@@ -293,7 +289,6 @@
     }
 </script>
 <style lang="scss">
-    @import "../../commons/css/mycss.scss"; // 引入公共样式
     @import "../../commons/css/top-bar.scss"; // 引入公共样式
     .top-bar {
         background: rgba(255,255,255, 1);
